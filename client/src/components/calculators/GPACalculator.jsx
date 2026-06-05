@@ -1,16 +1,16 @@
 import { useState, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
-import { useGPA } from "../hooks/useGPA";
-import { GRADES, SCALES } from "../utils/grades";
-import { generatePDF } from "../utils/pdfExport";
-import { downloadCSV } from "../utils/csvExport";
-import { logEvent } from "../firebase/analytics";
-import { trackExport } from "../firebase/exportTracker";
+import { useGPA } from "../../hooks/useGPA";
+import { GRADES, SCALES } from "../../utils/grades";
+import { generatePDF } from "../../utils/pdfExport";
+import { downloadCSV } from "../../utils/csvExport";
+import { logEvent } from "../../firebase/analytics";
+import { trackExport } from "../../firebase/exportTracker";
 import CourseCard from "./CourseCard";
 import ResultCard from "./ResultCard";
 import { GradeProgressBar, TargetGPACalculator } from "./GradeExtras";
 import ExportModal from "./ExportModal";
-import Toast from "./Toast";
+import Toast from "../common/Toast";
 
 const useGradeScale = (scale) =>
   useMemo(() => SCALES[scale] || GRADES, [scale]);
