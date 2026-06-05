@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Maniesta Suite – Academic Tools Platform</title>
+  <meta name="description" content="Modern academic tools platform for students. GPA, CGPA, scientific calculators, unit converters, interest calculators, and more." />
+  <meta name="keywords" content="GPA calculator, CGPA calculator, scientific calculator, unit converter, interest calculator, student tools, academic platform, Maniesta Calculator" />
+  <meta name="author" content="Usman Murtaza" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://maniestasuite.com" />
+  <meta property="og:site_name" content="Maniesta Suite" />
+  <meta property="og:title" content="Maniesta Suite – Academic Tools Platform" />
+  <meta property="og:description" content="Modern academic tools for students: GPA, CGPA, scientific calculator, converters, and more." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://maniestasuite.com" />
+  <meta property="og:image" content="https://maniestasuite.com/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Maniesta Suite" />
+  <meta name="twitter:description" content="Modern academic tools platform for students" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#6c63ff" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f7fa;
+      color: #1a1a2e;
+      transition: background 0.3s, color 0.3s;
+    }
+    .dark body, html.dark body { background: #0b0d17; color: #f1f1f5; }
+  </style>
+  <script>
+    (function() {
+      const theme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (theme === 'dark' || (!theme && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      } else if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+      }
+      document.documentElement.style.transition = 'none';
+    })();
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

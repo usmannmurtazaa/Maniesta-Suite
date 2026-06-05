@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply antialiased bg-gray-50 dark:bg-gray-950 transition-colors duration-300;
+    }
+}
+
+@layer components {
+
+    /* Glassmorphism */
+    .glass {
+        @apply backdrop-blur-xl bg-white/50 dark:bg-gray-900/50 border border-white/20 dark:border-white/10 shadow-glass rounded-2xl transition-all duration-300;
+    }
+
+    .glass-card {
+        @apply glass hover:shadow-glass-lg hover:bg-white/70 dark:hover:bg-gray-900/70 hover:-translate-y-1;
+    }
+
+    /* Typography */
+    .text-gradient {
+        @apply bg-gradient-brand bg-clip-text text-transparent;
+    }
+
+    .heading-xl {
+        @apply text-5xl md:text-7xl font-extrabold leading-tight;
+    }
+
+    .heading-lg {
+        @apply text-4xl md:text-5xl font-bold;
+    }
+
+    .heading-md {
+        @apply text-3xl font-bold;
+    }
+
+    /* Buttons */
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed select-none;
+    }
+
+    .btn-primary {
+        @apply btn bg-gradient-brand text-white shadow-brand hover:shadow-brand-lg hover:scale-105;
+    }
+
+    .btn-secondary {
+        @apply btn glass text-gray-900 dark:text-white hover:shadow-lg hover:scale-105;
+    }
+
+    /* Input / Select */
+    .input-base {
+        @apply w-full px-4 py-2.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all;
+    }
+
+    .input-error {
+        @apply border-red-500 focus:ring-red-500;
+    }
+
+    .select-base {
+        @apply input-base appearance-none bg-no-repeat bg-[center_right_1rem];
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    }
+}
+
+@layer utilities {
+    .animate-delay-1000 {
+        animation-delay: 1s;
+    }
+
+    .animate-delay-2000 {
+        animation-delay: 2s;
+    }
+}
