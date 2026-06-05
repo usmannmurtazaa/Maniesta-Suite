@@ -1,3 +1,4 @@
+// ExportModal.jsx
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Modal from '../common/Modal';
@@ -41,7 +42,10 @@ export default function ExportModal({ isOpen, onClose, calculatorType, resultDat
       const payload = {
         userData,
         calculatorType,
-        resultData: calculatorType === 'GPA' ? { courses: resultData.courses, gpa: resultData.gpa } : { semesters: resultData.semesters, cgpa: resultData.cgpa },
+        resultData:
+          calculatorType === 'GPA'
+            ? { courses: resultData.courses, gpa: resultData.gpa }
+            : { semesters: resultData.semesters, cgpa: resultData.cgpa },
         exportType: 'PDF & CSV',
         timestamp: new Date().toISOString(),
         userAgent: navigator.userAgent,
@@ -49,10 +53,16 @@ export default function ExportModal({ isOpen, onClose, calculatorType, resultDat
         language: navigator.language,
       };
       await saveExportData(payload);
+
+      // Generate and download PDF
       const doc = generatePDF({ userData, resultData, calculatorType });
       doc.save(`${calculatorType}_Report_${userData.fullName.replace(/\s+/g, '_')}.pdf`);
+
+      // Generate and download CSV
       const csv = generateCSV(
-        calculatorType === 'GPA' ? { courses: resultData.courses, gpa: resultData.gpa } : { semesters: resultData.semesters, cgpa: resultData.cgpa },
+        calculatorType === 'GPA'
+          ? { courses: resultData.courses, gpa: resultData.gpa }
+          : { semesters: resultData.semesters, cgpa: resultData.cgpa },
         calculatorType
       );
       const blob = new Blob([csv], { type: 'text/csv' });
@@ -62,6 +72,7 @@ export default function ExportModal({ isOpen, onClose, calculatorType, resultDat
       a.download = `${calculatorType}_Report_${userData.fullName.replace(/\s+/g, '_')}.csv`;
       a.click();
       URL.revokeObjectURL(url);
+
       if (analytics) logEvent(analytics, 'export_action', { calculatorType, status: 'success' });
       setStatus({ type: 'success', message: 'Report exported!' });
       setTimeout(() => onClose(), 1500);
@@ -76,28 +87,81 @@ export default function ExportModal({ isOpen, onClose, calculatorType, resultDat
 
   return (
     <Modal isOpen={isOpen} onClose={() => !loading && onClose()}>
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-5"
+      >
         <div>
-          <h3 className="text-2xl font-bold text-gradient">Export {calculatorType} Report</h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Fill details to generate PDF & CSV.</p>
+          <h3 className="text-2xl font-bold text-gradient">
+            Export {calculatorType} Report
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Fill details to generate PDF & CSV.
+          </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input name="fullName" label="Full Name *" required value={userData.fullName} onChange={handleChange} error={fieldErrors.fullName} />
+          <Input
+            name="fullName"
+            label="Full Name *"
+            required
+            value={userData.fullName}
+            onChange={handleChange}
+            error={fieldErrors.fullName}
+          />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <Input name="studentId" label="Student ID" value={userData.studentId} onChange={handleChange} />
-            <Input name="semester" label="Semester" value={userData.semester} onChange={handleChange} />
+            <Input
+              name="studentId"
+              label="Student ID"
+              value={userData.studentId}
+              onChange={handleChange}
+            />
+            <Input
+              name="semester"
+              label="Semester"
+              value={userData.semester}
+              onChange={handleChange}
+            />
           </div>
-          <Input name="university" label="University" value={userData.university} onChange={handleChange} />
-          <Input name="email" label="Email (optional)" type="email" value={userData.email} onChange={handleChange} error={fieldErrors.email} />
-          <Input name="notes" label="Notes" value={userData.notes} onChange={handleChange} />
+          <Input
+            name="university"
+            label="University"
+            value={userData.university}
+            onChange={handleChange}
+          />
+          <Input
+            name="email"
+            label="Email (optional)"
+            type="email"
+            value={userData.email}
+            onChange={handleChange}
+            error={fieldErrors.email}
+          />
+          <Input
+            name="notes"
+            label="Notes"
+            value={userData.notes}
+            onChange={handleChange}
+          />
           {status.message && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={`p-3 rounded-lg text-sm font-medium ${
-              status.type === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-            }`} role="alert">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className={`p-3 rounded-lg text-sm font-medium ${
+                status.type === 'success'
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                  : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+              }`}
+              role="alert"
+            >
               {status.message}
             </motion.div>
           )}
-          <Button type="submit" className="w-full" disabled={loading || !userData.fullName}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loading || !userData.fullName}
+          >
             {loading ? <Spinner /> : 'Generate PDF & CSV'}
           </Button>
         </form>
