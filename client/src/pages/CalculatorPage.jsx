@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import NormalCalculator from '../components/calculators/NormalCalculator';
-import ScientificCalculator from '../components/calculators/ScientificCalculator';
+import CalculatorPanel from '../components/calculators/CalculatorPanel';
 
 export default function CalculatorPage() {
   const [mode, setMode] = useState('normal');
