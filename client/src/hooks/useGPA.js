@@ -1,65 +1,63 @@
-import { useState, useCallback, useRef } from 'react';
-import { gradePoints } from '../utils/grades';
-
-let idCounter = 0;
-const createCourse = () => ({
-  id: ++idCounter,
-  code: '',
-  credits: '',
-  gradeIdx: 0,
-});
+// src/hooks/useGPA.js
+import { useState, useCallback } from 'react';
+import { calculateGPA } from '../utils/calculations';
+import { GRADES } from '../utils/grades';
 
 export function useGPA(scale) {
-  const [courses, setCourses] = useState([...Array(3)].map(createCourse));
+  const [courses, setCourses] = useState([]);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
-  const grades = gradePoints(scale);
 
   const addCourse = useCallback(() => {
-    if (courses.length >= 8) return;
-    setCourses(prev => [...prev, createCourse()]);
-  }, [courses.length]);
+    setCourses(prev => {
+      if (prev.length >= 8) return prev;
+      return [
+        ...prev,
+        { id: crypto.randomUUID(), code: '', credits: 3, gradeIdx: 0 },
+      ];
+    });
+  }, []);
 
-  const removeCourse = useCallback(id => {
-    if (courses.length <= 3) return;
+  const removeCourse = useCallback((id) => {
     setCourses(prev => prev.filter(c => c.id !== id));
-  }, [courses.length]);
+    setResult(null);
+    setError('');
+  }, []);
 
   const updateCourse = useCallback((id, field, value) => {
-    setCourses(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c));
+    setCourses(prev =>
+      prev.map(c => (c.id === id ? { ...c, [field]: value } : c))
+    );
+    setResult(null);
+    setError('');
   }, []);
 
   const calculate = useCallback(() => {
-    let totalPoints = 0;
-    let totalCredits = 0;
-    const scaleGrades = gradePoints(scale);
-    for (const c of courses) {
-      const credits = parseFloat(c.credits);
-      if (isNaN(credits) || credits <= 0) {
-        setError(`Invalid credits for "${c.code || 'course'}"`);
-        return;
-      }
-      const grade = scaleGrades[c.gradeIdx];
-      if (!grade) {
-        setError(`Invalid grade for "${c.code || 'course'}"`);
-        return;
-      }
-      totalPoints += grade.points * credits;
-      totalCredits += credits;
-    }
-    if (totalCredits === 0) {
-      setError('Total credits must be greater than zero.');
-      setResult(null);
+    setError('');
+    if (courses.length === 0) {
+      setError('Add at least one course to calculate GPA.');
       return;
     }
-    setError('');
+    const gradeScale = GRADES;
+    const mappedCourses = courses.map(c => ({
+      name: c.code || 'Course',
+      creditHours: c.credits,
+      grade: gradeScale[c.gradeIdx]?.g || 'F',
+    }));
+    const gpaResult = calculateGPA(mappedCourses);
+    if (gpaResult === '0.00' && mappedCourses.length > 0) {
+      setError('Invalid course data.');
+      return;
+    }
+    const totalCredits = courses.reduce((sum, c) => sum + (c.credits || 0), 0);
+    const totalPoints = gpaResult * totalCredits;
     setResult({
-      gpa: (totalPoints / totalCredits).toFixed(2),
+      gpa: parseFloat(gpaResult),
       count: courses.length,
       credits: totalCredits,
-      points: totalPoints,
+      points: parseFloat(totalPoints.toFixed(2)),
     });
-  }, [courses, scale]);
+  }, [courses]);
 
   return {
     courses,

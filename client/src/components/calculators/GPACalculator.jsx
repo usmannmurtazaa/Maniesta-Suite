@@ -1,11 +1,11 @@
+// src/components/calculators/GPACalculator.jsx
 import { useState, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useGPA } from "../../hooks/useGPA";
 import { GRADES, SCALES } from "../../utils/grades";
-import { generatePDF } from "../../utils/pdfExport";
-import { downloadCSV } from "../../utils/csvExport";
-import { logEvent } from "../../firebase/analytics";
-import { trackExport } from "../../firebase/exportTracker";
+import { generatePDF, downloadCSV } from "../../utils/exportHelpers";
+import { logEvent } from "../../services/firebase";
+import { trackExport } from "../../services/exportTracker";
 import CourseCard from "./CourseCard";
 import ResultCard from "./ResultCard";
 import { GradeProgressBar, TargetGPACalculator } from "./GradeExtras";
@@ -15,7 +15,7 @@ import Toast from "../common/Toast";
 const useGradeScale = (scale) =>
   useMemo(() => SCALES[scale] || GRADES, [scale]);
 
-export default function GPACalculator({ scale, darkMode }) {
+export default function GPACalculator({ scale = 4.0 }) {
   const {
     courses,
     addCourse,
@@ -58,7 +58,6 @@ export default function GPACalculator({ scale, darkMode }) {
     async (exportData) => {
       setIsExporting(true);
       setToast({ message: "", type: "" });
-
       const data = {
         ...exportData,
         scale,
@@ -75,14 +74,12 @@ export default function GPACalculator({ scale, darkMode }) {
           day: "numeric",
         }),
       };
-
       try {
         if (exportData.format === "pdf") {
           await generatePDF(data);
         } else {
           downloadCSV(data);
         }
-
         await trackExport({
           studentName: exportData.studentName || "",
           studentId: exportData.studentId || "",
@@ -102,13 +99,11 @@ export default function GPACalculator({ scale, darkMode }) {
             screenHeight: window.screen.height,
           },
         });
-
         logEvent("export_triggered", {
           format: exportData.format,
           scale,
           gpa: result?.gpa,
         });
-
         setShowExportModal(false);
         setToast({
           message: "Export completed successfully!",
@@ -128,28 +123,25 @@ export default function GPACalculator({ scale, darkMode }) {
   );
 
   return (
-    <div className="max-w-3xl mx-auto px-4 pb-6 animate-fade-up">
+    <div className="max-w-3xl mx-auto px-4 pb-6">
       <Toast
         message={toast.message}
         type={toast.type}
         onClose={() => setToast({ message: "", type: "" })}
-        darkMode={darkMode}
       />
-
       <ExportModal
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
         onExport={handleExport}
         isExporting={isExporting}
-        darkMode={darkMode}
       />
 
       {/* Section header */}
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
-        <h2 className="text-xs sm:text-sm font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
           Current Courses & Grades
         </h2>
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
           {result && (
             <button
               onClick={() => setShowTargetGPA(!showTargetGPA)}
@@ -160,11 +152,7 @@ export default function GPACalculator({ scale, darkMode }) {
               {showTargetGPA ? "Hide" : "Show"} Target GPA
             </button>
           )}
-          <span
-            className="px-4 py-1.5 rounded-full text-xs font-mono font-medium bg-brand-100 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-700"
-            aria-live="polite"
-            aria-atomic="true"
-          >
+          <span className="px-4 py-1.5 rounded-full text-xs font-mono font-medium bg-brand-100 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-700">
             {courses.length} / 8 courses
           </span>
         </div>
@@ -191,7 +179,6 @@ export default function GPACalculator({ scale, darkMode }) {
           data={c}
           onChange={updateCourse}
           scale={scale}
-          darkMode={darkMode}
         />
       ))}
 
@@ -211,7 +198,7 @@ export default function GPACalculator({ scale, darkMode }) {
       <button
         onClick={handleCalculate}
         disabled={calculating}
-        className={`w-full py-4 rounded-2xl font-semibold text-white text-lg flex items-center justify-center gap-2 transition-all ${
+        className={`w-full py-4 rounded-2xl font-semibold text-white text-lg flex items-center justify-center gap-2 transition-all mt-6 ${
           calculating
             ? "bg-purple-800 scale-95 opacity-90 cursor-progress"
             : "bg-gradient-to-r from-brand-600 to-brand-700 shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95"
@@ -231,7 +218,7 @@ export default function GPACalculator({ scale, darkMode }) {
       {/* Error message */}
       {error && (
         <div
-          className="mt-4 p-4 bg-red-500/10 border border-red-500/25 rounded-xl text-sm text-red-400"
+          className="mt-4 p-4 bg-red-500/10 border border-red-500/25 rounded-xl text-sm text-red-500"
           role="alert"
         >
           ⚠️ {error}
@@ -247,20 +234,14 @@ export default function GPACalculator({ scale, darkMode }) {
             credits={result.credits}
             points={result.points}
             scale={scale}
-            darkMode={darkMode}
           />
-          <GradeProgressBar
-            gpa={result.gpa}
-            scale={scale}
-            darkMode={darkMode}
-          />
+          <GradeProgressBar gpa={result.gpa} scale={scale} />
 
           {showTargetGPA && (
             <div id="target-gpa-section">
               <TargetGPACalculator
                 currentGPA={result.gpa}
                 totalCredits={result.credits}
-                darkMode={darkMode}
               />
             </div>
           )}
