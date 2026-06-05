@@ -1,41 +1,26 @@
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+// Thin wrapper around the existing exportHelpers to match the expected import
+import { generatePDF as generate } from './exportHelpers';
 
-export function generatePDF(data) {
-  const doc = new jsPDF();
-  // Header
-  doc.setFillColor(108, 99, 255);
-  doc.rect(0, 0, 210, 30, 'F');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(20);
-  doc.text('Maniesta GPA Report', 14, 20);
-  doc.setFontSize(11);
-  doc.text(`Date: ${data.date}`, 14, 27);
-
-  // Student info
-  doc.setTextColor(40);
-  doc.setFontSize(12);
-  let y = 40;
-  if (data.studentName) doc.text(`Name: ${data.studentName}`, 14, y += 7);
-  if (data.studentId) doc.text(`ID: ${data.studentId}`, 14, y += 7);
-  if (data.university) doc.text(`University: ${data.university}`, 14, y += 7);
-  if (data.semester) doc.text(`Semester: ${data.semester}`, 14, y += 7);
-
-  // Course table
-  const body = data.courses.map(c => [c.code, c.credits, c.grade, c.points]);
-  doc.autoTable({
-    startY: y + 6,
-    head: [['Course Code', 'Credits', 'Grade', 'Points']],
-    body,
-    theme: 'striped',
-    headStyles: { fillColor: [108, 99, 255] },
-    styles: { fontSize: 10 },
-    margin: { left: 14 },
+export async function generatePDF(data) {
+  // Adapt the shape if needed – the existing generatePDF expects { userData, resultData, calculatorType }
+  // For CGPA, we'll call it with the structure expected by the ExportModal
+  // But for standalone use we can provide a simpler adapter.
+  const doc = generate({
+    userData: {
+      fullName: data.studentName || 'Student',
+      studentId: data.studentId || '',
+      university: data.university || '',
+      semester: data.semester || '',
+    },
+    resultData: {
+      semesters: data.semesters.map((gpa, idx) => ({
+        name: `Semester ${idx + 1}`,
+        courses: [{ name: 'GPA', creditHours: 1, grade: 'GPA' }], // placeholder
+        gpa,
+      })),
+      cgpa: data.cgpaResult,
+    },
+    calculatorType: 'CGPA',
   });
-
-  const finalY = doc.lastAutoTable.finalY + 10;
-  doc.setFontSize(14);
-  doc.setTextColor(108, 99, 255);
-  doc.text(`GPA: ${data.gpaResult.gpa}  |  Credits: ${data.gpaResult.credits}`, 14, finalY);
-  doc.save(`GPA_Report_${data.studentName || 'student'}.pdf`);
+  doc.save(`CGPA_Report.pdf`);
 }
