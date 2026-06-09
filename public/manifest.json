@@ -1,0 +1,16 @@
+{
+  "name": "Maniesta Suite",
+  "short_name": "Maniesta",
+  "description": "Modern academic tools platform for students",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6c63ff",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}
