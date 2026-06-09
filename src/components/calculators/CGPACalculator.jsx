@@ -23,7 +23,6 @@ export default function CGPACalculator({ scale = 4.0 }) {
   const [toast, setToast] = useState({ message: "", type: "" });
   const [showCelebration, setShowCelebration] = useState(false);
 
-  // ── Celebration trigger when result appears ─────────────────────────
   useEffect(() => {
     if (result && result.cgpa >= 3.5) {
       setShowCelebration(true);
@@ -51,7 +50,7 @@ export default function CGPACalculator({ scale = 4.0 }) {
     });
   }, [calculate, scale, sems.length]);
 
-  // ── Export handler (returns blobs for modal) ─────────────────────────
+  // ── Fixed Export Handler (Non‑Blocking Firestore) ──
   const handleExport = useCallback(
     async (exportUserData) => {
       setIsExporting(true);
@@ -59,6 +58,7 @@ export default function CGPACalculator({ scale = 4.0 }) {
 
       const baseData = {
         ...exportUserData,
+        degree: exportUserData.degree,
         scale,
         semesters: sems.map((s) => ({ gpa: s.val })),
         cgpaResult: result,
@@ -71,15 +71,19 @@ export default function CGPACalculator({ scale = 4.0 }) {
       };
 
       try {
-        // Generate both files as Blobs
+        // 1. Generate files first (critical path)
         const pdfBlob = await generatePDFBlob(baseData);
         const csvBlob = generateCSVBlob(baseData);
 
-        // Save to Firestore
-        await trackExport({
+        // 2. Immediately return blobs to modal (so success screen appears)
+        setIsExporting(false);
+
+        // 3. Firestore save in background (non‑blocking, no await)
+        trackExport({
           studentName: exportUserData.fullName || "",
           studentId: exportUserData.studentId || "",
           university: exportUserData.university || "",
+          degree: exportUserData.degree || "",
           semester: exportUserData.semester || "All Semesters",
           scale,
           gpa: result?.cgpa || 0,
@@ -94,6 +98,12 @@ export default function CGPACalculator({ scale = 4.0 }) {
             screenWidth: window.screen.width,
             screenHeight: window.screen.height,
           },
+        }).catch((err) => {
+          console.error("Firestore save failed (non‑blocking):", err);
+          setToast({
+            message: "Report saved locally but cloud backup failed.",
+            type: "info",
+          });
         });
 
         if (analytics) {
@@ -104,16 +114,15 @@ export default function CGPACalculator({ scale = 4.0 }) {
           });
         }
 
-        setIsExporting(false);
         return { pdfBlob, csvBlob };
       } catch (err) {
-        console.error("Export failed:", err);
+        console.error("Export generation failed:", err);
         setIsExporting(false);
         setToast({
-          message: "Export failed. Please try again.",
+          message: "Failed to generate files. Please try again.",
           type: "error",
         });
-        throw err; // let modal know it failed
+        throw err;
       }
     },
     [sems, scale, result],
@@ -139,10 +148,8 @@ export default function CGPACalculator({ scale = 4.0 }) {
         isExporting={isExporting}
       />
 
-      {/* Celebration overlay */}
       <CelebrationOverlay show={showCelebration} />
 
-      {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
           Semester GPAs
@@ -152,7 +159,6 @@ export default function CGPACalculator({ scale = 4.0 }) {
         </span>
       </div>
 
-      {/* Empty state */}
       {sems.length === 0 && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -165,7 +171,6 @@ export default function CGPACalculator({ scale = 4.0 }) {
         </motion.div>
       )}
 
-      {/* Semester cards grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
         <AnimatePresence initial={false}>
           {sems.map((s, i) => (
@@ -224,7 +229,6 @@ export default function CGPACalculator({ scale = 4.0 }) {
         </AnimatePresence>
       </div>
 
-      {/* Add semester button (max 8) */}
       {sems.length < 8 && (
         <motion.button
           whileHover={{ scale: 1.02 }}
@@ -238,7 +242,6 @@ export default function CGPACalculator({ scale = 4.0 }) {
         </motion.button>
       )}
 
-      {/* Calculate button */}
       <motion.button
         whileHover={
           !calculating
@@ -278,7 +281,6 @@ export default function CGPACalculator({ scale = 4.0 }) {
         )}
       </motion.button>
 
-      {/* Error */}
       {error && (
         <div
           className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm backdrop-blur"
@@ -288,7 +290,6 @@ export default function CGPACalculator({ scale = 4.0 }) {
         </div>
       )}
 
-      {/* Results */}
       <AnimatePresence>
         {result && (
           <motion.div

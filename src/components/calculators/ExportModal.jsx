@@ -6,6 +6,7 @@ const INITIAL_USER_DATA = {
   fullName: "",
   studentId: "",
   university: "",
+  degree: "",
   semester: "",
   email: "",
   notes: "",
@@ -20,6 +21,7 @@ export default function ExportModal({
   const [userData, setUserData] = useState(INITIAL_USER_DATA);
   const [fieldErrors, setFieldErrors] = useState({});
   const [successFiles, setSuccessFiles] = useState(null);
+  const [generationError, setGenerationError] = useState(null);
   const fullNameRef = useRef(null);
 
   useEffect(() => {
@@ -27,8 +29,8 @@ export default function ExportModal({
       setUserData(INITIAL_USER_DATA);
       setFieldErrors({});
       setSuccessFiles(null);
-      const timer = setTimeout(() => fullNameRef.current?.focus(), 200);
-      return () => clearTimeout(timer);
+      setGenerationError(null);
+      setTimeout(() => fullNameRef.current?.focus(), 200);
     }
   }, [isOpen]);
 
@@ -51,14 +53,17 @@ export default function ExportModal({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-
+    setGenerationError(null);
     try {
       const files = await onExport(userData);
       const pdfUrl = URL.createObjectURL(files.pdfBlob);
       const csvUrl = URL.createObjectURL(files.csvBlob);
       setSuccessFiles({ pdfUrl, csvUrl });
     } catch (err) {
-      // Error toast already shown by parent
+      console.error("Export generation failed:", err);
+      setGenerationError(
+        err.message || "Failed to generate files. Please try again.",
+      );
     }
   };
 
@@ -71,39 +76,49 @@ export default function ExportModal({
     onClose();
   };
 
-  return (
-    <Modal isOpen={isOpen} onClose={() => !isExporting && handleClose()}>
-      <div className="flex flex-col" style={{ minHeight: "60vh" }}>
-        {successFiles ? (
-          /* ── Success Screen ─────────────────── */
-          <div className="flex-1 flex flex-col justify-center text-center space-y-6 py-4">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: "spring", stiffness: 200 }}
-              className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center"
-            >
-              <svg
-                className="w-8 h-8 text-emerald-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="2.5"
-              >
-                <path d="M5 13l4 4L19 7" />
-              </svg>
-            </motion.div>
-            <h3 className="text-2xl font-bold text-gradient">Export Ready!</h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              Your academic record has been generated and saved.
-            </p>
+  const handleRetry = () => {
+    setGenerationError(null);
+    // Re-submit the same user data
+    handleSubmit({ preventDefault: () => {} });
+  };
 
-            <div className="mt-auto pt-4 space-y-3">
-              <div className="flex flex-col sm:flex-row gap-3">
+  return (
+    <Modal isOpen={isOpen} onClose={!isExporting ? handleClose : undefined}>
+      {/* Main modal container with constrained height and flex layout */}
+      <div className="flex flex-col max-h-[85vh] min-h-[50vh]">
+        {successFiles ? (
+          // ── Success Screen (sticky header + scrollable content + sticky footer) ──
+          <div className="flex flex-col h-full">
+            <div className="shrink-0 pb-4 border-b border-white/20 dark:border-white/10">
+              <h3 className="text-2xl font-bold text-gradient text-center">
+                Export Ready!
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-1">
+                Your academic record has been generated.
+              </p>
+            </div>
+            <div className="flex-1 overflow-y-auto py-6 text-center space-y-6">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 200 }}
+                className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center"
+              >
+                <svg
+                  className="w-8 h-8 text-emerald-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+              </motion.div>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <a
                   href={successFiles.pdfUrl}
                   download="Academic_Record.pdf"
-                  className="btn-primary flex-1 py-3 flex items-center justify-center gap-2"
+                  className="btn-primary py-3 px-6 flex items-center justify-center gap-2"
                 >
                   <svg
                     className="w-5 h-5"
@@ -119,7 +134,7 @@ export default function ExportModal({
                 <a
                   href={successFiles.csvUrl}
                   download="Academic_Record.csv"
-                  className="btn-secondary flex-1 py-3 flex items-center justify-center gap-2"
+                  className="btn-secondary py-3 px-6 flex items-center justify-center gap-2"
                 >
                   <svg
                     className="w-5 h-5"
@@ -133,28 +148,28 @@ export default function ExportModal({
                   Download CSV
                 </a>
               </div>
+            </div>
+            <div className="shrink-0 pt-4 border-t border-white/20 dark:border-white/10 text-center">
               <button
                 onClick={handleClose}
-                className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 underline transition-colors w-full py-2"
+                className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 underline transition-colors py-2"
               >
                 Close
               </button>
             </div>
           </div>
         ) : (
-          /* ── Form Screen ───────────────────── */
+          // ── Form Screen (sticky header, scrollable form, sticky footer with submit) ──
           <>
-            {/* Sticky header */}
-            <div className="shrink-0 pb-3">
+            <div className="shrink-0 pb-3 border-b border-white/20 dark:border-white/10">
               <h3 className="text-2xl font-bold text-gradient">
                 Export Academic Record
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Fill details to generate PDF & CSV.
+                Fill your details to generate PDF and CSV files.
               </p>
             </div>
 
-            {/* Scrollable form body */}
             <div className="flex-1 overflow-y-auto py-4">
               <form
                 id="export-form"
@@ -229,6 +244,24 @@ export default function ExportModal({
 
                 <div>
                   <label
+                    htmlFor="degree"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                  >
+                    Degree / Program
+                  </label>
+                  <input
+                    id="degree"
+                    name="degree"
+                    type="text"
+                    value={userData.degree}
+                    onChange={handleChange}
+                    className="input-base"
+                    placeholder="e.g. BSc Computer Science"
+                  />
+                </div>
+
+                <div>
+                  <label
                     htmlFor="university"
                     className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
                   >
@@ -292,8 +325,18 @@ export default function ExportModal({
               </form>
             </div>
 
-            {/* Sticky footer with submit button */}
-            <div className="shrink-0 pt-2 pb-1">
+            <div className="shrink-0 pt-4 border-t border-white/20 dark:border-white/10">
+              {generationError && (
+                <div className="mb-3 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm flex justify-between items-center">
+                  <span>⚠️ {generationError}</span>
+                  <button
+                    onClick={handleRetry}
+                    className="text-sm underline hover:no-underline"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
               <button
                 type="submit"
                 form="export-form"
@@ -318,10 +361,10 @@ export default function ExportModal({
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                       />
                     </svg>
-                    Generating...
+                    Generating files...
                   </>
                 ) : (
-                  "Generate PDF & CSV"
+                  "Generate Export Files"
                 )}
               </button>
             </div>

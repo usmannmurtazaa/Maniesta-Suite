@@ -12,15 +12,9 @@ import ExportModal from "./ExportModal";
 import Toast from "../common/Toast";
 import CelebrationOverlay from "./CelebrationOverlay";
 
-/* -------------------------------------------------------------------------- */
-/*   Helper: Grade scale lookup                                               */
-/* -------------------------------------------------------------------------- */
 const useGradeScale = (scale) =>
   useMemo(() => SCALES[scale] || GRADES, [scale]);
 
-/* -------------------------------------------------------------------------- */
-/*   Main Component                                                           */
-/* -------------------------------------------------------------------------- */
 export default function GPACalculator({ scale, darkMode }) {
   const {
     courses,
@@ -41,7 +35,6 @@ export default function GPACalculator({ scale, darkMode }) {
   const [toast, setToast] = useState({ message: "", type: "" });
   const [showCelebration, setShowCelebration] = useState(false);
 
-  // ── Calculate handler ────────────────────────────────────────────────
   const handleCalculate = useCallback(() => {
     if (courses.length < 2) {
       setToast({
@@ -62,7 +55,6 @@ export default function GPACalculator({ scale, darkMode }) {
     });
   }, [calculate, scale, courses.length]);
 
-  // ── Celebration trigger when result appears ─────────────────────────
   useEffect(() => {
     if (result && result.gpa >= 3.5) {
       setShowCelebration(true);
@@ -71,7 +63,7 @@ export default function GPACalculator({ scale, darkMode }) {
     }
   }, [result]);
 
-  // ── Export handler (returns blobs for modal) ─────────────────────────
+  // ── Fixed Export Handler (Non‑Blocking Firestore) ──
   const handleExport = useCallback(
     async (exportUserData) => {
       setIsExporting(true);
@@ -79,6 +71,7 @@ export default function GPACalculator({ scale, darkMode }) {
 
       const baseData = {
         ...exportUserData,
+        degree: exportUserData.degree,
         scale,
         courses: courses.map((c) => ({
           code: c.code || "—",
@@ -95,15 +88,19 @@ export default function GPACalculator({ scale, darkMode }) {
       };
 
       try {
-        // Generate both files as Blobs
+        // 1. Generate files first (critical path)
         const pdfBlob = await generatePDFBlob(baseData);
         const csvBlob = generateCSVBlob(baseData);
 
-        // Save to Firestore
-        await trackExport({
+        // 2. Immediately return blobs to modal (so success screen appears)
+        setIsExporting(false);
+
+        // 3. Firestore save in background (non‑blocking, no await)
+        trackExport({
           studentName: exportUserData.fullName || "",
           studentId: exportUserData.studentId || "",
           university: exportUserData.university || "",
+          degree: exportUserData.degree || "",
           semester: exportUserData.semester || "",
           scale,
           gpa: result?.gpa || 0,
@@ -118,6 +115,13 @@ export default function GPACalculator({ scale, darkMode }) {
             screenWidth: window.screen.width,
             screenHeight: window.screen.height,
           },
+        }).catch((err) => {
+          // Non‑critical failure: show toast but don't block downloads
+          console.error("Firestore save failed (non‑blocking):", err);
+          setToast({
+            message: "Report saved locally but cloud backup failed.",
+            type: "info",
+          });
         });
 
         logEvent("export_triggered", {
@@ -126,22 +130,20 @@ export default function GPACalculator({ scale, darkMode }) {
           gpa: result?.gpa,
         });
 
-        setIsExporting(false);
         return { pdfBlob, csvBlob };
       } catch (err) {
-        console.error("Export failed:", err);
+        console.error("Export generation failed:", err);
         setIsExporting(false);
         setToast({
-          message: "Export failed. Please try again.",
+          message: "Failed to generate files. Please try again.",
           type: "error",
         });
-        throw err; // let modal know it failed
+        throw err;
       }
     },
     [courses, scale, result, gradeScale],
   );
 
-  // ── Render ──────────────────────────────────────────────────────────
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -163,10 +165,8 @@ export default function GPACalculator({ scale, darkMode }) {
         isExporting={isExporting}
       />
 
-      {/* Celebration overlay */}
       <CelebrationOverlay show={showCelebration} />
 
-      {/* Section header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
           Current Courses & Grades
@@ -190,7 +190,6 @@ export default function GPACalculator({ scale, darkMode }) {
         </div>
       </div>
 
-      {/* Empty state */}
       {courses.length === 0 && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -204,7 +203,6 @@ export default function GPACalculator({ scale, darkMode }) {
         </motion.div>
       )}
 
-      {/* Course cards with animated list */}
       <div className="space-y-4">
         <AnimatePresence initial={false}>
           {courses.map((c, i) => (
@@ -231,7 +229,6 @@ export default function GPACalculator({ scale, darkMode }) {
         </AnimatePresence>
       </div>
 
-      {/* Add course button (max 8) */}
       {courses.length < 8 && (
         <motion.button
           whileHover={{ scale: 1.02 }}
@@ -245,7 +242,6 @@ export default function GPACalculator({ scale, darkMode }) {
         </motion.button>
       )}
 
-      {/* Calculate button */}
       <motion.button
         whileHover={
           !calculating
@@ -285,7 +281,6 @@ export default function GPACalculator({ scale, darkMode }) {
         )}
       </motion.button>
 
-      {/* Error message */}
       {error && (
         <div
           role="alert"
@@ -295,7 +290,6 @@ export default function GPACalculator({ scale, darkMode }) {
         </div>
       )}
 
-      {/* Results section */}
       <AnimatePresence>
         {result && (
           <motion.div

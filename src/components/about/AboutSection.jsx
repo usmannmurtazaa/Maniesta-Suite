@@ -66,9 +66,7 @@ export default function AboutSection() {
       <ScrollReveal>
         <div className="grid md:grid-cols-2 gap-8">
           <div className="glass-card p-6 md:p-8">
-            <h2 className="text-2xl font-bold mb-4 text-gradient">
-              Our Story
-            </h2>
+            <h2 className="text-2xl font-bold mb-4 text-gradient">Our Story</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
               Maniesta Suite was born from the frustration of cluttered academic
               tools. Our founder, Usman Murtaza, envisioned a single, elegant
@@ -78,6 +76,7 @@ export default function AboutSection() {
               calculators and design.
             </p>
           </div>
+
           <div className="glass-card p-6 md:p-8 flex items-center gap-5">
             <div className="w-16 h-16 rounded-full bg-gradient-brand flex items-center justify-center text-2xl font-bold text-white shrink-0 shadow-brand">
               UM
@@ -93,6 +92,16 @@ export default function AboutSection() {
               </p>
             </div>
           </div>
+        </div>
+      </ScrollReveal>
+      <ScrollReveal>
+        <div className="glass-card p-6 md:p-8 text-center">
+          <h2 className="text-2xl font-bold mb-4 text-gradient">Our Vision</h2>
+          <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            To become the world’s most trusted academic toolkit – empowering
+            every student with beautiful, accessible, and intelligent tools that
+            make studying effortless.
+          </p>
         </div>
       </ScrollReveal>
 

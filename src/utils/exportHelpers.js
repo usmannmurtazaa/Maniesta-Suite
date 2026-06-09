@@ -38,6 +38,7 @@ async function buildPDF(doc, normalized) {
     studentName = 'Student',
     studentId = '',
     university = '',
+    degree = '',
     semester = '',
     date = new Date().toLocaleDateString(),
     scale = '4.0',
@@ -101,6 +102,7 @@ async function buildPDF(doc, normalized) {
   doc.setTextColor(...darkText);
   doc.text(`Name: ${s(studentName)}`, 25, yPos); yPos += 7;
   if (studentId) { doc.text(`Student ID: ${s(studentId)}`, 25, yPos); yPos += 7; }
+  if (degree) { doc.text(`Program: ${s(degree)}`, 25, yPos); yPos += 7; }
   if (university) { doc.text(`Institution: ${s(university)}`, 25, yPos); yPos += 7; }
   if (semester) { doc.text(`Semester: ${s(semester)}`, 25, yPos); yPos += 7; }
   doc.text(`Generated: ${s(date)}`, 25, yPos);
@@ -259,7 +261,7 @@ async function buildPDF(doc, normalized) {
   }
 }
 
-// ── Normalize data shapes ─────────────────────────────────
+// ── Normalize data shapes (includes degree) ─────────────────
 function normalizeExportData(data) {
   // Old ExportModal style (userData, resultData, calculatorType)
   if (data.userData) {
@@ -291,6 +293,7 @@ function normalizeExportData(data) {
       studentName: userData.fullName,
       studentId: userData.studentId,
       university: userData.university,
+      degree: userData.degree || '',
       semester: userData.semester,
       date: new Date().toLocaleDateString(),
       scale: '4.0',
@@ -314,11 +317,12 @@ function normalizeExportData(data) {
     };
   }
 
-  // New direct call
+  // New direct call (used by our fixed components)
   return {
     studentName: data.studentName || 'Student',
     studentId: data.studentId || '',
     university: data.university || '',
+    degree: data.degree || '',
     semester: data.semester || '',
     date: data.date || new Date().toLocaleDateString(),
     scale: data.scale || '4.0',
@@ -374,12 +378,14 @@ export function generateCSV(data, type) {
   const studentName = info.fullName || info.studentName || 'Student';
   const studentId = info.studentId || '';
   const university = info.university || '';
+  const degree = info.degree || '';
   const semester = info.semester || '';
   const date = info.date || new Date().toLocaleDateString();
 
   lines.push('STUDENT INFORMATION');
   lines.push(`${escapeCSV('Student Name')},${escapeCSV(studentName)}`);
   if (studentId) lines.push(`${escapeCSV('Student ID')},${escapeCSV(studentId)}`);
+  if (degree) lines.push(`${escapeCSV('Degree / Program')},${escapeCSV(degree)}`);
   if (university) lines.push(`${escapeCSV('University')},${escapeCSV(university)}`);
   if (semester) lines.push(`${escapeCSV('Semester')},${escapeCSV(semester)}`);
   lines.push(`${escapeCSV('Date')},${escapeCSV(date)}`);

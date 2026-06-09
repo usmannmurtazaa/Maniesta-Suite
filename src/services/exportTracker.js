@@ -35,6 +35,7 @@ export async function trackExport(data) {
     studentName = '',
     studentId = '',
     university = '',
+    degree = '',               // ✅ Added degree field
     semester = '',
     scale = '4.0',
     gpa = 0,
@@ -45,7 +46,7 @@ export async function trackExport(data) {
     deviceInfo,
   } = data;
 
-  // Firestore write with retry
+  // Firestore write with retry (non‑blocking)
   if (db) {
     try {
       await withRetry(async () => {
@@ -54,6 +55,7 @@ export async function trackExport(data) {
           studentName,
           studentId,
           university,
+          degree,               // ✅ Saved to Firestore
           semester,
           scale,
           gpa,
