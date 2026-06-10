@@ -9,7 +9,6 @@ const INITIAL_USER_DATA = {
   degree: "",
   semester: "",
   email: "",
-  notes: "",
 };
 
 export default function ExportModal({
@@ -303,24 +302,6 @@ export default function ExportModal({
                       {fieldErrors.email}
                     </motion.p>
                   )}
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="notes"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                  >
-                    Notes
-                  </label>
-                  <textarea
-                    id="notes"
-                    name="notes"
-                    rows={3}
-                    value={userData.notes}
-                    onChange={handleChange}
-                    className="input-base resize-none"
-                    placeholder="Optional remarks..."
-                  />
                 </div>
               </form>
             </div>
