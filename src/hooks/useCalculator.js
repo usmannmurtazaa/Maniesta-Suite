@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 
 /**
  * Shared logic for any calculator (normal, scientific, etc.)
@@ -11,7 +11,26 @@ export function useCalculator(evaluator) {
   const [history, setHistory] = useState([]);
   const [isResult, setIsResult] = useState(false);
 
+  // Refs for managing cleanup and unique IDs
+  const errorTimeoutRef = useRef(null);
+  const idCounterRef = useRef(0);
+
+  // Clear any pending error timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (errorTimeoutRef.current) {
+        clearTimeout(errorTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleInput = useCallback((value) => {
+    // Clear previous error timeout before setting a new one
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+      errorTimeoutRef.current = null;
+    }
+
     if (value === 'C') {
       setExpression('');
       setDisplay('0');
@@ -32,14 +51,21 @@ export function useCalculator(evaluator) {
       if (!isNaN(result)) {
         const formatted = Number.isInteger(result) ? result.toString() : parseFloat(result.toFixed(10)).toString();
         setDisplay(formatted);
-        setHistory(prev => [{ expression, result: formatted, id: Date.now() }, ...prev.slice(0, 9)]);
+        setHistory(prev => [
+          { expression, result: formatted, id: ++idCounterRef.current },
+          ...prev.slice(0, 9)
+        ]);
         setExpression(formatted);
         setIsResult(true);
       } else {
         setDisplay('Error');
         setExpression('');
         setIsResult(false);
-        setTimeout(() => setDisplay('0'), 1200);
+        // Schedule a timeout to reset the display
+        errorTimeoutRef.current = setTimeout(() => {
+          setDisplay('0');
+          errorTimeoutRef.current = null;
+        }, 1200);
       }
     } else {
       if (isResult) {

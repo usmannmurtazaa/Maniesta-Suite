@@ -5,6 +5,9 @@ import { useState, useEffect, useRef, useCallback } from 'react';
  * Custom hook that animates a number from 0 to `end` over a given duration.
  *
  * Improvements:
+ * - Respects `reducedMotion` option to skip animation.
+ * - Uses mounted ref to prevent state updates after unmount.
+ * - Stabilises `easing` via ref to avoid unnecessary re‑renders.
  * - Resets animation smoothly when `end` or `duration` changes.
  * - Cancels previous animation frames to prevent memory leaks.
  * - Uses `useCallback` for a stable `reset` function.
@@ -17,6 +20,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
  * @param {number} [options.decimals=2] - Number of decimal places in the output string.
  * @param {function} [options.easing] - Easing function (t => t in [0,1]). Default easeOutCubic.
  * @param {function} [options.formatter] - Custom formatter (value, decimals) => string.
+ * @param {boolean} [options.reducedMotion=false] - If true, animation is disabled.
  * @returns {{ value: string, reset: () => void }}
  */
 export function useCountUp(
@@ -26,37 +30,53 @@ export function useCountUp(
         decimals = 2,
         easing = (t) => 1 - Math.pow(1 - t, 3), // easeOutCubic
         formatter = (val, dec) => val.toFixed(dec),
+        reducedMotion = false,
     } = {}
 ) {
-    const [value, setValue] = useState(0);
+    const [value, setValue] = useState(() =>
+        formatter(0, decimals)
+    );
     const animationRef = useRef(null);
     const startTimeRef = useRef(null);
     const endValueRef = useRef(end);
+    const mountedRef = useRef(true);
+    const easingRef = useRef(easing);
+    easingRef.current = easing; // keep easing stable without changing the animate callback
 
     // Keep end value stable in a ref to avoid recreating the effect callback
     endValueRef.current = end;
 
+    // Animation loop – stable reference, no external state dependencies
     const animate = useCallback(
         (timestamp) => {
+            if (!mountedRef.current) return;
             if (startTimeRef.current === null) startTimeRef.current = timestamp;
             const elapsed = timestamp - startTimeRef.current;
             const progress = Math.min(elapsed / (duration * 1000), 1);
-            const current = easing(progress) * endValueRef.current;
+            const current = easingRef.current(progress) * endValueRef.current;
             setValue(current);
 
             if (progress < 1) {
                 animationRef.current = requestAnimationFrame(animate);
             } else {
-                setValue(endValueRef.current); // snap exactly to end
+                // snap exactly to end
+                setValue(endValueRef.current);
             }
         },
-        [duration, easing]
+        [duration] // only depends on duration, easing is stable via ref
     );
 
     useEffect(() => {
-        // Handle cases where end is not a valid number
-        if (typeof end !== 'number' || isNaN(end) || !isFinite(end)) {
-            setValue(0);
+        mountedRef.current = true;
+
+        // Handle cases where end is not a valid number, or reduced motion is preferred
+        if (
+            typeof end !== 'number' ||
+            isNaN(end) ||
+            !isFinite(end) ||
+            reducedMotion
+        ) {
+            setValue(end);
             return;
         }
 
@@ -70,11 +90,12 @@ export function useCountUp(
         animationRef.current = requestAnimationFrame(animate);
 
         return () => {
+            mountedRef.current = false;
             if (animationRef.current) {
                 cancelAnimationFrame(animationRef.current);
             }
         };
-    }, [end, animate]);
+    }, [end, animate, reducedMotion]);
 
     // Reset function (optional – can be exposed if needed)
     const reset = useCallback(() => {

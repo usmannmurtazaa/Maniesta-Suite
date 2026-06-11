@@ -1,13 +1,15 @@
 // src/contexts/UserProfileContext.jsx
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import { useUserProfile } from '../hooks/useUserProfile';
 
 const UserProfileContext = createContext(null);
 
 export function UserProfileProvider({ children }) {
   const { profile, actions, loading } = useUserProfile();
+  // Memoize the context value to prevent unnecessary re‑renders of consumers
+  const value = useMemo(() => ({ profile, actions, loading }), [profile, actions, loading]);
   return (
-    <UserProfileContext.Provider value={{ profile, actions, loading }}>
+    <UserProfileContext.Provider value={value}>
       {children}
     </UserProfileContext.Provider>
   );

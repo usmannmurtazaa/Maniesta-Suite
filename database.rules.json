@@ -1,4 +1,5 @@
 {
+  "_comment": "The Realtime Database is not currently used by Maniesta Suite. These rules lock all access as a secure default.",
   "rules": {
     ".read": false,
     ".write": false

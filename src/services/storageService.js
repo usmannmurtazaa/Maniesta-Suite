@@ -31,17 +31,42 @@ export function get(key) {
   } catch { return DEFAULT_STATE[key]; }
 }
 
+/**
+ * Merge partial data into an existing stored object.
+ * NOTE: This function is designed for object values.
+ * If the current stored value is an array, a warning is logged
+ * and the partial object will be spread over it (which breaks the array).
+ * Use save() directly for array keys.
+ */
 export function update(key, partial) {
   const current = get(key);
+  if (Array.isArray(current)) {
+    console.warn(
+      `storageService.update() called on array key "${key}". Use save() directly for array data.`
+    );
+  }
   const updated = { ...current, ...partial };
   save(key, updated);
 }
 
+/**
+ * Remove a key from storage and notify listeners with the default value.
+ * This effectively resets the state for that key (e.g., an empty array or null)
+ * rather than leaving consumers with stale data.
+ */
 export function remove(key) {
   localStorage.removeItem(key);
-  window.dispatchEvent(new CustomEvent('storage-update', { detail: { key, value: DEFAULT_STATE[key] } }));
+  window.dispatchEvent(
+    new CustomEvent('storage-update', { detail: { key, value: DEFAULT_STATE[key] } })
+  );
 }
 
+/**
+ * Clear all known storage keys.
+ * NOTE: This fires one storage-update event per key, which may trigger
+ * multiple re‑renders in listeners. For a bulk clear with a single event,
+ * a dedicated function could be added in the future.
+ */
 export function clearAll() {
   Object.keys(STORAGE_KEYS).forEach(key => remove(key));
 }

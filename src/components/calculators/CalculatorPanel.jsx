@@ -2,6 +2,19 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { logEvent } from "../../services/firebase";
 
+/* ── Local hook: reduced motion detection ───────────────────────────── */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
+
 /* ── Button layouts ───────────────────────────────────────────────── */
 const NORMAL_BUTTONS = [
   ["MC", "MR", "M+", "M-"],
@@ -56,34 +69,18 @@ export default function CalculatorPanel({ darkMode }) {
   const [memory, setMemory] = useState(0);
   const [angleMode, setAngleMode] = useState("deg");
   const containerRef = useRef(null);
+  const reducedMotion = usePrefersReducedMotion();
 
-  /* ── Keyboard support ─────────────────────────────────────────────── */
+  // Refs to keep the latest handler references for the keyboard listener
+  const handleNormalClickRef = useRef(() => {});
+  const handleScientificRef = useRef(() => {});
+  const modeRef = useRef(mode);
+
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
-        return;
-      const key = e.key;
-      if (key === "Enter") {
-        e.preventDefault();
-        mode === "normal" ? handleNormalClick("=") : handleScientific("=");
-      } else if (key === "Escape") {
-        setInput("");
-        setResult("0");
-      } else if (key === "Backspace") setInput((prev) => prev.slice(0, -1));
-      else if (/^[0-9.]$/.test(key)) setInput((prev) => prev + key);
-      else if (key === "+") setInput((prev) => prev + "+");
-      else if (key === "-") setInput((prev) => prev + "-");
-      else if (key === "*") setInput((prev) => prev + "*");
-      else if (key === "/") setInput((prev) => prev + "/");
-      else if (key === "(") setInput((prev) => prev + "(");
-      else if (key === ")") setInput((prev) => prev + ")");
-      else if (key === "%") setInput((prev) => prev + "%");
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [mode, input]);
+    modeRef.current = mode;
+  }, [mode]);
 
-  /* ── Handlers ──────────────────────────────────────────────────────── */
+  /* ── Handlers (defined first, then assigned to refs) ────────────────── */
   const handleNormalClick = useCallback(
     (value) => {
       if (value === "C") {
@@ -168,6 +165,14 @@ export default function CalculatorPanel({ darkMode }) {
     [input, angleMode],
   );
 
+  // Update refs whenever handlers change
+  useEffect(() => {
+    handleNormalClickRef.current = handleNormalClick;
+  }, [handleNormalClick]);
+  useEffect(() => {
+    handleScientificRef.current = handleScientific;
+  }, [handleScientific]);
+
   const handleButtonClick = useCallback(
     (btn) => {
       if (["MC", "MR", "M+", "M-"].includes(btn)) handleMemory(btn);
@@ -182,8 +187,41 @@ export default function CalculatorPanel({ darkMode }) {
     [mode, handleMemory, handleNormalClick, handleScientific],
   );
 
+  /* ── Keyboard support (optimised listener) ───────────────────────────── */
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
+        return;
+      const key = e.key;
+      if (key === "Enter") {
+        e.preventDefault();
+        modeRef.current === "normal"
+          ? handleNormalClickRef.current("=")
+          : handleScientificRef.current("=");
+      } else if (key === "Escape") {
+        setInput("");
+        setResult("0");
+      } else if (key === "Backspace") setInput((prev) => prev.slice(0, -1));
+      else if (/^[0-9.]$/.test(key)) setInput((prev) => prev + key);
+      else if (key === "+") setInput((prev) => prev + "+");
+      else if (key === "-") setInput((prev) => prev + "-");
+      else if (key === "*") setInput((prev) => prev + "*");
+      else if (key === "/") setInput((prev) => prev + "/");
+      else if (key === "(") setInput((prev) => prev + "(");
+      else if (key === ")") setInput((prev) => prev + ")");
+      else if (key === "%") setInput((prev) => prev + "%");
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []); // stable – uses refs for mode and handlers
+
   const buttonsToRender =
     mode === "normal" ? NORMAL_BUTTONS : SCIENTIFIC_BUTTONS;
+
+  // Common motion props – disabled when reducedMotion is true
+  const btnWhileHover = reducedMotion ? {} : { whileHover: { scale: 1.03 } };
+  const btnWhileTap = reducedMotion ? {} : { whileTap: { scale: 0.92 } };
+  const toggleWhileTap = reducedMotion ? {} : { whileTap: { scale: 0.95 } };
 
   /* ── Render ────────────────────────────────────────────────────────── */
   return (
@@ -192,45 +230,49 @@ export default function CalculatorPanel({ darkMode }) {
       <AnimatePresence>
         {mode === "scientific" && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="flex gap-2"
+            initial={
+              reducedMotion ? { opacity: 1 } : { opacity: 0, maxHeight: 0 }
+            }
+            animate={
+              reducedMotion ? { opacity: 1 } : { opacity: 1, maxHeight: 60 }
+            }
+            exit={reducedMotion ? { opacity: 1 } : { opacity: 0, maxHeight: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
             role="radiogroup"
             aria-label="Angle unit"
           >
-            {["deg", "rad"].map((m) => (
-              <motion.button
-                key={m}
-                onClick={() => {
-                  setAngleMode(m);
-                  logEvent("calculator_angle_mode", { mode: m });
-                }}
-                whileTap={{ scale: 0.95 }}
-                role="radio"
-                aria-checked={angleMode === m}
-                className={`flex-1 py-2 rounded-xl text-sm font-semibold uppercase tracking-wide transition-all ${
-                  angleMode === m
-                    ? "bg-brand-500 text-white shadow-brand"
-                    : "glass text-gray-600 dark:text-gray-300 hover:bg-white/10"
-                }`}
-              >
-                {m}
-              </motion.button>
-            ))}
+            <div className="flex gap-2">
+              {["deg", "rad"].map((m) => (
+                <motion.button
+                  key={m}
+                  type="button"
+                  onClick={() => {
+                    setAngleMode(m);
+                    logEvent("calculator_angle_mode", { mode: m });
+                  }}
+                  {...toggleWhileTap}
+                  role="radio"
+                  aria-checked={angleMode === m}
+                  className={`flex-1 py-2 rounded-xl text-sm font-semibold uppercase tracking-wide transition-all ${
+                    angleMode === m
+                      ? "bg-brand-500 text-white shadow-brand"
+                      : "glass text-gray-600 dark:text-gray-300 hover:bg-white/10"
+                  }`}
+                >
+                  {m}
+                </motion.button>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* Memory indicator */}
       {memory !== 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-mono font-medium backdrop-blur-sm border border-brand-500/20"
-        >
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-mono font-medium backdrop-blur-sm border border-brand-500/20">
           <span className="uppercase tracking-wider">M:</span> {memory}
-        </motion.div>
+        </div>
       )}
 
       {/* Display */}
@@ -252,11 +294,12 @@ export default function CalculatorPanel({ darkMode }) {
         {["normal", "scientific"].map((m) => (
           <motion.button
             key={m}
+            type="button"
             onClick={() => {
               setMode(m);
               logEvent("calculator_mode_switch", { mode: m });
             }}
-            whileTap={{ scale: 0.95 }}
+            {...toggleWhileTap}
             role="tab"
             aria-selected={mode === m}
             className={`flex-1 py-2.5 rounded-xl text-sm font-medium capitalize transition-all ${
@@ -283,8 +326,9 @@ export default function CalculatorPanel({ darkMode }) {
             return (
               <motion.button
                 key={`${i}-${j}`}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.92 }}
+                type="button"
+                {...btnWhileHover}
+                {...btnWhileTap}
                 onClick={() => handleButtonClick(btn)}
                 className={`py-3 rounded-xl text-lg font-medium transition-all select-none ${
                   isAction
@@ -293,7 +337,7 @@ export default function CalculatorPanel({ darkMode }) {
                       ? "bg-brand-500/15 border border-brand-500/20 text-brand-600 dark:text-brand-300 hover:bg-brand-500/25"
                       : "glass text-gray-800 dark:text-white hover:bg-white/30 dark:hover:bg-white/10"
                 }`}
-                aria-label={btn}
+                aria-label={btn === "⌫" ? "Backspace" : btn}
               >
                 {btn}
               </motion.button>
@@ -303,36 +347,30 @@ export default function CalculatorPanel({ darkMode }) {
       </div>
 
       {/* History */}
-      <AnimatePresence>
-        {history.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="pt-4 border-t border-gray-200/20 dark:border-white/10"
-          >
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                Recent
-              </span>
-              <button
-                onClick={() => setHistory([])}
-                className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 underline transition-colors"
-              >
-                Clear
-              </button>
+      {history.length > 0 && (
+        <div className="pt-4 border-t border-gray-200/20 dark:border-white/10">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+              Recent
+            </span>
+            <button
+              type="button"
+              onClick={() => setHistory([])}
+              className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 underline transition-colors"
+            >
+              Clear
+            </button>
+          </div>
+          {history.map((h, i) => (
+            <div
+              key={i}
+              className="text-sm text-gray-500 dark:text-gray-400 font-mono py-1 border-b border-white/5 break-all"
+            >
+              {h}
             </div>
-            {history.map((h, i) => (
-              <div
-                key={i}
-                className="text-sm text-gray-500 dark:text-gray-400 font-mono py-1 border-b border-white/5 break-all"
-              >
-                {h}
-              </div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,30 +1,78 @@
 // src/pages/CurrencyConverter.jsx
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 
-// List of major currencies with emoji flags and display names
+/* ── SVG Icons ────────────────────────────────────────────────────── */
+const ErrorAlertIcon = () => (
+  <svg
+    className="w-5 h-5 text-red-500 shrink-0"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="2"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+
+const SwapIcon = () => (
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="17 1 21 5 17 9" />
+    <path d="M3 11V9a4 4 0 014-4h14" />
+    <polyline points="7 23 3 19 7 15" />
+    <path d="M21 13v2a4 4 0 01-4 4H3" />
+  </svg>
+);
+
+/* ── Reduced‑motion hook ──────────────────────────────────────────── */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
+
+/* ── Currency data (no emoji flags) ───────────────────────────────── */
 const currencies = [
-  { code: "USD", name: "US Dollar", flag: "🇺🇸" },
-  { code: "EUR", name: "Euro", flag: "🇪🇺" },
-  { code: "GBP", name: "British Pound", flag: "🇬🇧" },
-  { code: "PKR", name: "Pakistani Rupee", flag: "🇵🇰" },
-  { code: "INR", name: "Indian Rupee", flag: "🇮🇳" },
-  { code: "SAR", name: "Saudi Riyal", flag: "🇸🇦" },
-  { code: "AED", name: "UAE Dirham", flag: "🇦🇪" },
-  { code: "JPY", name: "Japanese Yen", flag: "🇯🇵" },
-  { code: "CNY", name: "Chinese Yuan", flag: "🇨🇳" },
-  { code: "CAD", name: "Canadian Dollar", flag: "🇨🇦" },
-  { code: "AUD", name: "Australian Dollar", flag: "🇦🇺" },
-  { code: "CHF", name: "Swiss Franc", flag: "🇨🇭" },
-  { code: "NZD", name: "New Zealand Dollar", flag: "🇳🇿" },
-  { code: "SGD", name: "Singapore Dollar", flag: "🇸🇬" },
-  { code: "MYR", name: "Malaysian Ringgit", flag: "🇲🇾" },
-  { code: "THB", name: "Thai Baht", flag: "🇹🇭" },
-  { code: "KRW", name: "South Korean Won", flag: "🇰🇷" },
-  { code: "TRY", name: "Turkish Lira", flag: "🇹🇷" },
-  { code: "RUB", name: "Russian Ruble", flag: "🇷🇺" },
-  { code: "ZAR", name: "South African Rand", flag: "🇿🇦" },
+  { code: "USD", name: "US Dollar" },
+  { code: "EUR", name: "Euro" },
+  { code: "GBP", name: "British Pound" },
+  { code: "PKR", name: "Pakistani Rupee" },
+  { code: "INR", name: "Indian Rupee" },
+  { code: "SAR", name: "Saudi Riyal" },
+  { code: "AED", name: "UAE Dirham" },
+  { code: "JPY", name: "Japanese Yen" },
+  { code: "CNY", name: "Chinese Yuan" },
+  { code: "CAD", name: "Canadian Dollar" },
+  { code: "AUD", name: "Australian Dollar" },
+  { code: "CHF", name: "Swiss Franc" },
+  { code: "NZD", name: "New Zealand Dollar" },
+  { code: "SGD", name: "Singapore Dollar" },
+  { code: "MYR", name: "Malaysian Ringgit" },
+  { code: "THB", name: "Thai Baht" },
+  { code: "KRW", name: "South Korean Won" },
+  { code: "TRY", name: "Turkish Lira" },
+  { code: "RUB", name: "Russian Ruble" },
+  { code: "ZAR", name: "South African Rand" },
 ];
 
 // Cache duration in milliseconds (1 hour)
@@ -39,6 +87,7 @@ export default function CurrencyConverter() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const reducedMotion = usePrefersReducedMotion();
 
   // Fetch exchange rates (with localStorage caching)
   const fetchRates = useCallback(async () => {
@@ -114,18 +163,20 @@ export default function CurrencyConverter() {
     setAmount(value === "" ? "" : parseFloat(value));
   };
 
+  // Motion props for swap button
+  const swapMotionProps = reducedMotion
+    ? {}
+    : {
+        whileHover: { scale: 1.1, rotate: 180 },
+        whileTap: { scale: 0.9 },
+      };
+
   return (
     <>
       <SEO
         title="Currency Converter"
         description="Convert world currencies instantly with live exchange rates. Free, fast and accurate currency converter tool for students and travellers."
-        keywords={[
-          "currency converter",
-          "exchange rates",
-          "USD to EUR",
-          "live rates",
-          "money converter",
-        ]}
+        keywords="currency converter, exchange rates, USD to EUR, live rates, money converter"
         canonicalUrl="https://maniestasuite.netlify.app/currencyconverter"
       />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-12 md:py-16">
@@ -138,11 +189,13 @@ export default function CurrencyConverter() {
           </p>
 
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm text-center">
-              ⚠️ {error}
+            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+              <ErrorAlertIcon />
+              <span className="flex-1">{error}</span>
               <button
+                type="button"
                 onClick={fetchRates}
-                className="ml-3 underline hover:no-underline font-medium"
+                className="underline hover:no-underline font-medium"
               >
                 Retry
               </button>
@@ -188,7 +241,7 @@ export default function CurrencyConverter() {
                   >
                     {currencies.map((cur) => (
                       <option key={cur.code} value={cur.code}>
-                        {cur.flag} {cur.code} – {cur.name}
+                        {cur.code} – {cur.name}
                       </option>
                     ))}
                   </select>
@@ -196,13 +249,13 @@ export default function CurrencyConverter() {
 
                 <div className="flex justify-center pb-2">
                   <motion.button
-                    whileHover={{ scale: 1.1, rotate: 180 }}
-                    whileTap={{ scale: 0.9 }}
+                    type="button"
+                    {...swapMotionProps}
                     onClick={handleSwap}
                     className="glass w-12 h-12 rounded-full flex items-center justify-center text-xl transition-all hover:shadow-brand"
                     aria-label="Swap currencies"
                   >
-                    ⇄
+                    <SwapIcon />
                   </motion.button>
                 </div>
 
@@ -220,7 +273,7 @@ export default function CurrencyConverter() {
                   >
                     {currencies.map((cur) => (
                       <option key={cur.code} value={cur.code}>
-                        {cur.flag} {cur.code} – {cur.name}
+                        {cur.code} – {cur.name}
                       </option>
                     ))}
                   </select>
@@ -254,14 +307,14 @@ export default function CurrencyConverter() {
             </div>
           )}
 
-          {/* Back to home link */}
+          {/* Back to home link – now uses React Router Link */}
           <div className="mt-10 pt-6 border-t border-gray-200 dark:border-gray-800 text-center">
-            <a
-              href="/"
+            <Link
+              to="/"
               className="btn-secondary inline-flex items-center gap-2"
             >
               ← Back to Home
-            </a>
+            </Link>
           </div>
         </div>
       </main>

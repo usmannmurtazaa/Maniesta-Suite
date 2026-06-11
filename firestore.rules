@@ -1,8 +1,22 @@
+// ⚠️ These rules are designed for the current anonymous‑usage model of Maniesta Suite.
+// No authentication is required; export data is stored in the `exports` collection.
+// When user accounts are introduced, tighten these rules (e.g., require request.auth != null).
 rules_version = '2';
 service cloud.firestore {
-match /databases/{database}/documents {
-match /users/{userId}/{document=**} {
-  allow read, write: if request.auth != null && request.auth.uid == userId;
-}
-}
+  match /databases/{database}/documents {
+    // Placeholder for future user‑specific data
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Export records – publicly accessible (matching the app’s anonymous usage)
+    match /exports/{docId} {
+      allow read, write: if true;
+    }
+
+    // Deny everything else by default (explicit safety net)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
 }

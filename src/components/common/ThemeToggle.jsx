@@ -1,6 +1,22 @@
-import { useContext } from "react";
+import { useContext, useState, useEffect } from "react";
 import { ThemeContext } from "../../contexts/ThemeContext";
 import { motion, AnimatePresence } from "framer-motion";
+
+/**
+ * Local hook to detect reduced‑motion preference.
+ * (Can be extracted to a shared utility later.)
+ */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
 
 const SunIcon = () => (
   <svg
@@ -74,6 +90,21 @@ const labels = {
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const reducedMotion = usePrefersReducedMotion();
+
+  // If reduced motion, render a plain button with no animations
+  if (reducedMotion) {
+    return (
+      <button
+        onClick={toggleTheme}
+        type="button"
+        className="relative glass w-10 h-10 flex items-center justify-center rounded-full text-gray-700 dark:text-gray-200 transition-shadow hover:shadow-brand"
+        aria-label={labels[theme] || "Toggle theme"}
+      >
+        {icons[theme]}
+      </button>
+    );
+  }
 
   return (
     <motion.button

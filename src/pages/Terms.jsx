@@ -8,7 +8,7 @@ export default function Terms() {
       <SEO
         title="Terms and Conditions"
         description="Read the terms of use for Maniesta Suite. Free academic tools for students – no signup, no hidden fees."
-        keywords={["terms and conditions", "terms of use", "legal", "disclaimer", "academic tools terms"]}
+        keywords="terms and conditions, terms of use, legal, disclaimer, academic tools terms"
         canonicalUrl="https://maniestasuite.netlify.app/terms"
       />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">

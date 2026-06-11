@@ -1,5 +1,5 @@
 // src/contexts/DashboardProvider.jsx
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { get, save, STORAGE_KEYS, addRecentAction } from '../services/storageService';
 
 const DashboardContext = createContext();
@@ -11,6 +11,9 @@ export function DashboardProvider({ children }) {
   const [lastCurrency, setLastCurrency] = useState(null);
   const [exportHistory, setExportHistory] = useState([]);
   const [preferences, setPreferences] = useState({});
+
+  // Unique ID counter – avoids duplicate keys even for rapid calls
+  const idCounterRef = useRef(0);
 
   // Load all on mount
   useEffect(() => {
@@ -42,36 +45,43 @@ export function DashboardProvider({ children }) {
     setRecentActions(prev => [action, ...prev.filter(a => a.id !== action.id)].slice(0, 20));
   }, []);
 
-  // Favorite tools
+  // Favorite tools – now uses functional update to avoid stale closure
   const toggleFavorite = useCallback((toolId) => {
-    const newFav = favoriteTools.includes(toolId)
-      ? favoriteTools.filter(id => id !== toolId)
-      : [...favoriteTools, toolId];
-    setFavoriteTools(newFav);
-    save(STORAGE_KEYS.FAVORITE_TOOLS, newFav);
-  }, [favoriteTools]);
+    setFavoriteTools(prev => {
+      const newFav = prev.includes(toolId)
+        ? prev.filter(id => id !== toolId)
+        : [...prev, toolId];
+      save(STORAGE_KEYS.FAVORITE_TOOLS, newFav);
+      return newFav;
+    });
+  }, []); // stable – no dependency on favoriteTools
 
-  // Save GPA after calculation
+  // Save GPA after calculation – uses unique ID
   const saveGPA = useCallback((gpaData) => {
+    const id = `gpa-${Date.now()}-${++idCounterRef.current}`;
     setLastGPA(gpaData);
     save(STORAGE_KEYS.LAST_GPA, gpaData);
-    addRecent({ id: `gpa-${Date.now()}`, type: 'gpa', value: gpaData.gpa, credits: gpaData.credits, timestamp: Date.now() });
+    addRecent({ id, type: 'gpa', value: gpaData.gpa, credits: gpaData.credits, timestamp: Date.now() });
   }, [addRecent]);
 
-  // Save currency conversion
+  // Save currency conversion – uses unique ID
   const saveCurrency = useCallback((convData) => {
+    const id = `currency-${Date.now()}-${++idCounterRef.current}`;
     setLastCurrency(convData);
     save(STORAGE_KEYS.LAST_CURRENCY, convData);
-    addRecent({ id: `currency-${Date.now()}`, type: 'currency', from: convData.from, to: convData.to, value: convData.value, result: convData.result, timestamp: Date.now() });
+    addRecent({ id, type: 'currency', from: convData.from, to: convData.to, value: convData.value, result: convData.result, timestamp: Date.now() });
   }, [addRecent]);
 
-  // Save export record
+  // Save export record – functional update, no stale closure, unique ID
   const addExportRecord = useCallback((exportData) => {
-    const newHistory = [exportData, ...exportHistory].slice(0, 15);
-    setExportHistory(newHistory);
-    save(STORAGE_KEYS.EXPORT_HISTORY, newHistory);
-    addRecent({ id: `export-${Date.now()}`, type: 'export', filename: exportData.filename, timestamp: Date.now() });
-  }, [exportHistory, addRecent]);
+    const id = `export-${Date.now()}-${++idCounterRef.current}`;
+    setExportHistory(prev => {
+      const newHistory = [exportData, ...prev].slice(0, 15);
+      save(STORAGE_KEYS.EXPORT_HISTORY, newHistory);
+      return newHistory;
+    });
+    addRecent({ id, type: 'export', filename: exportData.filename, timestamp: Date.now() });
+  }, [addRecent]);
 
   const value = {
     recentActions,

@@ -1,8 +1,23 @@
 // src/pages/Tools.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import SEO from "../components/SEO";
+
+// -------------------------------------------------------------------
+// Local hook: detect reduced motion preference
+// -------------------------------------------------------------------
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
 
 // SVG Icons (professional, with aria-hidden)
 const GPAIcon = () => (
@@ -233,21 +248,9 @@ const categories = [
   ...new Map(tools.map((t) => [t.category, t.category])).keys(),
 ];
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
-};
-
 export default function Tools() {
   const [search, setSearch] = useState("");
+  const reducedMotion = usePrefersReducedMotion();
 
   const filteredTools = tools.filter(
     (tool) =>
@@ -263,41 +266,33 @@ export default function Tools() {
     }))
     .filter((group) => group.tools.length > 0);
 
+  // ── Motion props ──────────────────────────────────────────────────
+  const heroProps = reducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.5 },
+      };
+
   return (
     <>
       <SEO
         title="All Tools – GPA, CGPA, Calculators & Converters"
         description="Explore all free student tools: GPA calculator, CGPA calculator, scientific calculator, unit converter, currency converter, and PDF/CSV export. No signup required."
-        keywords={[
-          "tools",
-          "GPA calculator",
-          "CGPA calculator",
-          "scientific calculator",
-          "unit converter",
-          "currency converter",
-          "PDF export",
-          "CSV export",
-        ]}
+        keywords="tools, GPA calculator, CGPA calculator, scientific calculator, unit converter, currency converter, PDF export, CSV export"
         canonicalUrl="https://maniestasuite.netlify.app/tools"
       />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         {/* Hero Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12"
-        >
+        <motion.div {...heroProps} className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-extrabold text-gradient mb-4">
             All Tools in One Place
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
             Access GPA, CGPA, calculators, converters and export tools instantly
             – all free, no signup required. Need help? Use our{" "}
-            <Link to="/" className="text-brand-500 hover:underline">
-              AI Chat Assistant
-            </Link>
-            .
+            <span className="text-brand-500">AI Chat Assistant</span>.
           </p>
         </motion.div>
 
@@ -313,44 +308,87 @@ export default function Tools() {
           />
         </div>
 
-        {/* Tool Sections with stagger animations */}
+        {/* Tool Sections */}
         {groupedTools.length > 0 ? (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-50px" }}
-            className="space-y-16"
-          >
-            {groupedTools.map((group, idx) => (
-              <motion.div key={group.category} variants={itemVariants}>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center md:text-left">
-                  {group.category}
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {group.tools.map((tool) => (
-                    <Link key={tool.name} to={tool.path}>
-                      <motion.div
-                        whileHover={{ scale: 1.02, y: -4 }}
-                        transition={{ duration: 0.2 }}
-                        className="glass-card p-6 h-full flex flex-col items-start gap-3 hover:shadow-brand-lg transition-all break-words"
-                      >
-                        <div className="p-2 rounded-xl bg-brand-50 dark:bg-brand-900/20">
-                          {tool.icon}
+          reducedMotion ? (
+            // Static layout without animations
+            <div className="space-y-16">
+              {groupedTools.map((group) => (
+                <div key={group.category}>
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center md:text-left">
+                    {group.category}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {group.tools.map((tool) => (
+                      <Link key={tool.name} to={tool.path}>
+                        <div className="glass-card p-6 h-full flex flex-col items-start gap-3 hover:shadow-brand-lg transition-all break-words">
+                          <div className="p-2 rounded-xl bg-brand-50 dark:bg-brand-900/20">
+                            {tool.icon}
+                          </div>
+                          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                            {tool.name}
+                          </h3>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm">
+                            {tool.description}
+                          </p>
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                          {tool.name}
-                        </h3>
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">
-                          {tool.description}
-                        </p>
-                      </motion.div>
-                    </Link>
-                  ))}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </motion.div>
-            ))}
-          </motion.div>
+              ))}
+            </div>
+          ) : (
+            // Animated layout
+            <motion.div
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.1, delayChildren: 0.2 },
+                },
+              }}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              className="space-y-16"
+            >
+              {groupedTools.map((group) => (
+                <motion.div
+                  key={group.category}
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+                  }}
+                >
+                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center md:text-left">
+                    {group.category}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {group.tools.map((tool) => (
+                      <Link key={tool.name} to={tool.path}>
+                        <motion.div
+                          whileHover={{ scale: 1.02, y: -4 }}
+                          transition={{ duration: 0.2 }}
+                          className="glass-card p-6 h-full flex flex-col items-start gap-3 hover:shadow-brand-lg transition-all break-words"
+                        >
+                          <div className="p-2 rounded-xl bg-brand-50 dark:bg-brand-900/20">
+                            {tool.icon}
+                          </div>
+                          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                            {tool.name}
+                          </h3>
+                          <p className="text-gray-600 dark:text-gray-400 text-sm">
+                            {tool.description}
+                          </p>
+                        </motion.div>
+                      </Link>
+                    ))}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )
         ) : (
           <div className="text-center py-12">
             <p className="text-gray-500 dark:text-gray-400">

@@ -1,9 +1,8 @@
 // src/router/AppRouter.jsx
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Spinner from "../components/common/Spinner";
 import { useTrackPageView } from "../hooks/useAnalytics";
-import Tools from "../pages/ToolsPage";
 
 // Existing pages
 const Home = lazy(() => import("../pages/Home"));
@@ -17,7 +16,7 @@ const AboutPage = lazy(() => import("../pages/AboutPage"));
 const ContactPage = lazy(() => import("../pages/ContactPage"));
 const NotFound = lazy(() => import("../pages/NotFound"));
 
-// Phase 1 pages (already added)
+// Phase 1 pages
 const PrivacyPolicy = lazy(() => import("../pages/PrivacyPolicy"));
 const Terms = lazy(() => import("../pages/Terms"));
 const FAQ = lazy(() => import("../pages/FAQ"));
@@ -26,7 +25,7 @@ const ExportGuide = lazy(() => import("../pages/ExportGuide"));
 const GPA_Guide = lazy(() => import("../pages/GPA_Guide"));
 const CGPA_vs_GPA = lazy(() => import("../pages/CGPA_vs_GPA"));
 
-// New pages (Phase 2 – SEO & content)
+// New Phase 2 pages
 const HowToCalculateGPA = lazy(() => import("../pages/HowToCalculateGPA"));
 const HowToCalculateCGPA = lazy(() => import("../pages/HowToCalculateCGPA"));
 const GPAImprovementTips = lazy(() => import("../pages/GPAImprovementTips"));
@@ -41,11 +40,28 @@ const ToolsPage = lazy(() => import("../pages/ToolsPage"));
 // Dashboard page
 const DashboardPage = lazy(() => import("../pages/DashboardPage"));
 
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
+
 function LoadingFallback() {
+  const reducedMotion = usePrefersReducedMotion();
   return (
     <div className="flex flex-col items-center justify-center py-20 gap-4">
       <Spinner size="lg" />
-      <p className="text-sm text-gray-500 dark:text-gray-400 animate-pulse">
+      <p
+        className={`text-sm text-gray-500 dark:text-gray-400 ${
+          reducedMotion ? "" : "animate-pulse"
+        }`}
+      >
         Loading...
       </p>
     </div>

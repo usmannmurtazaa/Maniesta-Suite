@@ -2,6 +2,23 @@
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
+// Inline SVG icon – replaces ⚠️
+const WarningIcon = () => (
+  <svg
+    className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="2"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 9v2m0 4h.01M10.29 3.86l-8.6 14.86A1 1 0 002.56 20h18.88a1 1 0 00.87-1.28l-8.6-14.86a1 1 0 00-1.72 0z"
+    />
+  </svg>
+);
+
 export default function GPAToPercentageGuide() {
   return (
     <>
@@ -10,6 +27,10 @@ export default function GPAToPercentageGuide() {
         <meta
           name="description"
           content="Convert GPA to percentage using standard formulas. Learn how different scales (4.0, 5.0, 10.0) convert to percentages."
+        />
+        <meta
+          name="keywords"
+          content="GPA to percentage, convert GPA, percentage formula, 4.0 scale, 5.0 scale, 10.0 scale, academic tools, Maniesta Suite"
         />
         <link rel="canonical" href="https://maniestasuite.netlify.app/gpa-to-percentage" />
       </Helmet>
@@ -45,7 +66,10 @@ export default function GPAToPercentageGuide() {
                   <p className="text-sm text-gray-500">Alternative formula: (GPA ÷ 10) × 100 = same result.</p>
                 </div>
               </div>
-              <p className="mt-3 text-amber-600 dark:text-amber-400">⚠️ Always check your institution’s official conversion method – they may use a different multiplier.</p>
+              <div className="mt-3 flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                <WarningIcon />
+                <span>Always check your institution’s official conversion method – they may use a different multiplier.</span>
+              </div>
             </section>
 
             <section>

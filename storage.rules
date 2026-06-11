@@ -1,3 +1,6 @@
+// ⚠️ These storage rules are intended for a future file‑upload feature.
+// Currently, the application does not upload files to Firebase Storage.
+// Review and tighten these rules (e.g., requiring authentication) before enabling uploads.
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {

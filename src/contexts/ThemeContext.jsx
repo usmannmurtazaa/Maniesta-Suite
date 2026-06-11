@@ -11,7 +11,7 @@ import { logEvent } from "firebase/analytics";
 import { analytics } from "../services/firebase";
 import {
   getStoredTheme,
-  setTheme as setThemeExternal,
+  setTheme as applyThemeToDOM,
   listenToSystemTheme,
 } from "../theme-init";
 
@@ -30,8 +30,13 @@ const resolveEffectiveTheme = (stored) => {
 };
 
 export function ThemeProvider({ children }) {
+  // Ensure the initial stored theme is valid; fallback to "system"
   const initialStored = useRef(
-    typeof window !== "undefined" ? getStoredTheme() : "system",
+    (() => {
+      const stored =
+        typeof window !== "undefined" ? getStoredTheme() : "system";
+      return THEME_CYCLE.includes(stored) ? stored : "system";
+    })(),
   ).current;
 
   const [theme, setThemeState] = useState(initialStored);
@@ -41,9 +46,9 @@ export function ThemeProvider({ children }) {
 
   const prevThemeRef = useRef(theme);
 
-  // Apply theme to DOM immediately (before paint)
+  // Single source of truth for applying the theme to the DOM
   useLayoutEffect(() => {
-    setThemeExternal(theme);
+    applyThemeToDOM(theme);
     setResolvedTheme(resolveEffectiveTheme(theme));
   }, [theme]);
 
@@ -70,14 +75,13 @@ export function ThemeProvider({ children }) {
   const setTheme = useCallback((newTheme) => {
     if (!THEME_CYCLE.includes(newTheme)) return;
     setThemeState(newTheme);
-    setThemeExternal(newTheme);
+    // DOM application is handled by the useLayoutEffect above
   }, []);
 
   const toggleTheme = useCallback(() => {
     setThemeState((prev) => {
       const idx = THEME_CYCLE.indexOf(prev);
       const next = THEME_CYCLE[(idx + 1) % THEME_CYCLE.length];
-      setThemeExternal(next);
       return next;
     });
   }, []);

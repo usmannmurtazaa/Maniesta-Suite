@@ -11,6 +11,10 @@ export default function GPAGradingScaleGuide() {
           name="description"
           content="Understand different GPA scales (4.0, 5.0, 10.0). Grade point conversion tables and how to interpret your academic standing."
         />
+        <meta
+          name="keywords"
+          content="GPA grading scale, 4.0 scale, 5.0 scale, 10.0 scale, academic standing, grade points, Maniesta Suite"
+        />
         <link rel="canonical" href="https://maniestasuite.netlify.app/grading-scale-guide" />
       </Helmet>
 
@@ -79,14 +83,17 @@ export default function GPAGradingScaleGuide() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Academic Standing (Based on 4.0 Scale)</h2>
+              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Academic Standing (as calculated by Maniesta Suite)</h2>
+              <p className="mb-2">Our GPA calculator determines academic standing based on the percentage of the maximum scale value. For the 4.0 scale, the thresholds are:</p>
               <ul className="list-disc pl-6 space-y-1">
-                <li><strong>3.5 – 4.0:</strong> Excellent / Dean’s List</li>
-                <li><strong>3.0 – 3.49:</strong> Good</li>
-                <li><strong>2.0 – 2.99:</strong> Satisfactory</li>
-                <li><strong>Below 2.0:</strong> Academic Probation</li>
+                <li><strong>3.70 – 4.00</strong> (92.5%+): Outstanding / Dean’s List</li>
+                <li><strong>3.20 – 3.69</strong> (80–92.4%): Very Good Standing</li>
+                <li><strong>2.60 – 3.19</strong> (65–79.9%): Good Standing</li>
+                <li><strong>2.00 – 2.59</strong> (50–64.9%): Satisfactory</li>
+                <li><strong>1.40 – 1.99</strong> (35–49.9%): Below Average</li>
+                <li><strong>Below 1.40</strong> (&lt;35%): Academic Probation</li>
               </ul>
-              <p className="mt-2">Each institution may vary – always check your university’s official policy.</p>
+              <p className="mt-2">For other scales, the same percentage thresholds apply. Please note that each institution may vary – always check your university’s official policy.</p>
             </section>
 
             <section>

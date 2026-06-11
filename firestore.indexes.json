@@ -1,4 +1,5 @@
 {
+  "_comment": "No composite indexes are required for the current Firestore usage (only simple writes to the 'exports' collection). Add indexes here if complex queries are introduced.",
   "indexes": [],
   "fieldOverrides": []
 }

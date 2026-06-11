@@ -43,7 +43,7 @@ export function getFallbackResponse(userMessage, context) {
   // Currency help
   if (lowerMsg.includes('currency') && toolActive === 'currency') {
     return {
-      reply: `**Currency Converter**\n• Enter amount\n• Select "From" and "To" currencies\n• Rates update automatically\n• Use the swap button ⇄ to reverse currencies\n\nRates are cached for 1 hour to save API calls.`,
+      reply: `**Currency Converter**\n• Enter amount\n• Select "From" and "To" currencies\n• Rates update automatically\n• Use the swap button to reverse currencies\n\nRates are cached for 1 hour to save API calls.`,
       suggestions: ['Convert USD to EUR', 'Update rates', 'Accuracy of rates'],
       updatedContext: { lastIntent: 'currency' },
     };

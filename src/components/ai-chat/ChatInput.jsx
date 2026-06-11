@@ -25,6 +25,7 @@ export default function ChatInput({ onSend, onQuickReply, quickReplies }) {
           {quickReplies.map((reply, idx) => (
             <button
               key={idx}
+              type="button"
               onClick={() => onQuickReply(reply)}
               className="px-3 py-1.5 text-sm rounded-full glass hover:bg-brand-500/20 hover:text-brand-500 transition-colors"
             >

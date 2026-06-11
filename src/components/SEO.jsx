@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 export default function SEO({
   title,
   description,
-  keywords = [],
+  keywords = "",
   canonicalUrl,
   ogImage = "https://maniestasuite.netlify.app/og-image.png",
   ogType = "website",
@@ -14,9 +14,12 @@ export default function SEO({
   const metaDescription =
     description ||
     "Free GPA calculator, CGPA calculator, unit converter, currency converter and academic dashboard for students. No signup required.";
-  const metaKeywords = keywords.length
+
+  // Accept both string and array for keywords
+  const metaKeywords = Array.isArray(keywords)
     ? keywords.join(", ")
-    : "GPA calculator, CGPA calculator, student tools, grade calculator, academic dashboard, currency converter";
+    : keywords ||
+      "GPA calculator, CGPA calculator, student tools, grade calculator, academic dashboard, currency converter";
 
   return (
     <Helmet>
@@ -26,7 +29,8 @@ export default function SEO({
       <link
         rel="canonical"
         href={
-          canonicalUrl || `https://maniestasuite.netlify.app${window.location.pathname}`
+          canonicalUrl ||
+          `https://maniestasuite.netlify.app${window.location.pathname}`
         }
       />
 
@@ -41,11 +45,6 @@ export default function SEO({
       <meta name="twitter:title" content={siteTitle} />
       <meta name="twitter:description" content={metaDescription} />
       <meta name="twitter:image" content={ogImage} />
-
-      <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, viewport-fit=cover"
-      />
     </Helmet>
   );
 }

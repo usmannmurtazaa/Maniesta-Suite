@@ -1,9 +1,22 @@
 // file: src/components/calculators/ConverterModule.jsx
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Dropdown from "../common/Dropdown";
 
-// Professional SVG icons (replacing emojis)
+/* ── Local reduced‑motion hook ───────────────────────────────────── */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
+
+/* ── Professional SVG Icons ──────────────────────────────────────── */
 const LengthIcon = () => (
   <svg
     className="w-4 h-4"
@@ -20,6 +33,7 @@ const LengthIcon = () => (
     />
   </svg>
 );
+
 const WeightIcon = () => (
   <svg
     className="w-4 h-4"
@@ -29,13 +43,15 @@ const WeightIcon = () => (
     strokeWidth="1.5"
     aria-hidden="true"
   >
+    {/* Simple balance scale icon – distinct from length */}
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="M3 6l3-3 3 3M9 3v14M21 18l-3 3-3-3M15 21V7"
+      d="M12 3v4m0 0l-3 4h6l-3-4zm-6.5 7.5L12 10l6.5 4.5M5 15l-2 5h18l-2-5"
     />
   </svg>
 );
+
 const TemperatureIcon = () => (
   <svg
     className="w-4 h-4"
@@ -53,6 +69,7 @@ const TemperatureIcon = () => (
     <circle cx="12" cy="12" r="3" />
   </svg>
 );
+
 const AreaIcon = () => (
   <svg
     className="w-4 h-4"
@@ -69,6 +86,7 @@ const AreaIcon = () => (
     />
   </svg>
 );
+
 const CurrencyIcon = () => (
   <svg
     className="w-4 h-4"
@@ -85,6 +103,7 @@ const CurrencyIcon = () => (
     />
   </svg>
 );
+
 const TimeIcon = () => (
   <svg
     className="w-4 h-4"
@@ -101,6 +120,7 @@ const TimeIcon = () => (
     />
   </svg>
 );
+
 const SpeedIcon = () => (
   <svg
     className="w-4 h-4"
@@ -118,6 +138,25 @@ const SpeedIcon = () => (
   </svg>
 );
 
+/* ── Swap icon (replaces ⇄) ──────────────────────────────────────── */
+const SwapIcon = () => (
+  <svg
+    className="w-5 h-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <polyline points="17 1 21 5 17 9" />
+    <path d="M3 11V9a4 4 0 014-4h14" />
+    <polyline points="7 23 3 19 7 15" />
+    <path d="M21 13v2a4 4 0 01-4 4H3" />
+  </svg>
+);
+
+/* ── Conversion definitions ──────────────────────────────────────── */
 const converters = {
   length: {
     label: "Length",
@@ -204,6 +243,8 @@ export default function ConverterModule() {
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
 
+  const reducedMotion = usePrefersReducedMotion();
+
   const converter = converters[active];
 
   const unitOptions = useMemo(
@@ -263,12 +304,28 @@ export default function ConverterModule() {
     setError("");
   };
 
+  // Common motion props – empty when reduced motion
+  const containerMotion = reducedMotion
+    ? {}
+    : { initial: { opacity: 0, y: 20 }, animate: { opacity: 1, y: 0 } };
+
+  const tabHoverTap = reducedMotion
+    ? {}
+    : { whileHover: { scale: 1.05 }, whileTap: { scale: 0.95 } };
+
+  const btnHoverTap = reducedMotion
+    ? {}
+    : { whileHover: { scale: 1.02 }, whileTap: { scale: 0.98 } };
+
+  const swapBtnProps = reducedMotion
+    ? {}
+    : {
+        whileHover: { scale: 1.1, rotate: 180 },
+        whileTap: { scale: 0.9 },
+      };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="max-w-2xl mx-auto px-4"
-    >
+    <motion.div {...containerMotion} className="max-w-2xl mx-auto px-4">
       <div className="glass-card p-4 sm:p-6 md:p-8 space-y-6">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold text-gradient">
@@ -279,15 +336,15 @@ export default function ConverterModule() {
           </p>
         </div>
 
-        {/* Category tabs – responsive wrap with larger tap targets */}
+        {/* Category tabs */}
         <div className="flex flex-wrap gap-2" role="tablist">
           {Object.entries(converters).map(([key, cat]) => (
             <motion.button
               key={key}
+              type="button"
               role="tab"
               aria-selected={active === key}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              {...tabHoverTap}
               onClick={() => handleCategoryChange(key)}
               className={`inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all ${
                 active === key
@@ -322,7 +379,7 @@ export default function ConverterModule() {
           />
         </div>
 
-        {/* From / To selection + swap – Responsive: column on mobile, row on tablet+ */}
+        {/* From / To selection + swap */}
         <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-2 items-stretch sm:items-end">
           <Dropdown
             id="from-unit"
@@ -337,13 +394,13 @@ export default function ConverterModule() {
           />
           <div className="flex justify-center sm:justify-center items-center py-1 sm:pb-2 order-first sm:order-none">
             <motion.button
-              whileHover={{ scale: 1.1, rotate: 180 }}
-              whileTap={{ scale: 0.9 }}
+              type="button"
+              {...swapBtnProps}
               onClick={handleSwap}
               className="glass w-10 h-10 flex items-center justify-center rounded-full transition-transform hover:shadow-brand"
               aria-label="Swap units"
             >
-              ⇄
+              <SwapIcon />
             </motion.button>
           </div>
           <Dropdown
@@ -362,16 +419,16 @@ export default function ConverterModule() {
         {/* Action buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            type="button"
+            {...btnHoverTap}
             onClick={handleConvert}
             className="btn-primary flex-1 py-3"
           >
             Convert
           </motion.button>
           <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+            type="button"
+            {...btnHoverTap}
             onClick={handleClear}
             className="btn-secondary flex-1 py-3"
           >
@@ -380,38 +437,59 @@ export default function ConverterModule() {
         </div>
 
         {/* Error */}
-        <AnimatePresence>
-          {error && (
-            <motion.p
-              initial={{ opacity: 0, y: -5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="text-red-500 text-sm text-center"
-              role="alert"
-            >
+        {reducedMotion ? (
+          error ? (
+            <p className="text-red-500 text-sm text-center" role="alert">
               {error}
-            </motion.p>
-          )}
-        </AnimatePresence>
+            </p>
+          ) : null
+        ) : (
+          <AnimatePresence>
+            {error && (
+              <motion.p
+                initial={{ opacity: 0, y: -5 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                className="text-red-500 text-sm text-center"
+                role="alert"
+              >
+                {error}
+              </motion.p>
+            )}
+          </AnimatePresence>
+        )}
 
         {/* Result */}
-        <AnimatePresence>
-          {result && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              className="p-5 bg-brand-500/10 rounded-xl text-center border border-brand-500/20 backdrop-blur"
-            >
+        {reducedMotion ? (
+          result ? (
+            <div className="p-5 bg-brand-500/10 rounded-xl text-center border border-brand-500/20 backdrop-blur">
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Converted Result
               </p>
               <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-1 break-words">
                 {value || "0"} {fromUnit} = {result} {toUnit}
               </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            </div>
+          ) : null
+        ) : (
+          <AnimatePresence>
+            {result && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="p-5 bg-brand-500/10 rounded-xl text-center border border-brand-500/20 backdrop-blur"
+              >
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Converted Result
+                </p>
+                <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-1 break-words">
+                  {value || "0"} {fromUnit} = {result} {toUnit}
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </div>
     </motion.div>
   );

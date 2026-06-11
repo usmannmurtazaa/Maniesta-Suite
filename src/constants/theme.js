@@ -1,3 +1,18 @@
+/**
+ * ⚠️ DEPRECATED THEME CONFIGURATION
+ *
+ * This file originally provided a centralized design‑token system.
+ * The application has since migrated to Tailwind CSS with utility classes
+ * and uses the global font stack "Inter" (see index.html and tailwind.config).
+ *
+ * The `generateCSSVariables` function and the `typography` scale are no longer
+ * actively consumed.  They are kept here for reference only and may be removed
+ * in a future cleanup.
+ *
+ * If you need to modify the visual appearance, prefer updating the Tailwind
+ * configuration or the global styles in `src/index.css`.
+ */
+
 const theme = {
   colors: {
     primary: '#7c3aed',
@@ -16,6 +31,9 @@ const theme = {
     error: '#f87171',
     success: '#34d399',
     warning: '#fbbf24',
+    // Gradient stops – these could be derived from the primary palette in the future
+    gradientDark1: '#1a1035',
+    gradientDark2: '#2d1b4e',
   },
   spacing: {
     xs: 4, sm: 8, md: 12, lg: 16, xl: 20, xxl: 24, xxxl: 32, xxxxl: 48,
@@ -24,9 +42,10 @@ const theme = {
   borderRadius: {
     sm: 8, md: 12, lg: 16, xl: 20, full: 9999,
   },
+  // Fonts now match the global app stack (Inter)
   fonts: {
-    heading: "'Playfair Display', serif",
-    body: "'DM Sans', sans-serif",
+    heading: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     mono: "'JetBrains Mono', monospace",
   },
   shadows: {
@@ -47,15 +66,8 @@ const theme = {
   zIndex: {
     dropdown: 10, sticky: 20, modal: 100, toast: 200, tooltip: 300,
   },
-  typography: {
-    heading1: { fontSize: 'clamp(28px, 6vw, 48px)', lineHeight: 1.2, fontWeight: 700, fontFamily: "'Playfair Display', serif" },
-    heading2: { fontSize: 'clamp(22px, 4vw, 36px)', lineHeight: 1.3, fontWeight: 600, fontFamily: "'Playfair Display', serif" },
-    heading3: { fontSize: 'clamp(18px, 3vw, 24px)', lineHeight: 1.4, fontWeight: 600, fontFamily: "'DM Sans', sans-serif" },
-    bodyLarge: { fontSize: 'clamp(15px, 2.5vw, 18px)', lineHeight: 1.6, fontWeight: 400 },
-    body: { fontSize: 'clamp(14px, 2vw, 16px)', lineHeight: 1.5, fontWeight: 400 },
-    bodySmall: { fontSize: 'clamp(12px, 1.5vw, 14px)', lineHeight: 1.5, fontWeight: 400 },
-    caption: { fontSize: 'clamp(10px, 1.5vw, 12px)', lineHeight: 1.4, fontWeight: 400 },
-  },
+  // The `typography` object is kept for reference but is not currently used.
+  // typography: { ... },
   transitions: {
     fast: '0.15s cubic-bezier(0.4, 0, 0.2, 1)',
     base: '0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -64,13 +76,18 @@ const theme = {
   },
 };
 
+/**
+ * Generates a set of CSS custom properties based on the current theme mode.
+ * Note: This function is no longer actively used in the application.
+ * Kept for potential backward compatibility with legacy components.
+ */
 export function generateCSSVariables(darkMode) {
   return {
     '--color-primary': theme.colors.primary,
     '--color-primary-light': theme.colors.primaryLight,
     '--color-primary-dark': theme.colors.primaryDark,
     '--bg-app': darkMode
-      ? `linear-gradient(135deg, ${theme.colors.backgroundDark}, #1a1035 25%, #2d1b4e 75%, ${theme.colors.backgroundDark})`
+      ? `linear-gradient(135deg, ${theme.colors.backgroundDark}, ${theme.colors.gradientDark1} 25%, ${theme.colors.gradientDark2} 75%, ${theme.colors.backgroundDark})`
       : `linear-gradient(135deg, ${theme.colors.backgroundLight}, #eef1ff 25%, #f0e6ff 75%, ${theme.colors.backgroundLight})`,
     '--bg-ambient': darkMode
       ? 'radial-gradient(circle at 20% 80%, rgba(120,50,220,0.08) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(80,150,255,0.06) 0%, transparent 50%)'

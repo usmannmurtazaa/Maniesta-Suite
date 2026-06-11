@@ -1,5 +1,5 @@
 // src/components/dashboard/DashboardLayout.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDashboard } from "../../contexts/DashboardProvider";
@@ -11,6 +11,19 @@ import {
   DocumentIcon,
   ChartIcon,
 } from "../icons";
+
+/* ── Reduced‑motion hook ──────────────────────────────────────────── */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
 
 const navItems = [
   { path: "/dashboard", label: "Dashboard", icon: DashboardIcon },
@@ -25,6 +38,7 @@ export default function DashboardLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
   const { recentActions } = useDashboard();
+  const reducedMotion = usePrefersReducedMotion();
 
   const isActive = (path) => location.pathname === path;
 
@@ -105,9 +119,11 @@ export default function DashboardLayout({ children }) {
       <div className="flex-1 flex flex-col">
         <header className="md:hidden glass sticky top-0 z-10 px-4 py-3 flex justify-between items-center border-b border-white/20">
           <button
+            type="button"
             onClick={toggleSidebar}
             className="glass p-2 rounded-xl"
             aria-label="Menu"
+            aria-expanded={isSidebarOpen}
           >
             <svg
               className="w-6 h-6"
@@ -130,29 +146,22 @@ export default function DashboardLayout({ children }) {
         </header>
 
         {/* Mobile Sidebar Drawer */}
-        <AnimatePresence>
-          {isSidebarOpen && (
+        {reducedMotion ? (
+          /* Static sidebar – no animations */
+          isSidebarOpen && (
             <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+              <div
                 className="fixed inset-0 bg-black/50 z-40 md:hidden"
                 onClick={toggleSidebar}
               />
-              <motion.aside
-                initial={{ x: "-100%" }}
-                animate={{ x: 0 }}
-                exit={{ x: "-100%" }}
-                transition={{ type: "spring", damping: 25 }}
-                className="fixed top-0 left-0 h-full w-64 glass z-50 md:hidden shadow-xl"
-              >
+              <aside className="fixed top-0 left-0 h-full w-64 glass z-50 md:hidden shadow-xl">
                 <div className="p-5">
                   <div className="flex justify-between items-center mb-8">
                     <Link to="/" className="text-2xl font-bold text-gradient">
                       Maniesta
                     </Link>
                     <button
+                      type="button"
                       onClick={toggleSidebar}
                       className="glass p-2 rounded-full"
                       aria-label="Close"
@@ -190,10 +199,77 @@ export default function DashboardLayout({ children }) {
                     ))}
                   </nav>
                 </div>
-              </motion.aside>
+              </aside>
             </>
-          )}
-        </AnimatePresence>
+          )
+        ) : (
+          /* Animated sidebar */
+          <AnimatePresence>
+            {isSidebarOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 bg-black/50 z-40 md:hidden"
+                  onClick={toggleSidebar}
+                />
+                <motion.aside
+                  initial={{ x: "-100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "-100%" }}
+                  transition={{ type: "spring", damping: 25 }}
+                  className="fixed top-0 left-0 h-full w-64 glass z-50 md:hidden shadow-xl"
+                >
+                  <div className="p-5">
+                    <div className="flex justify-between items-center mb-8">
+                      <Link to="/" className="text-2xl font-bold text-gradient">
+                        Maniesta
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={toggleSidebar}
+                        className="glass p-2 rounded-full"
+                        aria-label="Close"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    <nav className="space-y-1">
+                      {navItems.map((item) => (
+                        <Link
+                          key={item.path}
+                          to={item.path}
+                          onClick={toggleSidebar}
+                          className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all ${
+                            isActive(item.path)
+                              ? "bg-gradient-brand text-white shadow-brand"
+                              : "text-gray-700 dark:text-gray-300 hover:bg-white/10"
+                          }`}
+                        >
+                          {renderIcon(item.icon)}
+                          <span>{item.label}</span>
+                        </Link>
+                      ))}
+                    </nav>
+                  </div>
+                </motion.aside>
+              </>
+            )}
+          </AnimatePresence>
+        )}
 
         {/* Main Content */}
         <main className="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">

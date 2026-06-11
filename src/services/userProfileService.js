@@ -7,13 +7,15 @@ const PROFILE_KEY = 'user_profile';
 /**
  * Read the current profile from localStorage, apply migration if needed,
  * and return the valid profile object.
+ * If migration fails (e.g., corrupted data), a fresh default profile is returned.
  * @returns {object} The current user profile
  */
 export function getUserProfile() {
   let raw = safeGetItem(PROFILE_KEY, null);
+  const now = new Date().toISOString();
+
   if (!raw) {
     // First time visitor – create default profile
-    const now = new Date().toISOString();
     const newProfile = {
       ...DEFAULT_PROFILE,
       firstVisit: now,
@@ -24,11 +26,24 @@ export function getUserProfile() {
     return newProfile;
   }
 
-  // If schema version is missing or outdated, migrate
+  // If schema version is missing or outdated, attempt migration
   if (!raw._schemaVersion || raw._schemaVersion < CURRENT_SCHEMA_VERSION) {
-    const migrated = migrateProfile(raw);
-    safeSetItem(PROFILE_KEY, migrated);
-    return migrated;
+    try {
+      const migrated = migrateProfile(raw);
+      safeSetItem(PROFILE_KEY, migrated);
+      return migrated;
+    } catch (error) {
+      console.warn('User profile migration failed. Resetting to default profile.', error);
+      // Fall back to a fresh default profile
+      const freshProfile = {
+        ...DEFAULT_PROFILE,
+        firstVisit: now,
+        lastVisit: now,
+        visitCount: 1,
+      };
+      safeSetItem(PROFILE_KEY, freshProfile);
+      return freshProfile;
+    }
   }
 
   return raw;
@@ -45,7 +60,10 @@ export function setUserProfile(profile) {
 /**
  * Atomically update the profile using an updater function.
  * Reads current profile, applies updater, writes back.
- * @param {Function} updater - Function that receives current profile and mutates it (or returns new)
+ *
+ * @param {Function} updater - Function that receives current profile and returns the updated profile.
+ *   For backward compatibility, the updater may mutate the provided object, but returning a new object
+ *   is preferred to avoid accidental side‑effects.
  * @returns {object} The updated profile
  */
 export function updateUserProfile(updater) {

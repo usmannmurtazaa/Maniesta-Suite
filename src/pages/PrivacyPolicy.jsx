@@ -8,7 +8,7 @@ export default function PrivacyPolicy() {
       <SEO
         title="Privacy Policy"
         description="Learn how Maniesta Suite collects, uses, and protects your data. No accounts, no personal data sold. Free academic tools for students."
-        keywords={["privacy policy", "data protection", "student privacy", "GDPR", "academic tools privacy"]}
+        keywords="privacy policy, data protection, student privacy, GDPR, academic tools privacy"
         canonicalUrl="https://maniestasuite.netlify.app/privacy"
       />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">

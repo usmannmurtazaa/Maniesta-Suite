@@ -16,6 +16,7 @@ export default function StructuredData() {
     "featureList": "GPA Calculator, CGPA Calculator, Scientific Calculator, Unit Converter, Currency Converter, Interest Calculator, PDF/CSV Export, Academic Dashboard",
     "softwareVersion": "2.0",
     "url": "https://maniestasuite.netlify.app",
+    // ⚠️ Placeholder social profiles – replace with actual URLs when available
     "sameAs": [
       "https://github.com/your-repo",
       "https://twitter.com/maniestasuite"

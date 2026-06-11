@@ -2,6 +2,44 @@
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
+// Inline SVG icons – replace emojis
+const ChartIcon = () => (
+  <svg className="w-6 h-6 mx-auto text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18h18M7 16l4-8 4 4 4-6" />
+  </svg>
+);
+const CalcIcon = () => (
+  <svg className="w-6 h-6 mx-auto text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+    <rect x="4" y="2" width="16" height="20" rx="2" />
+    <line x1="8" y1="6" x2="16" y2="6" />
+    <line x1="8" y1="10" x2="16" y2="10" />
+    <line x1="8" y1="14" x2="12" y2="14" />
+    <line x1="8" y1="18" x2="16" y2="18" />
+  </svg>
+);
+const RulerIcon = () => (
+  <svg className="w-6 h-6 mx-auto text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 6l3-3 3 3M9 3v14M21 18l-3 3-3-3M15 21V7" />
+  </svg>
+);
+const MoneyIcon = () => (
+  <svg className="w-6 h-6 mx-auto text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 6v12m-3-2.818l.879.659a3 3 0 004.242 0L18 13.182" />
+  </svg>
+);
+const MoonIcon = () => (
+  <svg className="w-6 h-6 mx-auto text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+    <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+  </svg>
+);
+const MobileIcon = () => (
+  <svg className="w-6 h-6 mx-auto text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5">
+    <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+    <line x1="12" y1="18" x2="12.01" y2="18" />
+  </svg>
+);
+
 export default function HowItWorks() {
   return (
     <>
@@ -10,6 +48,10 @@ export default function HowItWorks() {
         <meta
           name="description"
           content="Learn how to calculate your GPA, generate PDF reports, and export CSV files in 3 simple steps. Free, no signup."
+        />
+        <meta
+          name="keywords"
+          content="how it works, GPA calculator guide, export guide, academic tools, Maniesta Suite"
         />
         <link rel="canonical" href="https://maniestasuite.netlify.app/how-it-works" />
       </Helmet>
@@ -64,12 +106,30 @@ export default function HowItWorks() {
           <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-800">
             <h2 className="text-2xl font-bold text-center mb-6 text-gray-900 dark:text-white">Features at a Glance</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="glass p-4 rounded-xl text-center">📊 GPA & CGPA calculators</div>
-              <div className="glass p-4 rounded-xl text-center">🧮 Scientific & normal calculators</div>
-              <div className="glass p-4 rounded-xl text-center">📐 Unit converter (7 categories)</div>
-              <div className="glass p-4 rounded-xl text-center">💰 Interest calculator (simple, compound, EMI)</div>
-              <div className="glass p-4 rounded-xl text-center">🌙 Dark mode (light/dark/system)</div>
-              <div className="glass p-4 rounded-xl text-center">📱 Fully responsive (mobile, tablet, desktop)</div>
+              <div className="glass p-4 rounded-xl text-center space-y-2">
+                <ChartIcon />
+                <p>GPA & CGPA calculators</p>
+              </div>
+              <div className="glass p-4 rounded-xl text-center space-y-2">
+                <CalcIcon />
+                <p>Scientific & normal calculators</p>
+              </div>
+              <div className="glass p-4 rounded-xl text-center space-y-2">
+                <RulerIcon />
+                <p>Unit converter (7 categories)</p>
+              </div>
+              <div className="glass p-4 rounded-xl text-center space-y-2">
+                <MoneyIcon />
+                <p>Interest calculator (simple, compound, EMI)</p>
+              </div>
+              <div className="glass p-4 rounded-xl text-center space-y-2">
+                <MoonIcon />
+                <p>Dark mode (light/dark/system)</p>
+              </div>
+              <div className="glass p-4 rounded-xl text-center space-y-2">
+                <MobileIcon />
+                <p>Fully responsive (mobile, tablet, desktop)</p>
+              </div>
             </div>
           </div>
 
