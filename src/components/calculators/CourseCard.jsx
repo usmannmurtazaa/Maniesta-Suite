@@ -1,23 +1,36 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { GRADES } from "../../utils/grades";
+import { getGradeScale } from "../../utils/grades";
 import Dropdown from "../common/Dropdown";
 
-// ── Grade colour hints (optional premium touch) ───────────────
-const gradeColors = {
-  "A+": "text-emerald-400",
-  A: "text-emerald-400",
-  "A-": "text-emerald-400",
-  "B+": "text-blue-400",
-  B: "text-blue-400",
-  "B-": "text-blue-400",
-  "C+": "text-amber-400",
-  C: "text-amber-400",
-  "C-": "text-amber-400",
-  "D+": "text-orange-400",
-  D: "text-orange-400",
-  F: "text-red-400",
-};
+// -------------------------------------------------------------------
+// Local hook: detect reduced motion preference
+// (Can be extracted to a shared utility later.)
+// -------------------------------------------------------------------
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
+
+// ── Dynamic grade colour helper ────────────────────────────────
+// Maps a grade's point value relative to the maximum possible points
+// in the selected scale to a colour that moves from red → amber → emerald.
+function getGradeColor(points, maxPoints) {
+  if (!maxPoints || maxPoints <= 0) return "text-gray-400";
+  const ratio = points / maxPoints;
+  if (ratio >= 0.9) return "text-emerald-400";
+  if (ratio >= 0.7) return "text-blue-400";
+  if (ratio >= 0.5) return "text-amber-400";
+  if (ratio >= 0.3) return "text-orange-400";
+  return "text-red-400";
+}
 
 export default function CourseCard({
   id,
@@ -29,6 +42,9 @@ export default function CourseCard({
   scale,
   darkMode,
 }) {
+  const reducedMotion = usePrefersReducedMotion();
+
+  // Credit options unchanged
   const creditOptions = useMemo(
     () =>
       [1, 2, 3, 4, 5, 6].map((c) => ({
@@ -38,23 +54,35 @@ export default function CourseCard({
     [],
   );
 
+  // Grade options now derived from the selected scale (not static GRADES)
   const gradeOptions = useMemo(() => {
-    const list = GRADES;
-    return list.map((grade, idx) => ({
+    const gradeScale = getGradeScale(scale);
+    const maxPoints = Math.max(...gradeScale.map((g) => g.p), 0);
+    return gradeScale.map((grade, idx) => ({
       value: idx,
       label: grade.g,
-      color: gradeColors[grade.g] || "",
+      color: getGradeColor(grade.p, maxPoints),
     }));
-  }, []);
+  }, [scale]);
+
+  // Motion props that respect reduced motion
+  const cardEntryMotion = reducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -10, scale: 0.98 },
+      };
+  const removeBtnHover = reducedMotion ? {} : { whileHover: { scale: 1.15 } };
+  const removeBtnTap = reducedMotion ? {} : { whileTap: { scale: 0.9 } };
+  const cardHoverClass = reducedMotion ? "" : "hover:-translate-y-1";
 
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10, scale: 0.98 }}
       transition={{ duration: 0.2 }}
-      className="relative glass-card p-5 md:p-6 mb-4 group hover:-translate-y-1 hover:shadow-glass-lg transition-all duration-300"
+      {...cardEntryMotion}
+      className={`relative glass-card p-5 md:p-6 mb-4 group ${cardHoverClass} hover:shadow-glass-lg transition-all duration-300`}
       role="group"
       aria-label={`Course ${index + 1}${data.code ? ": " + data.code : ""}`}
     >
@@ -69,8 +97,9 @@ export default function CourseCard({
       {/* Remove button */}
       {removable && (
         <motion.button
-          whileHover={{ scale: 1.15 }}
-          whileTap={{ scale: 0.9 }}
+          type="button"
+          {...removeBtnHover}
+          {...removeBtnTap}
           onClick={() => onRemove(id)}
           className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-lg bg-red-500/15 border border-red-500/30 text-red-500 hover:bg-red-500/30 transition-colors z-10"
           aria-label={`Remove course ${index + 1}`}
@@ -126,7 +155,7 @@ export default function CourseCard({
           className="w-full"
         />
 
-        {/* Grade – Custom Dropdown */}
+        {/* Grade – Custom Dropdown (now scale‑aware) */}
         <Dropdown
           id={`course-grade-${id}`}
           label="Grade"

@@ -1,13 +1,30 @@
 // src/components/common/Confetti.jsx
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+/**
+ * Local hook to detect reduced‑motion preference.
+ * (Can be extracted to a shared utility later.)
+ */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
 
 export default function Confetti({ active, duration = 2000 }) {
   const canvasRef = useRef(null);
   const animationRef = useRef(null);
   const particlesRef = useRef([]);
+  const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    if (!active) return;
+    if (!active || reducedMotion) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -62,7 +79,7 @@ export default function Confetti({ active, duration = 2000 }) {
 
     frameId = requestAnimationFrame(draw);
     return () => cancelAnimationFrame(frameId);
-  }, [active, duration]);
+  }, [active, duration, reducedMotion]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -75,7 +92,7 @@ export default function Confetti({ active, duration = 2000 }) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  if (!active) return null;
+  if (!active || reducedMotion) return null;
   return (
     <canvas
       ref={canvasRef}

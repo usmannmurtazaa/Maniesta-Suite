@@ -14,6 +14,39 @@ const INITIAL_USER_DATA = {
   semester: "",
 };
 
+// Inline SVG error icon – replaces ⚠️
+const ErrorAlertIcon = () => (
+  <svg
+    className="w-5 h-5 text-red-500 shrink-0"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="2"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+
+/**
+ * Local hook to detect reduced‑motion preference.
+ * (Can be extracted to a shared utility later.)
+ */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
+
 export default function ExportModal({
   isOpen,
   onClose,
@@ -26,6 +59,7 @@ export default function ExportModal({
   const [successFiles, setSuccessFiles] = useState(null);
   const [generationError, setGenerationError] = useState(null);
   const fullNameRef = useRef(null);
+  const reducedMotion = usePrefersReducedMotion();
 
   // Load saved user details from localStorage when modal opens
   useEffect(() => {
@@ -99,12 +133,45 @@ export default function ExportModal({
     handleSubmit({ preventDefault: () => {} });
   };
 
+  // Success checkmark – static if reduced motion
+  const SuccessCheckmark = () =>
+    reducedMotion ? (
+      <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center">
+        <svg
+          className="w-8 h-8 text-emerald-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+    ) : (
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", stiffness: 200 }}
+        className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center"
+      >
+        <svg
+          className="w-8 h-8 text-emerald-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        >
+          <path d="M5 13l4 4L19 7" />
+        </svg>
+      </motion.div>
+    );
+
   return (
     <Modal isOpen={isOpen} onClose={!isExporting ? handleClose : undefined}>
       {/* Main modal container with constrained height and flex layout */}
       <div className="flex flex-col max-h-[85vh] min-h-[50vh]">
         {successFiles ? (
-          // ── Success Screen (sticky header + scrollable content + sticky footer) ──
+          // ── Success Screen ──
           <div className="flex flex-col h-full">
             <div className="shrink-0 pb-4 border-b border-white/20 dark:border-white/10">
               <h3 className="text-2xl font-bold text-gradient text-center">
@@ -115,22 +182,7 @@ export default function ExportModal({
               </p>
             </div>
             <div className="flex-1 overflow-y-auto py-6 text-center space-y-6">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: "spring", stiffness: 200 }}
-                className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center"
-              >
-                <svg
-                  className="w-8 h-8 text-emerald-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                >
-                  <path d="M5 13l4 4L19 7" />
-                </svg>
-              </motion.div>
+              <SuccessCheckmark />
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <a
                   href={successFiles.pdfUrl}
@@ -176,7 +228,7 @@ export default function ExportModal({
             </div>
           </div>
         ) : (
-          // ── Form Screen (sticky header, scrollable form, sticky footer with submit) ──
+          // ── Form Screen ──
           <>
             <div className="shrink-0 pb-3 border-b border-white/20 dark:border-white/10">
               <h3 className="text-2xl font-bold text-gradient">
@@ -254,7 +306,7 @@ export default function ExportModal({
                       value={userData.semester}
                       onChange={handleChange}
                       className="input-base"
-                      placeholder="Your Semester "
+                      placeholder="Your Semester"
                     />
                   </div>
                 </div>
@@ -300,7 +352,10 @@ export default function ExportModal({
             <div className="shrink-0 pt-4 border-t border-white/20 dark:border-white/10">
               {generationError && (
                 <div className="mb-3 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm flex justify-between items-center">
-                  <span>⚠️ {generationError}</span>
+                  <span className="flex items-center gap-2">
+                    <ErrorAlertIcon />
+                    {generationError}
+                  </span>
                   <button
                     onClick={handleRetry}
                     className="text-sm underline hover:no-underline"

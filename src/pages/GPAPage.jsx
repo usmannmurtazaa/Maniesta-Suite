@@ -1,8 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTheme } from "../hooks/useTheme";
 import GPACalculator from "../components/calculators/GPACalculator";
 import SEO from "../components/SEO"; // Import SEO component
+
+/**
+ * Local hook to detect the user’s motion preference.
+ * (Can be extracted to a shared utility later.)
+ */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
 
 const SCALES = [
   { value: "4.0", label: "4.0 Scale" },
@@ -14,26 +30,49 @@ export default function GPAPage() {
   const { resolvedTheme } = useTheme();
   const darkMode = resolvedTheme === "dark";
   const [scale, setScale] = useState("4.0");
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  // Conditional motion props – empty when reduced motion is preferred
+  const containerMotion = prefersReducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.4 },
+      };
+
+  const headingMotion = prefersReducedMotion
+    ? {}
+    : {
+        initial: { y: -20, opacity: 0 },
+        animate: { y: 0, opacity: 1 },
+      };
+
+  const cardMotion = prefersReducedMotion
+    ? {}
+    : {
+        initial: { y: 30, opacity: 0 },
+        animate: { y: 0, opacity: 1 },
+        transition: { delay: 0.2 },
+      };
+
+  // Button motion props – disabled when reduced motion
+  const buttonHoverProps = prefersReducedMotion ? {} : { whileHover: { scale: 1.05 } };
+  const buttonTapProps = prefersReducedMotion ? {} : { whileTap: { scale: 0.95 } };
 
   return (
     <>
       <SEO
         title="GPA Calculator"
         description="Calculate your semester GPA instantly with our free online GPA calculator. Supports 4.0, 5.0 and 10.0 scales. No signup required."
-        keywords={["GPA calculator", "semester GPA", "grade point average", "college GPA", "university grades"]}
-        canonicalUrl="https://maniestasuite.netlify.app/gpa"
+        keywords="GPA calculator, semester GPA, grade point average, college GPA, university grades"
+        canonicalUrl="https://maniestasuite.netlify.app/gpa" 
       />
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className="max-w-5xl mx-auto space-y-8"
-      >
+      <motion.div {...containerMotion} className="max-w-5xl mx-auto space-y-8">
         {/* Page Header */}
         <div className="text-center space-y-3">
           <motion.h1
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            {...headingMotion}
             className="text-4xl md:text-5xl font-extrabold text-gradient"
           >
             GPA Calculator
@@ -47,9 +86,11 @@ export default function GPAPage() {
             {SCALES.map((s) => (
               <motion.button
                 key={s.value}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                type="button"
+                {...buttonHoverProps}
+                {...buttonTapProps}
                 onClick={() => setScale(s.value)}
+                aria-pressed={scale === s.value}
                 className={`px-5 py-2 rounded-xl text-sm font-semibold transition-all ${
                   scale === s.value
                     ? "bg-gradient-brand text-white shadow-brand"
@@ -64,9 +105,7 @@ export default function GPAPage() {
 
         {/* Calculator Card */}
         <motion.div
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
+          {...cardMotion}
           className="glass-card p-6 md:p-8 rounded-3xl border border-white/20 dark:border-white/10 shadow-glass-lg"
         >
           <GPACalculator scale={scale} darkMode={darkMode} />

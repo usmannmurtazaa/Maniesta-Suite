@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import ContactForm from "../components/contact/ContactForm";
+import ContactForm from "../components/contact/Contact";
 import SEO from "../components/SEO";
 
 /**

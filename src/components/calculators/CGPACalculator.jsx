@@ -3,19 +3,55 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../../hooks/useTheme";
 import { useCGPA } from "../../hooks/useCGPA";
 import { generatePDFBlob, generateCSVBlob } from "../../utils/exportHelpers";
-import { analytics } from "../../services/firebase";
-import { logEvent } from "firebase/analytics";
+import { logEvent } from "../../services/firebase"; 
 import { trackExport } from "../../services/exportTracker";
 import CGPAResultCard from "./CGPAResultCard";
 import ExportModal from "./ExportModal";
 import Toast from "../common/Toast";
 import CelebrationOverlay from "./CelebrationOverlay";
 
+// -------------------------------------------------------------------
+// Local hook: detect reduced motion preference
+// (Can be extracted to a shared utility later.)
+// -------------------------------------------------------------------
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
+
+// SVG error alert icon – replaces ⚠️ emoji
+const ErrorAlertIcon = () => (
+  <svg
+    className="w-5 h-5 text-red-500 shrink-0"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="2"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+
 export default function CGPACalculator({ scale = 4.0 }) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
+  const reducedMotion = usePrefersReducedMotion();
+
+  // Normalize scale to string (the hook expects a string key)
+  const scaleStr = String(scale);
   const { sems, addSem, removeSem, updateSem, calculate, result, error } =
-    useCGPA(scale);
+    useCGPA(scaleStr);
 
   const [calculating, setCalculating] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
@@ -39,18 +75,17 @@ export default function CGPACalculator({ scale = 4.0 }) {
     setCalculating(true);
     requestAnimationFrame(() => {
       calculate();
-      if (analytics) {
-        logEvent(analytics, "cgpa_calculated", {
-          scale,
-          semesters_count: sems.length,
-          timestamp: new Date().toISOString(),
-        });
-      }
+      // Unified analytics call – no conditional needed
+      logEvent("cgpa_calculated", {
+        scale: scaleStr,
+        semesters_count: sems.length,
+        timestamp: new Date().toISOString(),
+      });
       setCalculating(false);
     });
-  }, [calculate, scale, sems.length]);
+  }, [calculate, scaleStr, sems.length]);
 
-  // ── Fixed Export Handler (Non‑Blocking Firestore) ──
+  // Export handler (unchanged logic, uses unified analytics)
   const handleExport = useCallback(
     async (exportUserData) => {
       setIsExporting(true);
@@ -59,7 +94,7 @@ export default function CGPACalculator({ scale = 4.0 }) {
       const baseData = {
         ...exportUserData,
         degree: exportUserData.degree,
-        scale,
+        scale: scaleStr,
         semesters: sems.map((s) => ({ gpa: s.val })),
         cgpaResult: result,
         date: new Date().toLocaleDateString("en-US", {
@@ -71,21 +106,17 @@ export default function CGPACalculator({ scale = 4.0 }) {
       };
 
       try {
-        // 1. Generate files first (critical path)
         const pdfBlob = await generatePDFBlob(baseData);
         const csvBlob = generateCSVBlob(baseData);
-
-        // 2. Immediately return blobs to modal (so success screen appears)
         setIsExporting(false);
 
-        // 3. Firestore save in background (non‑blocking, no await)
         trackExport({
           studentName: exportUserData.fullName || "",
           studentId: exportUserData.studentId || "",
           university: exportUserData.university || "",
           degree: exportUserData.degree || "",
           semester: exportUserData.semester || "All Semesters",
-          scale,
+          scale: scaleStr,
           gpa: result?.cgpa || 0,
           credits: result?.total || 0,
           date: baseData.date,
@@ -106,13 +137,11 @@ export default function CGPACalculator({ scale = 4.0 }) {
           });
         });
 
-        if (analytics) {
-          logEvent(analytics, "export_triggered", {
-            format: "both",
-            type: "cgpa",
-            cgpa: result?.cgpa,
-          });
-        }
+        logEvent("export_triggered", {
+          format: "both",
+          type: "cgpa",
+          cgpa: result?.cgpa,
+        });
 
         return { pdfBlob, csvBlob };
       } catch (err) {
@@ -125,14 +154,72 @@ export default function CGPACalculator({ scale = 4.0 }) {
         throw err;
       }
     },
-    [sems, scale, result],
+    [sems, scaleStr, result],
   );
+
+  // Motion props respecting reduced motion
+  const containerMotion = reducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+      };
+
+  const emptyStateMotion = reducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+      };
+
+  // Semester card animations
+  const cardEntryMotion = reducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, scale: 0.95, y: 20 },
+        animate: { opacity: 1, scale: 1, y: 0 },
+        exit: { opacity: 0, scale: 0.95, y: -20 },
+      };
+
+  // Result section animation
+  const resultMotion = reducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0 },
+      };
+
+  // Button hover/tap props
+  const btnWhileHover = reducedMotion ? {} : { whileHover: { scale: 1.02 } };
+  const btnWhileTap = reducedMotion ? {} : { whileTap: { scale: 0.98 } };
+  const removeBtnWhileHover = reducedMotion
+    ? {}
+    : { whileHover: { scale: 1.15 } };
+  const removeBtnWhileTap = reducedMotion ? {} : { whileTap: { scale: 0.9 } };
+  const exportBtnWhileHover = reducedMotion
+    ? {}
+    : { whileHover: { scale: 1.05 } };
+  const exportBtnWhileTap = reducedMotion ? {} : { whileTap: { scale: 0.95 } };
+  const calcBtnWhileHover =
+    !calculating && !reducedMotion
+      ? {
+          whileHover: {
+            scale: 1.02,
+            boxShadow: "0 12px 28px rgba(124,58,237,0.5)",
+          },
+        }
+      : {};
+  const calcBtnWhileTap =
+    !calculating && !reducedMotion ? { whileTap: { scale: 0.98 } } : {};
+
+  // Conditional card hover class
+  const cardHoverClass = reducedMotion ? "" : "hover:-translate-y-1";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
       className="max-w-4xl mx-auto px-4 relative"
+      {...containerMotion}
     >
       <Toast
         message={toast.message}
@@ -148,7 +235,7 @@ export default function CGPACalculator({ scale = 4.0 }) {
         isExporting={isExporting}
       />
 
-      <CelebrationOverlay show={showCelebration} />
+      {!reducedMotion && <CelebrationOverlay show={showCelebration} />}
 
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
@@ -161,9 +248,8 @@ export default function CGPACalculator({ scale = 4.0 }) {
 
       {sems.length === 0 && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
           className="text-center py-10 px-4 glass border-dashed border-2 border-gray-300 dark:border-gray-700 rounded-2xl mb-6"
+          {...emptyStateMotion}
         >
           <p className="text-gray-500 dark:text-gray-400 font-medium">
             No semester GPAs added yet. Click "Add Semester" to begin.
@@ -177,11 +263,9 @@ export default function CGPACalculator({ scale = 4.0 }) {
             <motion.div
               key={s.id}
               layout
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              transition={{ duration: 0.2 }}
-              className="glass-card p-5 transition-all hover:border-brand-400/40 hover:-translate-y-1 group"
+              {...cardEntryMotion}
+              transition={{ duration: reducedMotion ? 0 : 0.2 }}
+              className={`glass-card p-5 transition-all hover:border-brand-400/40 ${cardHoverClass} group`}
               role="group"
               aria-label={`Semester ${i + 1}`}
             >
@@ -191,8 +275,9 @@ export default function CGPACalculator({ scale = 4.0 }) {
                 </span>
                 {sems.length > 2 && (
                   <motion.button
-                    whileHover={{ scale: 1.15 }}
-                    whileTap={{ scale: 0.9 }}
+                    type="button"
+                    {...removeBtnWhileHover}
+                    {...removeBtnWhileTap}
                     onClick={() => removeSem(s.id)}
                     aria-label={`Remove semester ${i + 1}`}
                     className="w-7 h-7 flex items-center justify-center rounded-lg bg-red-500/10 border border-red-500/25 text-red-500 hover:bg-red-500/25 transition-colors"
@@ -216,7 +301,7 @@ export default function CGPACalculator({ scale = 4.0 }) {
               <input
                 type="number"
                 min="0"
-                max={scale}
+                max={scaleStr}
                 step="0.01"
                 placeholder="0.00"
                 value={s.val}
@@ -231,8 +316,9 @@ export default function CGPACalculator({ scale = 4.0 }) {
 
       {sems.length < 8 && (
         <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          type="button"
+          {...btnWhileHover}
+          {...btnWhileTap}
           onClick={addSem}
           className="w-full py-3.5 border-2 border-dashed border-brand-300/50 dark:border-brand-400/30 rounded-2xl bg-transparent text-brand-600 dark:text-brand-300 font-semibold flex items-center justify-center gap-2 hover:bg-brand-50/30 dark:hover:bg-brand-900/20 transition-all"
           aria-label="Add new semester"
@@ -243,12 +329,9 @@ export default function CGPACalculator({ scale = 4.0 }) {
       )}
 
       <motion.button
-        whileHover={
-          !calculating
-            ? { scale: 1.02, boxShadow: "0 12px 28px rgba(124,58,237,0.5)" }
-            : {}
-        }
-        whileTap={!calculating ? { scale: 0.98 } : {}}
+        type="button"
+        {...calcBtnWhileHover}
+        {...calcBtnWhileTap}
         onClick={handleCalculate}
         disabled={calculating}
         className={`btn-primary w-full mt-6 py-4 text-lg font-semibold rounded-2xl ${
@@ -283,34 +366,34 @@ export default function CGPACalculator({ scale = 4.0 }) {
 
       {error && (
         <div
-          className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm backdrop-blur"
+          className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm backdrop-blur flex items-center gap-2"
           role="alert"
         >
-          ⚠️ {error}
+          <ErrorAlertIcon />
+          {error}
         </div>
       )}
 
       <AnimatePresence>
         {result && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
             className="mt-8 space-y-6 scroll-margin-header"
+            {...resultMotion}
+            transition={{ duration: reducedMotion ? 0 : 0.4 }}
           >
             <CGPAResultCard
               cgpa={result.cgpa}
               sems={result.sems}
               total={result.total}
               best={result.best}
-              scale={scale}
+              scale={scaleStr}
               darkMode={isDark}
             />
             <div className="flex justify-end mt-4">
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                type="button"
+                {...exportBtnWhileHover}
+                {...exportBtnWhileTap}
                 onClick={() => setShowExportModal(true)}
                 className="btn-secondary flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium"
                 aria-label="Export academic record as PDF or CSV"

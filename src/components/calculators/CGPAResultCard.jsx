@@ -1,34 +1,88 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import AnimatedNumber from "./AnimatedNumber";
 import { getStanding } from "../../utils/grades";
 
-export default function CGPAResultCard({ cgpa, sems, total, best, scale, darkMode }) {
+/**
+ * Local hook to detect the user’s motion preference.
+ * (Can be extracted to a shared utility later.)
+ */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
+
+export default function CGPAResultCard({
+  cgpa,
+  sems,
+  total,
+  best,
+  scale,
+  darkMode,
+}) {
+  const reducedMotion = usePrefersReducedMotion();
   const numericCgpa = parseFloat(cgpa);
   const standing = useMemo(
     () => getStanding(numericCgpa, scale),
     [numericCgpa, scale]
   );
   const maxScale = parseFloat(scale);
-  const isHighCGPA = numericCgpa >= 3.5;
+
+  // Scale‑aware high CGPA (≥ 80% of max scale)
+  const isHighCGPA = maxScale > 0 && numericCgpa / maxScale >= 0.8;
+
+  // Fallback‑safe values
+  const semesterCount = sems?.length ?? 0;
+  const bestDisplay = best != null ? Number(best).toFixed(2) : "0.00";
 
   const stats = useMemo(
     () => [
-      { label: "Semesters", value: sems.length },
-      { label: "Best GPA", value: best.toFixed(2) },
+      { label: "Semesters", value: semesterCount },
+      { label: "Best GPA", value: bestDisplay },
       { label: "Scale", value: maxScale.toFixed(1) },
     ],
-    [sems, best, maxScale]
+    [semesterCount, bestDisplay, maxScale]
   );
+
+  // Motion props that respect reduced motion
+  const cardMotion = reducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 30 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.4, ease: "easeOut" },
+      };
+
+  const highCGPAMotion = reducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0 },
+        animate: { opacity: 0.15 },
+        transition: { delay: 0.5 },
+      };
+
+  const statItemMotion = (i) =>
+    reducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 10 },
+          animate: { opacity: 1, y: 0 },
+          transition: { delay: 0.2 + i * 0.1 },
+        };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
       role="region"
       aria-label={`CGPA result: ${numericCgpa.toFixed(2)} out of ${maxScale}, standing: ${standing.t}`}
       className="relative mt-8 rounded-2xl overflow-hidden border border-white/20 dark:border-white/10 glass shadow-glass-lg"
+      {...cardMotion}
     >
       {/* Top gradient line */}
       <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-brand-400 to-transparent" />
@@ -37,10 +91,8 @@ export default function CGPAResultCard({ cgpa, sems, total, best, scale, darkMod
       <div className="px-6 py-8 md:py-10 text-center relative">
         {isHighCGPA && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.15 }}
-            transition={{ delay: 0.5 }}
             className="absolute inset-0 bg-gradient-brand blur-2xl pointer-events-none"
+            {...highCGPAMotion}
           />
         )}
 
@@ -55,7 +107,7 @@ export default function CGPAResultCard({ cgpa, sems, total, best, scale, darkMod
               : "text-gray-900 dark:text-gray-100"
           }`}
         >
-          <AnimatedNumber value={cgpa} />
+          <AnimatedNumber value={cgpa} reducedMotion={reducedMotion} />
         </div>
 
         <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
@@ -82,14 +134,12 @@ export default function CGPAResultCard({ cgpa, sems, total, best, scale, darkMod
         {stats.map((stat, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 + i * 0.1 }}
             className={`py-5 px-2 text-center transition-colors duration-200 ${
               i < stats.length - 1
                 ? "border-r border-white/10 dark:border-white/5"
                 : ""
             } hover:bg-white/5 dark:hover:bg-white/[0.03]`}
+            {...statItemMotion(i)}
           >
             <div className="text-lg md:text-xl font-bold font-mono text-gray-900 dark:text-gray-100">
               {stat.value}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import AboutSection from "../components/about/AboutSection";
+import AboutSection from "../components/about/About";
 import SEO from "../components/SEO";
 
 /**

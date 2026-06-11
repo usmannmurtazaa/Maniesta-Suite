@@ -1,7 +1,7 @@
 // src/hooks/useGPA.js
 import { useState, useCallback } from 'react';
 import { calculateGPA } from '../utils/calculations';
-import { GRADES } from '../utils/grades';
+import { getGradeScale } from '../utils/grades';
 
 export function useGPA(scale) {
   const [courses, setCourses] = useState([]);
@@ -38,26 +38,30 @@ export function useGPA(scale) {
       setError('Add at least one course to calculate GPA.');
       return;
     }
-    const gradeScale = GRADES;
+
+    // Use the selected scale instead of the default 4.0
+    const gradeScale = getGradeScale(scale);
     const mappedCourses = courses.map(c => ({
       name: c.code || 'Course',
       creditHours: c.credits,
       grade: gradeScale[c.gradeIdx]?.g || 'F',
     }));
+
     const gpaResult = calculateGPA(mappedCourses);
-    if (gpaResult === '0.00' && mappedCourses.length > 0) {
-      setError('Invalid course data.');
-      return;
-    }
+
+    // Removed the false error for a valid 0.00 GPA.
+    // A student with all F's should still see a 0.00 result.
+
     const totalCredits = courses.reduce((sum, c) => sum + (c.credits || 0), 0);
-    const totalPoints = gpaResult * totalCredits;
+    const totalGradePoints = parseFloat(gpaResult) * totalCredits;
+
     setResult({
       gpa: parseFloat(gpaResult),
       count: courses.length,
       credits: totalCredits,
-      points: parseFloat(totalPoints.toFixed(2)),
+      points: parseFloat(totalGradePoints.toFixed(2)),
     });
-  }, [courses]);
+  }, [courses, scale]);
 
   return {
     courses,

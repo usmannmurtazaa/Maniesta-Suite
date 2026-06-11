@@ -1,5 +1,5 @@
-import { getStanding } from './grades';
-import { gradePoints } from './calculations';
+import { getStanding, getGradeScale } from './grades';
+// Removed deprecated import: import { gradePoints } from './calculations';
 
 // ── Helpers ────────────────────────────────────────────────
 function s(value) {
@@ -261,29 +261,36 @@ async function buildPDF(doc, normalized) {
   }
 }
 
-// ── Normalize data shapes (includes degree) ─────────────────
+// ── Normalize data shapes (now scale‑aware for legacy path) ──
 function normalizeExportData(data) {
   // Old ExportModal style (userData, resultData, calculatorType)
   if (data.userData) {
-    const { userData, resultData, calculatorType } = data;
+    const { userData, resultData, calculatorType, scale = '4.0' } = data;
     const isCGPA = calculatorType === 'CGPA';
+
+    // Build a points map from the selected scale (fixes hardcoded 4.0)
+    const gradeScale = getGradeScale(scale);
+    const pointsMap = Object.fromEntries(gradeScale.map(g => [g.g, g.p]));
+
     const courses = !isCGPA
-      ? (resultData.courses || []).map(c => ({
-        code: c.name,
-        credits: c.creditHours,
-        grade: c.grade,
-        points: (gradePoints?.[c.grade] || 0) * (parseFloat(c.creditHours) || 0),
-      }))
+      ? (resultData.courses || []).map(c => {
+        const pts = (pointsMap[c.grade] || 0) * (parseFloat(c.creditHours) || 0);
+        return {
+          code: c.name,
+          credits: parseFloat(c.creditHours) || 0,
+          grade: c.grade,
+          points: pts,
+        };
+      })
       : [];
     const semesters = isCGPA
       ? (resultData.semesters || []).map(sem => ({
-        gpa:
-          sem.courses
-            ? (
-              sem.courses.reduce((acc, c) => acc + (gradePoints?.[c.grade] || 0) * parseFloat(c.creditHours), 0) /
-              (sem.courses.reduce((acc, c) => acc + parseFloat(c.creditHours), 0) || 1)
-            ).toFixed(2)
-            : '0',
+        gpa: sem.courses
+          ? (
+            sem.courses.reduce((acc, c) => acc + (pointsMap[c.grade] || 0) * parseFloat(c.creditHours), 0) /
+            (sem.courses.reduce((acc, c) => acc + parseFloat(c.creditHours), 0) || 1)
+          ).toFixed(2)
+          : '0',
         credits: sem.courses ? sem.courses.reduce((acc, c) => acc + parseFloat(c.creditHours), 0) : 0,
         status: '',
       }))
@@ -296,7 +303,7 @@ function normalizeExportData(data) {
       degree: userData.degree || '',
       semester: userData.semester,
       date: new Date().toLocaleDateString(),
-      scale: '4.0',
+      scale, // use actual scale, not hardcoded 4.0
       isCGPA,
       courses,
       semesters,

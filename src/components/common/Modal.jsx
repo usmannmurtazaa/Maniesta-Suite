@@ -1,13 +1,32 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+
+/**
+ * Local hook to detect reduced‑motion preference.
+ * (Can be extracted to a shared utility later.)
+ */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
 
 export default function Modal({ isOpen, onClose, children }) {
   const modalRef = useRef(null);
+  const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      const handleKey = (e) => e.key === "Escape" && onClose();
+      const handleKey = (e) => {
+        if (e.key === "Escape" && onClose) onClose();
+      };
       document.addEventListener("keydown", handleKey);
       return () => {
         document.body.style.overflow = "";
@@ -17,8 +36,55 @@ export default function Modal({ isOpen, onClose, children }) {
   }, [isOpen, onClose]);
 
   const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) onClose();
+    if (e.target === e.currentTarget && onClose) onClose();
   };
+
+  // If reduced motion, render a static overlay and card (no animations)
+  if (reducedMotion) {
+    return (
+      <>
+        {isOpen && (
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            onClick={handleOverlayClick}
+            role="presentation"
+          >
+            {/* Static decorative blobs (no animation) */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+              <div className="absolute -top-32 -right-32 w-96 h-96 bg-brand-400/20 rounded-full blur-3xl" />
+              <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl" />
+            </div>
+
+            <div
+              ref={modalRef}
+              className="glass w-full max-w-lg p-6 sm:p-8 rounded-3xl max-h-[90vh] overflow-y-auto relative z-20 shadow-glass-lg"
+              role="dialog"
+              aria-modal="true"
+            >
+              <button
+                type="button"
+                onClick={onClose}
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 transition-colors"
+                aria-label="Close"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+              {children}
+            </div>
+          </div>
+        )}
+      </>
+    );
+  }
 
   return (
     <AnimatePresence>
@@ -67,6 +133,7 @@ export default function Modal({ isOpen, onClose, children }) {
             aria-modal="true"
           >
             <motion.button
+              type="button"
               whileHover={{ scale: 1.1, rotate: 90 }}
               whileTap={{ scale: 0.9 }}
               onClick={onClose}
