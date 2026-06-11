@@ -1,0 +1,13 @@
+// src/components/icons/index.js
+export { default as GraduationIcon } from "./GraduationIcon";
+export { default as CurrencyIcon } from "./CurrencyIcon";
+export { default as DocumentIcon } from "./DocumentIcon";
+export { default as DashboardIcon } from "./DashboardIcon";
+export { default as CalculatorIcon } from "./CalculatorIcon";
+export { default as StarIcon } from "./StarIcon";
+export { default as RocketIcon } from "./RocketIcon";
+export { default as SparkleIcon } from "./SparkleIcon";
+export { default as ChartIcon } from "./ChartIcon";
+export { default as ArrowRightIcon } from "./ArrowRightIcon";
+export { default as GPAIcon } from "./GPAIcon";
+export { default as CGPAIcon } from "./CGPAIcon";

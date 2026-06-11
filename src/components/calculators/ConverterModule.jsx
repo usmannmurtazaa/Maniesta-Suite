@@ -1,29 +1,145 @@
+// file: src/components/calculators/ConverterModule.jsx
 import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Dropdown from "../common/Dropdown";
 
+// Professional SVG icons (replacing emojis)
+const LengthIcon = () => (
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="1.5"
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3 6l3-3 3 3M9 3v14M21 18l-3 3-3-3M15 21V7"
+    />
+  </svg>
+);
+const WeightIcon = () => (
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="1.5"
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3 6l3-3 3 3M9 3v14M21 18l-3 3-3-3M15 21V7"
+    />
+  </svg>
+);
+const TemperatureIcon = () => (
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="1.5"
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.773l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636"
+    />
+    <circle cx="12" cy="12" r="3" />
+  </svg>
+);
+const AreaIcon = () => (
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="1.5"
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3.75 3.75v16.5h16.5V3.75H3.75zM12 6v12M6 12h12"
+    />
+  </svg>
+);
+const CurrencyIcon = () => (
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="1.5"
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 6v12m-3-2.818l.879.659a3 3 0 004.242 0L18 13.182M12 6v12m-3-2.818l.879.659a3 3 0 004.242 0L18 13.182"
+    />
+  </svg>
+);
+const TimeIcon = () => (
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="1.5"
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 6v6l4 2m-4-8a9 9 0 110 18 9 9 0 010-18z"
+    />
+  </svg>
+);
+const SpeedIcon = () => (
+  <svg
+    className="w-4 h-4"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    strokeWidth="1.5"
+    aria-hidden="true"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"
+    />
+  </svg>
+);
+
 const converters = {
   length: {
     label: "Length",
-    icon: "📏",
+    icon: <LengthIcon />,
     units: ["Meter", "Kilometer", "Mile", "Foot"],
     rate: { Meter: 1, Kilometer: 0.001, Mile: 0.000621371, Foot: 3.28084 },
   },
   weight: {
     label: "Weight",
-    icon: "⚖️",
+    icon: <WeightIcon />,
     units: ["Kilogram", "Gram", "Pound", "Ounce"],
     rate: { Kilogram: 1, Gram: 1000, Pound: 2.20462, Ounce: 35.274 },
   },
   temperature: {
     label: "Temperature",
-    icon: "🌡️",
+    icon: <TemperatureIcon />,
     units: ["Celsius", "Fahrenheit", "Kelvin"],
     special: true,
   },
   area: {
     label: "Area",
-    icon: "📐",
+    icon: <AreaIcon />,
     units: ["Sq Meter", "Sq Kilometer", "Sq Mile", "Sq Foot"],
     rate: {
       "Sq Meter": 1,
@@ -34,19 +150,19 @@ const converters = {
   },
   currency: {
     label: "Currency",
-    icon: "💵",
+    icon: <CurrencyIcon />,
     units: ["USD", "EUR", "GBP", "PKR"],
     rate: { USD: 1, EUR: 0.92, GBP: 0.79, PKR: 278 },
   },
   time: {
     label: "Time",
-    icon: "⏱️",
+    icon: <TimeIcon />,
     units: ["Second", "Minute", "Hour", "Day"],
     rate: { Second: 1, Minute: 1 / 60, Hour: 1 / 3600, Day: 1 / 86400 },
   },
   speed: {
     label: "Speed",
-    icon: "🚀",
+    icon: <SpeedIcon />,
     units: ["m/s", "km/h", "mph", "knot"],
     rate: { "m/s": 1, "km/h": 3.6, mph: 2.23694, knot: 1.94384 },
   },
@@ -153,7 +269,7 @@ export default function ConverterModule() {
       animate={{ opacity: 1, y: 0 }}
       className="max-w-2xl mx-auto px-4"
     >
-      <div className="glass-card p-6 sm:p-8 space-y-6">
+      <div className="glass-card p-4 sm:p-6 md:p-8 space-y-6">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold text-gradient">
             Unit Converter
@@ -163,7 +279,7 @@ export default function ConverterModule() {
           </p>
         </div>
 
-        {/* Category tabs */}
+        {/* Category tabs – responsive wrap with larger tap targets */}
         <div className="flex flex-wrap gap-2" role="tablist">
           {Object.entries(converters).map(([key, cat]) => (
             <motion.button
@@ -173,13 +289,15 @@ export default function ConverterModule() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleCategoryChange(key)}
-              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              className={`inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2 rounded-full text-sm font-medium transition-all ${
                 active === key
                   ? "bg-gradient-brand text-white shadow-brand"
                   : "glass text-gray-600 dark:text-gray-300 hover:bg-white/40"
               }`}
             >
-              <span>{cat.icon}</span>
+              <span className="text-gray-700 dark:text-gray-200">
+                {cat.icon}
+              </span>
               <span>{cat.label}</span>
             </motion.button>
           ))}
@@ -199,12 +317,13 @@ export default function ConverterModule() {
               setResult("");
               setError("");
             }}
-            className="input-base w-full"
+            className="input-base w-full text-base sm:text-lg"
+            aria-label="Value to convert"
           />
         </div>
 
-        {/* From / To selection + swap */}
-        <div className="grid grid-cols-[1fr_auto_1fr] gap-2 items-end">
+        {/* From / To selection + swap – Responsive: column on mobile, row on tablet+ */}
+        <div className="flex flex-col sm:grid sm:grid-cols-[1fr_auto_1fr] gap-3 sm:gap-2 items-stretch sm:items-end">
           <Dropdown
             id="from-unit"
             label="From"
@@ -216,12 +335,12 @@ export default function ConverterModule() {
               setError("");
             }}
           />
-          <div className="flex items-center pb-2">
+          <div className="flex justify-center sm:justify-center items-center py-1 sm:pb-2 order-first sm:order-none">
             <motion.button
               whileHover={{ scale: 1.1, rotate: 180 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleSwap}
-              className="glass w-10 h-10 flex items-center justify-center rounded-full transition-transform"
+              className="glass w-10 h-10 flex items-center justify-center rounded-full transition-transform hover:shadow-brand"
               aria-label="Swap units"
             >
               ⇄
@@ -241,12 +360,12 @@ export default function ConverterModule() {
         </div>
 
         {/* Action buttons */}
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleConvert}
-            className="btn-primary flex-1"
+            className="btn-primary flex-1 py-3"
           >
             Convert
           </motion.button>
@@ -254,7 +373,7 @@ export default function ConverterModule() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleClear}
-            className="btn-secondary flex-1"
+            className="btn-secondary flex-1 py-3"
           >
             Reset
           </motion.button>
@@ -267,7 +386,7 @@ export default function ConverterModule() {
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="text-red-500 text-sm"
+              className="text-red-500 text-sm text-center"
               role="alert"
             >
               {error}
@@ -287,8 +406,8 @@ export default function ConverterModule() {
               <p className="text-sm text-gray-500 dark:text-gray-400">
                 Converted Result
               </p>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mt-1">
-                {value} {fromUnit} = {result} {toUnit}
+              <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mt-1 break-words">
+                {value || "0"} {fromUnit} = {result} {toUnit}
               </p>
             </motion.div>
           )}

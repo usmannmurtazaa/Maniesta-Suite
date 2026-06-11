@@ -1,166 +1,302 @@
-```
-# Maniesta Suite — Academic Tools Platform
+```md
+# Maniesta Suite
 
-Premium, glassmorphism‑designed academic calculators for students worldwide.  
-Built with React 19, Tailwind CSS, Framer Motion, Firebase, and EmailJS.
+Academic Productivity Dashboard System
 
----
+A modern, frontend-first academic tools platform built for students to calculate, convert, export, and track their academic performance in one unified dashboard experience.
 
-## ✨ Features
-
-- **GPA Calculator** — dynamic courses, live results, celebration animation for high GPA, export to PDF/CSV
-- **CGPA Calculator** — multiple semesters, best semester highlight, export to PDF/CSV
-- **Normal & Scientific Calculators** — history, copy to clipboard, full keyboard support
-- **Unit Converter** — length, weight, temperature, currency, area, time, speed
-- **Interest Calculator** — simple, compound, loan EMI
-- **Contact Form** — sends messages via EmailJS
-- **Export System** — professional PDF reports + structured CSV, persisted to Firestore
-- **Dark / Light / System Theme** — glassmorphism UI with animated transitions
-- **Analytics** — centralized Firebase Analytics with typed event tracking
-- **Enterprise Architecture** — clean separation of `lib/`, `services/`, `hooks/`, `utils/`, and `components/`
+Built with React 19, Vite, Tailwind CSS, Framer Motion, Firebase, EmailJS, and a local-first data architecture.
 
 ---
 
-## 📁 Project Structure (Root Level)
+## Overview
 
-```
-maniesta-suite/
-├── public/                  # Static assets
-├── src/
-│   ├── lib/firebase/        # Firebase app, firestore, analytics initialization
-│   ├── services/            # Business logic layer (analytics, firestore, email, export)
-│   ├── hooks/               # Custom React hooks (useGPA, useCGPA, useCalculator, useExport, …)
-│   ├── utils/               # Pure functions (calculations, grades, validators, device info)
-│   ├── constants/           # Grade scales, limits, analytics events
-│   ├── components/          # UI components (calculators, common, layout, contact)
-│   ├── pages/               # Page components (Home, GPA, CGPA, …)
-│   ├── router/              # React Router configuration
-│   ├── contexts/            # Theme context
-│   ├── store/               # Zustand store (optional global state)
-│   ├── styles/              # Global & animation CSS
-│   └── App.jsx / main.jsx   # Entry points
-├── .env                     # Environment variables
-├── index.html               # Entry HTML
-├── netlify.toml             # Deployment config
-├── tailwind.config.js       # Tailwind configuration
-├── vite.config.js           # Vite configuration
-└── package.json             # Dependencies & scripts
-```
+Maniesta Suite is a modular academic productivity system that replaces scattered student tools with a single unified interface.
+
+It combines calculators, converters, exports, and analytics into a dashboard-driven experience without requiring authentication or backend complexity.
 
 ---
 
-## 🚀 Getting Started
+## Core Capabilities
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-username/maniesta-suite.git
-   cd maniesta-suite
-   ```
+### Academic Tools
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+- GPA Calculator with real-time grade computation
+- CGPA Calculator with multi-semester tracking
+- Scientific and standard calculator with history support
+- Unit conversion across multiple categories
+- Interest calculator including EMI and compound interest
 
-3. **Set up environment variables**  
-   Rename `.env.example` to `.env` and fill in your credentials:
-   - Firebase configuration (`VITE_FIREBASE_*`)
-   - EmailJS (`VITE_EMAILJS_*`)
+### Financial Utility
 
-4. **Start development server**
-   ```bash
-   npm run dev
-   ```
+- Live currency converter with exchange rate caching
+- 150+ currency support
+- Offline fallback using cached rates
 
-5. **Build for production**
-   ```bash
-   npm run build
-   ```
+### Export System
 
----
+- PDF report generation for GPA and CGPA
+- CSV export for structured academic data
+- Export history tracking in dashboard
 
-## 🔧 Environment Variables
+### Dashboard System
 
-| Variable | Description |
-|----------|-------------|
-| `VITE_FIREBASE_API_KEY` | Firebase API key |
-| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase Auth domain |
-| `VITE_FIREBASE_PROJECT_ID` | Firebase project ID |
-| `VITE_FIREBASE_STORAGE_BUCKET` | Firebase storage bucket |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID |
-| `VITE_FIREBASE_APP_ID` | Firebase app ID |
-| `VITE_FIREBASE_MEASUREMENT_ID` | Google Analytics measurement ID |
-| `VITE_EMAILJS_SERVICE_ID` | EmailJS service ID |
-| `VITE_EMAILJS_TEMPLATE_ID` | EmailJS template ID |
-| `VITE_EMAILJS_PUBLIC_KEY` | EmailJS public key |
-| `VITE_APP_URL` | (optional) Production URL |
+- Local-first analytics using localStorage
+- Recent activity tracking
+- Favorite tools system
+- Last calculation memory (GPA, currency, exports)
+- Quick action navigation
+
+### Contact System
+
+- EmailJS-powered contact form
+- Direct message delivery without backend server
 
 ---
 
-## 🧱 Architecture
+## System Architecture
 
-### Layered Design
-- **`lib/`** — Infrastructure layer (Firebase init only, no business logic)
-- **`services/`** — Business logic layer
-  - `analytics/` — Centralized event tracking with typed constants
-  - `firestore/` — CRUD operations for export records
-  - `export/` — PDF/CSV generation & download orchestrator
-  - `email/` — EmailJS wrapper
-- **`hooks/`** — React hooks connecting services to UI
-  - `useGPA`, `useCGPA` — domain‑specific state management
-  - `useCalculator` — shared calculator engine
-  - `useExport` — unified export flow
-  - `useAnalytics` — page view tracking
-- **`utils/`** — Pure functions (no React, no side‑effects)
-  - `calculations/` — GPA, CGPA, interest, expression evaluators
-  - `analytics.js` — device/browser detection
-  - `grades.js` — grade scales & standing
-  - `validators.js` — form validators
-- **`constants/`** — Immutable application constants (grade scales, limits, event names)
-
-### Data Flow
-```
-UI (components)  →  hooks  →  services  →  lib/firebase  →  Firebase / EmailJS
-                         ↕
-                       utils (pure calculations)
+### Frontend Architecture
 ```
 
-### Design System
-- **Glassmorphism** via Tailwind utilities (`glass`, `glass-card`, `shadow-glass-lg`)
-- **Animated backgrounds** with floating gradient blobs and Framer Motion
-- **Micro‑interactions** on all buttons, inputs, and cards
-- **Responsive** from 320px to 1920px+
-- **Dark / Light / System** theme with seamless transitions
+UI Layer
+↓
+Hooks Layer
+↓
+Services Layer
+↓
+Firebase / EmailJS / localStorage
+↓
+Utilities Layer (pure functions)
 
----
-
-## 📦 Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 19, React Router 6 |
-| Styling | Tailwind CSS 3, CSS variables |
-| Animation | Framer Motion |
-| Backend / Data | Firebase Firestore |
-| Analytics | Firebase Analytics |
-| Email | EmailJS |
-| PDF / CSV | jsPDF, custom CSV generator |
-| State | React Context, Zustand |
-| Build | Vite 5 |
-| Deployment | Netlify |
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please open an issue or pull request.  
-For major changes, discuss first to align with the architecture vision.
-
----
-
-## 📄 License
-
-MIT — built and maintained with ❤️ by Usman Murtaza.
 ```
 
 ---
+
+## Project Structure
+
+```
+
+src/
+├── components/
+│ ├── dashboard/
+│ │ ├── widgets/
+│ │ ├── DashboardLayout.jsx
+│ ├── currency/
+│ ├── calculator/
+│ ├── common/
+│
+├── pages/
+│ ├── Home.jsx
+│ ├── GPA.jsx
+│ ├── CGPA.jsx
+│ ├── Dashboard.jsx
+│ ├── Contact.jsx
+│
+├── hooks/
+├── services/
+├── utils/
+├── constants/
+├── contexts/
+├── lib/firebase/
+├── styles/
+└── router/
+
+```
+
+---
+
+## Data Flow Model
+
+```
+
+User Action
+↓
+React Component
+↓
+Custom Hook
+↓
+Service Layer
+↓
+localStorage / Firebase / EmailJS
+↓
+Dashboard Sync Event
+↓
+UI Auto Update
+
+```
+
+---
+
+## Key Design Principles
+
+### 1. Local-First System
+- No authentication required
+- All user data stored in localStorage
+- Optional Firebase persistence for exports
+
+### 2. Dashboard-Centric UX
+- Every tool feeds into a central dashboard
+- All user activity is tracked automatically
+- Instant UI reflection without refresh
+
+### 3. Modular Service Layer
+- Separation of UI, logic, and storage
+- Reusable hooks across the system
+- Centralized data handling
+
+### 4. Performance Optimized
+- Lazy-loaded routes
+- Memoized components
+- Cached API responses (currency rates)
+- Minimal re-renders via context design
+
+---
+
+## Tech Stack
+
+Frontend
+- React 19
+- React Router 6
+- Vite
+
+Styling
+- Tailwind CSS
+- Glassmorphism UI system
+- Framer Motion animations
+
+Backend Services
+- Firebase Firestore (export storage only)
+- Firebase Analytics
+- EmailJS (contact system)
+
+State Management
+- React Context API
+- localStorage persistence layer
+
+Utilities
+- jsPDF (PDF exports)
+- CSV generator utilities
+- Currency API integration
+
+---
+
+## Environment Variables
+
+```
+
+VITE_FIREBASE_API_KEY
+VITE_FIREBASE_AUTH_DOMAIN
+VITE_FIREBASE_PROJECT_ID
+VITE_FIREBASE_STORAGE_BUCKET
+VITE_FIREBASE_MESSAGING_SENDER_ID
+VITE_FIREBASE_APP_ID
+VITE_FIREBASE_MEASUREMENT_ID
+
+VITE_EMAILJS_SERVICE_ID
+VITE_EMAILJS_TEMPLATE_ID
+VITE_EMAILJS_PUBLIC_KEY
+
+VITE_APP_URL
+
+```
+
+---
+
+## Features Breakdown
+
+### Dashboard Intelligence
+- Tracks GPA calculations automatically
+- Stores currency conversions history
+- Saves export activity logs
+- Highlights recent tool usage
+
+### Currency System
+- Live exchange rate fetching
+- 24-hour caching system
+- Offline fallback support
+- Swap animation between currencies
+
+### GPA System
+- Dynamic course input
+- Weighted calculation engine
+- Instant result updates
+- Export-ready structured output
+
+### Export Engine
+- PDF formatting for academic reports
+- CSV structured data output
+- Firebase export history logging
+
+---
+
+## Performance Strategy
+
+- Route-based code splitting
+- Lazy loading for heavy calculators
+- Memoized widget rendering
+- Debounced input handling
+- Cached API responses for currency system
+
+---
+
+## SEO Strategy
+
+- Fully indexable SPA routing
+- Meta tag support per route
+- OpenGraph + Twitter card optimization
+- Sitemap-ready route structure
+- Keyword-targeted landing content for academic tools
+
+---
+
+## Deployment
+
+### Netlify
+- SPA redirect handling enabled
+- Build output: dist/
+- Environment variables injected at build time
+
+### Build Commands
+```
+
+npm install
+npm run dev
+npm run build
+npm run preview
+
+```
+
+---
+
+## Roadmap
+
+Planned Enhancements
+- AI academic assistant chatbot
+- Smart study suggestions based on GPA trends
+- Cloud sync (optional login layer)
+- Multi-device dashboard sync
+- Advanced analytics visualization
+
+---
+
+## Contribution Guidelines
+
+- Keep architecture modular
+- No direct logic inside UI components
+- Use services layer for all external calls
+- Maintain local-first design philosophy
+
+---
+
+## License
+
+MIT License
+
+---
+
+## Author
+
+Built by Usman Murtaza
+Focused on modern academic productivity systems and frontend architecture design.
+```

@@ -2,6 +2,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import { HelmetProvider } from "react-helmet-async";
+import { DashboardProvider } from "./contexts/DashboardProvider"; // New import
 
 class SystemErrorBoundary extends React.Component {
   constructor(props) {
@@ -90,10 +92,14 @@ if (!container) {
 const root = ReactDOM.createRoot(container);
 root.render(
   <React.StrictMode>
-    <SystemErrorBoundary>
-      <ApplicationBootstrapper>
-        <App />
-      </ApplicationBootstrapper>
-    </SystemErrorBoundary>
+    <HelmetProvider>
+      <DashboardProvider>
+        <SystemErrorBoundary>
+          <ApplicationBootstrapper>
+            <App />
+          </ApplicationBootstrapper>
+        </SystemErrorBoundary>
+      </DashboardProvider>
+    </HelmetProvider>
   </React.StrictMode>,
 );

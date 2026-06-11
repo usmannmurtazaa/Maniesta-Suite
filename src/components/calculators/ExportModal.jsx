@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Modal from "../common/Modal";
+import { useDashboard } from "../../contexts/DashboardProvider";
+import { get, save } from "../../services/storageService";
+
+const USER_DETAILS_KEY = "maniesta_export_user_details";
 
 const INITIAL_USER_DATA = {
   fullName: "",
@@ -8,7 +12,6 @@ const INITIAL_USER_DATA = {
   university: "",
   degree: "",
   semester: "",
-  email: "",
 };
 
 export default function ExportModal({
@@ -17,15 +20,22 @@ export default function ExportModal({
   onExport,
   isExporting = false,
 }) {
+  const { addExportRecord } = useDashboard();
   const [userData, setUserData] = useState(INITIAL_USER_DATA);
   const [fieldErrors, setFieldErrors] = useState({});
   const [successFiles, setSuccessFiles] = useState(null);
   const [generationError, setGenerationError] = useState(null);
   const fullNameRef = useRef(null);
 
+  // Load saved user details from localStorage when modal opens
   useEffect(() => {
     if (isOpen) {
-      setUserData(INITIAL_USER_DATA);
+      const saved = get(USER_DETAILS_KEY);
+      if (saved) {
+        setUserData(saved);
+      } else {
+        setUserData(INITIAL_USER_DATA);
+      }
       setFieldErrors({});
       setSuccessFiles(null);
       setGenerationError(null);
@@ -36,8 +46,6 @@ export default function ExportModal({
   const validate = () => {
     const errors = {};
     if (!userData.fullName.trim()) errors.fullName = "Full name is required";
-    if (userData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email))
-      errors.email = "Invalid email";
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -58,6 +66,16 @@ export default function ExportModal({
       const pdfUrl = URL.createObjectURL(files.pdfBlob);
       const csvUrl = URL.createObjectURL(files.csvBlob);
       setSuccessFiles({ pdfUrl, csvUrl });
+
+      // Save user details for future exports
+      save(USER_DETAILS_KEY, userData);
+
+      // Add to dashboard export history
+      addExportRecord({
+        filename: `Academic_Record_${new Date().toISOString().slice(0, 19)}.pdf`,
+        type: "pdf",
+        date: new Date().toISOString(),
+      });
     } catch (err) {
       console.error("Export generation failed:", err);
       setGenerationError(
@@ -191,7 +209,7 @@ export default function ExportModal({
                     value={userData.fullName}
                     onChange={handleChange}
                     className={`input-base ${fieldErrors.fullName ? "input-error" : ""}`}
-                    placeholder="John Doe"
+                    placeholder="Your Name"
                   />
                   {fieldErrors.fullName && (
                     <motion.p
@@ -219,7 +237,7 @@ export default function ExportModal({
                       value={userData.studentId}
                       onChange={handleChange}
                       className="input-base"
-                      placeholder="e.g. FA21-BCS-123"
+                      placeholder="Your Student ID"
                     />
                   </div>
                   <div>
@@ -236,7 +254,7 @@ export default function ExportModal({
                       value={userData.semester}
                       onChange={handleChange}
                       className="input-base"
-                      placeholder="e.g. Fall 2025"
+                      placeholder="Your Semester "
                     />
                   </div>
                 </div>
@@ -255,7 +273,7 @@ export default function ExportModal({
                     value={userData.degree}
                     onChange={handleChange}
                     className="input-base"
-                    placeholder="e.g. BSc Computer Science"
+                    placeholder="Your Degree or Program"
                   />
                 </div>
 
@@ -273,35 +291,8 @@ export default function ExportModal({
                     value={userData.university}
                     onChange={handleChange}
                     className="input-base"
-                    placeholder="e.g. COMSATS University Islamabad"
+                    placeholder="Your University Name"
                   />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                  >
-                    Email (optional)
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={userData.email}
-                    onChange={handleChange}
-                    className={`input-base ${fieldErrors.email ? "input-error" : ""}`}
-                    placeholder="you@example.com"
-                  />
-                  {fieldErrors.email && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="mt-1 text-sm text-red-500"
-                    >
-                      {fieldErrors.email}
-                    </motion.p>
-                  )}
                 </div>
               </form>
             </div>

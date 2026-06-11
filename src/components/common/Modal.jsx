@@ -28,7 +28,7 @@ export default function Modal({ isOpen, onClose, children }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
           onClick={handleOverlayClick}
           role="presentation"
         >
@@ -62,7 +62,7 @@ export default function Modal({ isOpen, onClose, children }) {
               transition: { type: "spring", damping: 25, stiffness: 300 },
             }}
             exit={{ scale: 0.92, opacity: 0, y: 30 }}
-            className="glass w-full max-w-lg p-6 sm:p-8 rounded-3xl max-h-[90vh] overflow-y-auto relative z-10 shadow-glass-lg"
+            className="glass w-full max-w-lg p-6 sm:p-8 rounded-3xl max-h-[90vh] overflow-y-auto relative z-20 shadow-glass-lg"
             role="dialog"
             aria-modal="true"
           >

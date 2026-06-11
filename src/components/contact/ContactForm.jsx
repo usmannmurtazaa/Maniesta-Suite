@@ -1,9 +1,43 @@
-import { useState } from "react";
+// file: src/components/contact/ContactForm.jsx
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { sendContactEmail } from "../../services/emailjs";
 import { validateEmail } from "../../utils/validators";
 
 const MAX_MESSAGE_LENGTH = 500;
+const SUCCESS_MESSAGE_DURATION = 5000;
+
+// Professional icon components (replacing emojis)
+const SuccessIcon = () => (
+  <svg
+    className="w-5 h-5 text-green-500 shrink-0"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+const ErrorIcon = () => (
+  <svg
+    className="w-5 h-5 text-red-500 shrink-0"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
 
 export default function ContactForm() {
   const [form, setForm] = useState({
@@ -15,16 +49,35 @@ export default function ContactForm() {
   const [status, setStatus] = useState({ type: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const nameInputRef = useRef(null);
+  const statusLiveRef = useRef(null);
+
+  useEffect(() => {
+    if (status.type === "success") {
+      const timer = setTimeout(() => {
+        setStatus({ type: "", message: "" });
+      }, SUCCESS_MESSAGE_DURATION);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
+
+  // Announce status to screen readers
+  useEffect(() => {
+    if (status.message && statusLiveRef.current) {
+      statusLiveRef.current.textContent = status.message;
+    }
+  }, [status]);
 
   const validate = () => {
     const errs = {};
-    if (!form.name.trim()) errs.name = "Required";
-    if (!form.email.trim()) errs.email = "Required";
-    else if (!validateEmail(form.email)) errs.email = "Invalid email";
-    if (!form.subject.trim()) errs.subject = "Required";
-    if (!form.message.trim()) errs.message = "Required";
+    if (!form.name.trim()) errs.name = "Full name is required";
+    if (!form.email.trim()) errs.email = "Email address is required";
+    else if (!validateEmail(form.email))
+      errs.email = "Enter a valid email address (e.g., name@example.com)";
+    if (!form.subject.trim()) errs.subject = "Subject is required";
+    if (!form.message.trim()) errs.message = "Message is required";
     else if (form.message.length > MAX_MESSAGE_LENGTH)
-      errs.message = `Max ${MAX_MESSAGE_LENGTH} characters`;
+      errs.message = `Message must be ${MAX_MESSAGE_LENGTH} characters or less`;
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -36,11 +89,20 @@ export default function ContactForm() {
     setStatus({ type: "", message: "" });
     try {
       await sendContactEmail(form);
-      setStatus({ type: "success", message: "Message sent successfully! 🎉" });
+      setStatus({
+        type: "success",
+        message: "Message sent successfully! We'll reply within 24 hours.",
+      });
       setForm({ name: "", email: "", subject: "", message: "" });
       setErrors({});
-    } catch {
-      setStatus({ type: "error", message: "Failed to send. Please try again." });
+      nameInputRef.current?.focus();
+    } catch (err) {
+      console.error("Email send error:", err);
+      setStatus({
+        type: "error",
+        message:
+          "Failed to send. Please try again later or email us directly at support@maniestasuite.netlify.app.",
+      });
     } finally {
       setLoading(false);
     }
@@ -55,6 +117,14 @@ export default function ContactForm() {
 
   return (
     <div className="relative">
+      {/* Live region for screen reader announcements */}
+      <div
+        ref={statusLiveRef}
+        className="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      />
+
       {/* Decorative floating blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
@@ -73,19 +143,23 @@ export default function ContactForm() {
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="glass-card p-8 md:p-12 relative z-10"
+        className="glass-card p-8 md:p-12 relative z-10 break-words"
       >
-        <h2 className="text-3xl font-bold text-gradient mb-6">
-          Get in Touch
-        </h2>
+        <h2 className="text-3xl font-bold text-gradient mb-6">Get in Touch</h2>
         <p className="text-gray-600 dark:text-gray-400 mb-8">
-          We'll get back to you within 24 hours.
+          Have a question or feedback? Fill out the form and we’ll get back to
+          you within 24 hours. You can also use our{" "}
+          <a href="#" className="text-brand-500 hover:underline">
+            AI Chat Assistant
+          </a>{" "}
+          for instant help with our calculators.
         </p>
 
         <form onSubmit={handleSubmit} noValidate className="space-y-6">
           {/* Name */}
           <div className="relative">
             <input
+              ref={nameInputRef}
               name="name"
               value={form.name}
               onChange={handleChange}
@@ -97,12 +171,16 @@ export default function ContactForm() {
               placeholder=" "
               required
               aria-label="Full name"
+              aria-invalid={!!errors.name}
+              aria-describedby={errors.name ? "name-error" : undefined}
+              disabled={loading}
             />
             <label className="absolute left-0 top-1 text-sm text-gray-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500">
               Full name *
             </label>
             {errors.name && (
               <motion.span
+                id="name-error"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-red-500 text-xs"
@@ -127,12 +205,16 @@ export default function ContactForm() {
               placeholder=" "
               required
               aria-label="Email address"
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? "email-error" : undefined}
+              disabled={loading}
             />
             <label className="absolute left-0 top-1 text-sm text-gray-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500">
               Email address *
             </label>
             {errors.email && (
               <motion.span
+                id="email-error"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-red-500 text-xs"
@@ -156,12 +238,16 @@ export default function ContactForm() {
               placeholder=" "
               required
               aria-label="Subject"
+              aria-invalid={!!errors.subject}
+              aria-describedby={errors.subject ? "subject-error" : undefined}
+              disabled={loading}
             />
             <label className="absolute left-0 top-1 text-sm text-gray-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500">
               Subject *
             </label>
             {errors.subject && (
               <motion.span
+                id="subject-error"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-red-500 text-xs"
@@ -187,13 +273,18 @@ export default function ContactForm() {
               placeholder=" "
               required
               aria-label="Message"
+              aria-invalid={!!errors.message}
+              aria-describedby={errors.message ? "message-error" : undefined}
+              disabled={loading}
             />
             <label className="absolute left-0 top-1 text-sm text-gray-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500">
               Message *
             </label>
             <div className="flex justify-between text-xs text-gray-400 mt-1">
               {errors.message ? (
-                <span className="text-red-500">{errors.message}</span>
+                <span id="message-error" className="text-red-500">
+                  {errors.message}
+                </span>
               ) : (
                 <span>Min. 10 characters</span>
               )}
@@ -207,34 +298,50 @@ export default function ContactForm() {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full py-3 text-lg flex items-center justify-center gap-2"
+            className="btn-primary w-full py-3 text-lg flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
           >
             {loading ? (
-              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
+              <>
+                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+                Sending...
+              </>
             ) : (
               "Send message"
             )}
           </button>
 
-          {/* Status */}
+          {/* Status message */}
           <AnimatePresence>
             {status.message && (
-              <motion.p
+              <motion.div
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className={`text-sm p-3 rounded-lg ${
+                className={`flex items-center gap-2 text-sm p-3 rounded-lg ${
                   status.type === "success"
                     ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20"
                     : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
                 } backdrop-blur`}
                 role="alert"
               >
-                {status.message}
-              </motion.p>
+                {status.type === "success" ? <SuccessIcon /> : <ErrorIcon />}
+                <span>{status.message}</span>
+              </motion.div>
             )}
           </AnimatePresence>
         </form>

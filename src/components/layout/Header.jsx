@@ -4,10 +4,12 @@ import { AnimatePresence, motion } from "framer-motion";
 import ThemeToggle from "../common/ThemeToggle";
 
 const links = [
+  { to: "/dashboard", label: "Dashboard" },
   { to: "/gpa", label: "GPA" },
   { to: "/cgpa", label: "CGPA" },
   { to: "/calculator", label: "Calc" },
   { to: "/converter", label: "Convert" },
+  { to: "/currencyconverter", label: "Currency" },
   { to: "/interest", label: "Interest" },
   { to: "/about", label: "About" },
   { to: "/contact", label: "Contact" },

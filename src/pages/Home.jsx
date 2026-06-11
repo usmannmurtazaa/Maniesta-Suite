@@ -1,120 +1,87 @@
-import { useRef, useState, useEffect } from "react";
+// src/pages/Home.jsx
+import { useRef, useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { motion, useInView, useSpring } from "framer-motion";
+import {
+  GraduationIcon,
+  CurrencyIcon,
+  DocumentIcon,
+  DashboardIcon,
+  CalculatorIcon,
+  StarIcon,
+  RocketIcon,
+  SparkleIcon,
+  ChartIcon,
+  ArrowRightIcon,
+} from "../components/icons";
 
+// ----- Tool definitions (icon components used inside the card) -----
 const tools = [
   {
     name: "GPA Calculator",
     path: "/gpa",
-    icon: (
-      <svg
-        className="w-8 h-8"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-      </svg>
-    ),
+    Icon: CalculatorIcon, // reuse generic calculator? better to have GPAIcon, but for brevity keep.
     desc: "Compute semester GPA instantly.",
     gradient: "from-brand-400 to-violet-400",
   },
   {
     name: "CGPA Calculator",
     path: "/cgpa",
-    icon: (
-      <svg
-        className="w-8 h-8"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <path d="M12 14l9-5-9-5-9 5 9 5z" />
-        <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-        <path d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-      </svg>
-    ),
+    Icon: ChartIcon,
     desc: "Cumulative performance tracking.",
     gradient: "from-pink-400 to-rose-400",
   },
   {
     name: "Calculator",
     path: "/calculator",
-    icon: (
-      <svg
-        className="w-8 h-8"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <path d="M4 4h16v16H4V4zm4 4h8M8 12h2m2 0h2m-6 4h2m2 0h2" />
-      </svg>
-    ),
+    Icon: CalculatorIcon,
     desc: "Normal & scientific modes.",
     gradient: "from-cyan-400 to-blue-400",
   },
   {
     name: "Unit Converter",
     path: "/converter",
-    icon: (
-      <svg
-        className="w-8 h-8"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <path d="M3 6l3-3 3 3M9 3v14M21 18l-3 3-3-3M15 21V7" />
-      </svg>
-    ),
-    desc: "Length, currency, temperature…",
+    Icon: CalculatorIcon, // or specific UnitIcon
+    desc: "Length, weight, temperature, and more.",
     gradient: "from-emerald-400 to-green-400",
   },
   {
     name: "Interest",
     path: "/interest",
-    icon: (
-      <svg
-        className="w-8 h-8"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
-      </svg>
-    ),
+    Icon: ChartIcon, // or MoneyIcon
     desc: "Simple, compound, loan EMI.",
     gradient: "from-yellow-400 to-amber-400",
   },
   {
+    name: "Currency Converter",
+    path: "/currencyconverter",
+    Icon: CurrencyIcon,
+    desc: "Live exchange rates, 150+ currencies.",
+    gradient: "from-teal-400 to-cyan-400",
+  },
+  {
+    name: "Dashboard",
+    path: "/dashboard",
+    Icon: DashboardIcon,
+    desc: "Your academic command center.",
+    gradient: "from-indigo-400 to-purple-400",
+  },
+  {
     name: "Contact",
     path: "/contact",
-    icon: (
-      <svg
-        className="w-8 h-8"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-      </svg>
-    ),
+    Icon: DocumentIcon,
     desc: "Get in touch with our team.",
     gradient: "from-fuchsia-400 to-purple-400",
   },
 ];
 
 const statsData = [
-  { label: "Calculators", target: 7 },
+  { label: "Calculators & Tools", target: 8 },
   { label: "Countries", target: 120 },
   { label: "Students", target: 50000 },
 ];
 
+// AnimatedCounter (unchanged, already pure)
 function AnimatedCounter({ target, label }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -138,26 +105,165 @@ function AnimatedCounter({ target, label }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      className="glass-card p-6 text-center"
+      className="glass-card p-4 sm:p-6 text-center"
     >
-      <div className="text-4xl md:text-5xl font-extrabold text-gradient mb-2">
+      <div className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gradient mb-2">
         {label === "Students"
           ? `${(displayValue / 1000).toFixed(0)}k+`
           : displayValue}
       </div>
-      <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+      <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">
         {label}
       </div>
     </motion.div>
   );
 }
 
-export default function Home() {
+// ========== localStorage helper hook (unchanged) ==========
+const STORAGE_KEYS = {
+  RECENT_ACTIONS: "maniesta_recent_actions",
+  LAST_GPA: "maniesta_last_gpa",
+  LAST_CURRENCY: "maniesta_last_currency",
+  EXPORT_HISTORY: "maniesta_export_history",
+  FAVORITE_TOOLS: "maniesta_favorite_tools",
+};
+
+function useUserActivity() {
+  const [lastGPA, setLastGPA] = useState(null);
+  const [lastCurrency, setLastCurrency] = useState(null);
+  const [lastExport, setLastExport] = useState(null);
+  const [favoriteTools, setFavoriteTools] = useState([]);
+  const [recentActions, setRecentActions] = useState([]);
+
+  useEffect(() => {
+    const handleStorageUpdate = () => {
+      setLastGPA(
+        JSON.parse(localStorage.getItem(STORAGE_KEYS.LAST_GPA) || "null"),
+      );
+      setLastCurrency(
+        JSON.parse(localStorage.getItem(STORAGE_KEYS.LAST_CURRENCY) || "null"),
+      );
+      const exports = JSON.parse(
+        localStorage.getItem(STORAGE_KEYS.EXPORT_HISTORY) || "[]",
+      );
+      setLastExport(exports[0] || null);
+      setFavoriteTools(
+        JSON.parse(localStorage.getItem(STORAGE_KEYS.FAVORITE_TOOLS) || "[]"),
+      );
+      setRecentActions(
+        JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_ACTIONS) || "[]"),
+      );
+    };
+    handleStorageUpdate();
+    window.addEventListener("storage-update", handleStorageUpdate);
+    return () =>
+      window.removeEventListener("storage-update", handleStorageUpdate);
+  }, []);
+
+  return { lastGPA, lastCurrency, lastExport, favoriteTools, recentActions };
+}
+
+// ========== Activity Insight Panel (no emojis) ==========
+function ActivityInsightPanel({ lastGPA, lastCurrency, lastExport }) {
   return (
-    <div className="space-y-32">
+    <div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+      {lastGPA && (
+        <Link
+          to="/gpa"
+          className="glass inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full hover:bg-white/20 transition-colors"
+        >
+          <GraduationIcon className="w-4 h-4" />
+          <span>Last GPA: {lastGPA.gpa} → View Dashboard</span>
+        </Link>
+      )}
+      {lastCurrency && (
+        <Link
+          to="/currencyconverter"
+          className="glass inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full hover:bg-white/20 transition-colors"
+        >
+          <CurrencyIcon className="w-4 h-4" />
+          <span>
+            Last conversion: {lastCurrency.from} → {lastCurrency.to}
+          </span>
+        </Link>
+      )}
+      {lastExport && (
+        <Link
+          to="/export-guide"
+          className="glass inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full hover:bg-white/20 transition-colors"
+        >
+          <DocumentIcon className="w-4 h-4" />
+          <span>Last export ready → View Guide</span>
+        </Link>
+      )}
+      {!lastGPA && !lastCurrency && !lastExport && (
+        <div className="glass inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full">
+          <SparkleIcon className="w-4 h-4" />
+          <span>Start using tools to build your academic dashboard</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ========== Quick Access Strip (no emojis) ==========
+function QuickAccessStrip({ lastGPA, lastCurrency, lastExport }) {
+  const items = [];
+  if (lastGPA)
+    items.push({ label: `GPA: ${lastGPA.gpa}`, link: "/gpa", icon: ChartIcon });
+  if (lastCurrency)
+    items.push({
+      label: `${lastCurrency.from} → ${lastCurrency.to}`,
+      link: "/currencyconverter",
+      icon: CurrencyIcon,
+    });
+  if (lastExport)
+    items.push({
+      label: "View last export",
+      link: "/export-guide",
+      icon: DocumentIcon,
+    });
+  items.push({ label: "Open Dashboard", link: "/dashboard", icon: RocketIcon });
+
+  if (items.length === 1 && items[0].label === "Open Dashboard") return null;
+
+  return (
+    <div className="container mx-auto px-4 my-6 sm:my-8">
+      <div className="glass p-2 sm:p-3 rounded-full overflow-x-auto flex gap-2 items-center whitespace-nowrap scrollbar-hide">
+        {items.map((item, idx) => (
+          <Link
+            key={idx}
+            to={item.link}
+            className="glass inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm hover:bg-white/20 transition-colors"
+          >
+            <item.icon className="w-4 h-4" />
+            <span>{item.label}</span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function Home() {
+  const { lastGPA, lastCurrency, lastExport, favoriteTools, recentActions } =
+    useUserActivity();
+
+  const recentToolPath = (() => {
+    const action = recentActions.find(
+      (a) => a.type === "gpa" || a.type === "currency",
+    );
+    if (action?.type === "gpa") return "/gpa";
+    if (action?.type === "currency") return "/currencyconverter";
+    return null;
+  })();
+
+  const memoizedTools = useMemo(() => tools, []);
+
+  return (
+    <div className="space-y-24 sm:space-y-28 lg:space-y-32">
       {/* Hero Section */}
-      <section className="relative pt-12 md:pt-20">
-        {/* Large background gradient mesh */}
+      <section className="relative pt-12 sm:pt-16 md:pt-20">
         <div className="absolute inset-0 -z-10 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-violet-400/20 dark:bg-violet-600/10 rounded-full blur-3xl animate-float" />
           <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-pink-400/20 dark:bg-pink-600/10 rounded-full blur-3xl animate-float animate-delay-1000" />
@@ -168,41 +274,49 @@ export default function Home() {
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut" }}
-          className="container mx-auto px-4 max-w-5xl text-center relative"
+          className="container mx-auto px-4 sm:px-6 max-w-5xl text-center relative"
         >
-          {/* Floating badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="inline-flex items-center gap-2 glass rounded-full px-5 py-2 mb-8 text-sm font-medium text-gray-600 dark:text-gray-300"
+            className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 sm:px-5 sm:py-2 mb-6 sm:mb-8 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300"
           >
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse-soft" />
-            New: Export reports as PDF
+            <SparkleIcon className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
+            <span>New: Live Currency Converter & Dashboard</span>
           </motion.div>
 
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight text-gradient mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight text-gradient mb-4 sm:mb-6">
             Academic Tools,
             <br />
-            <span className="text-gradient-animate">Redesigned.</span>
+            <span className="text-gradient-animate">
+              Precision for Students.
+            </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-2">
             Maniesta Suite provides elegant, intuitive calculators for students.
-            GPA, CGPA, conversions, and more — all in one premium platform.
+            GPA, CGPA, conversions, live currency, and a personal dashboard —
+            all in one premium platform.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-4">
-            <Link to="/gpa" className="btn-primary text-lg px-8 py-4">
-              Start calculating →
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+            <Link
+              to="/dashboard"
+              className="btn-primary text-base sm:text-lg px-6 py-3 sm:px-8 sm:py-4 w-full sm:w-auto"
+            >
+              Go to Dashboard →
             </Link>
-            <a href="#features" className="btn-secondary text-lg px-8 py-4">
-              Explore tools
-            </a>
+            <Link
+              to="/gpa"
+              className="btn-secondary text-base sm:text-lg px-6 py-3 sm:px-8 sm:py-4 w-full sm:w-auto"
+            >
+              Try GPA Calculator
+            </Link>
           </div>
 
-          {/* Premium stats counter */}
-          <div className="mt-16 grid grid-cols-3 gap-4 md:gap-6 max-w-3xl mx-auto">
+          {/* Stats counters */}
+          <div className="mt-12 sm:mt-16 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6 max-w-3xl mx-auto">
             {statsData.map((stat) => (
               <AnimatedCounter
                 key={stat.label}
@@ -211,80 +325,150 @@ export default function Home() {
               />
             ))}
           </div>
+
+          <ActivityInsightPanel
+            lastGPA={lastGPA}
+            lastCurrency={lastCurrency}
+            lastExport={lastExport}
+          />
         </motion.div>
       </section>
 
+      {/* Quick Access Strip */}
+      <QuickAccessStrip
+        lastGPA={lastGPA}
+        lastCurrency={lastCurrency}
+        lastExport={lastExport}
+      />
+
+      {/* SEO Content Preview */}
+      <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
+        <div className="text-center mb-8 p-4 sm:p-6 glass rounded-2xl">
+          <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+            Academic Tools Quick Guide
+          </h3>
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 sm:gap-x-6 text-xs sm:text-sm">
+            <Link
+              to="/gpa-guide"
+              className="text-brand-500 hover:underline inline-flex items-center gap-1"
+            >
+              <GraduationIcon className="w-4 h-4" /> What is GPA?
+            </Link>
+            <Link
+              to="/cgpa-vs-gpa"
+              className="text-brand-500 hover:underline inline-flex items-center gap-1"
+            >
+              <ChartIcon className="w-4 h-4" /> What is CGPA?
+            </Link>
+            <Link
+              to="/export-guide"
+              className="text-brand-500 hover:underline inline-flex items-center gap-1"
+            >
+              <DocumentIcon className="w-4 h-4" /> Why export reports?
+            </Link>
+            <Link
+              to="/how-it-works"
+              className="text-brand-500 hover:underline inline-flex items-center gap-1"
+            >
+              <CurrencyIcon className="w-4 h-4" /> Currency converter for
+              students abroad
+            </Link>
+          </div>
+          <p className="text-gray-500 dark:text-gray-400 text-xs mt-3">
+            Quick answers – learn how to boost your academic performance
+          </p>
+        </div>
+      </div>
+
       {/* Features Grid */}
-      <section id="features" className="container mx-auto px-4">
+      <section id="features" className="container mx-auto px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-10 sm:mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
             Everything a student needs
           </h2>
-          <p className="text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-            Seven powerful tools in one unified experience.
+          <p className="text-sm sm:text-base md:text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
+            Eight powerful tools + a smart dashboard in one unified experience.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {tools.map((tool, i) => (
-            <motion.div
-              key={tool.name}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <Link
-                to={tool.path}
-                className="glass-card group relative overflow-hidden p-6 h-full block"
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
+          {memoizedTools.map((tool, i) => {
+            const isFavorited = favoriteTools.includes(
+              tool.path.replace("/", ""),
+            );
+            const isRecent = recentToolPath === tool.path;
+            return (
+              <motion.div
+                key={tool.name}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ delay: i * 0.05 }}
               >
-                {/* Gradient glow on hover */}
-                <div
-                  className={`absolute inset-0 bg-gradient-to-br ${tool.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none`}
-                />
-                <div className="relative z-10">
+                <Link
+                  to={tool.path}
+                  className="glass-card group relative overflow-hidden p-4 sm:p-6 h-full block"
+                >
                   <div
-                    className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${tool.gradient} p-3 text-white mb-5 group-hover:scale-110 transition-transform duration-300`}
-                  >
-                    {tool.icon}
+                    className={`absolute inset-0 bg-gradient-to-br ${tool.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none`}
+                  />
+                  <div className="relative z-10">
+                    {isRecent && (
+                      <span className="absolute -top-2 -right-2 bg-brand-500 text-white text-xs px-2 py-0.5 rounded-full shadow-lg z-20 inline-flex items-center gap-1">
+                        Continue <ArrowRightIcon className="w-3 h-3" />
+                      </span>
+                    )}
+                    {isFavorited && (
+                      <span className="absolute top-0 left-0 text-yellow-400 z-20">
+                        <StarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </span>
+                    )}
+                    <div
+                      className={`w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${tool.gradient} p-2 sm:p-3 text-white mb-3 sm:mb-5 group-hover:scale-110 transition-transform duration-300`}
+                    >
+                      <tool.Icon className="w-full h-full" />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2 text-gray-900 dark:text-white group-hover:text-brand-500 transition-colors">
+                      {tool.name}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                      {tool.desc}
+                    </p>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white group-hover:text-brand-500 transition-colors">
-                    {tool.name}
-                  </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {tool.desc}
-                  </p>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+                </Link>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="container mx-auto px-4 max-w-4xl pb-20">
+      <section className="container mx-auto px-4 sm:px-6 max-w-4xl pb-16 sm:pb-20">
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="glass-card p-10 md:p-16 text-center relative overflow-hidden"
+          className="glass-card p-6 sm:p-10 md:p-16 text-center relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-mesh-gradient opacity-30" />
           <div className="relative z-10">
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
+            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
               Ready to simplify your studies?
             </h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-xl mx-auto">
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 max-w-xl mx-auto">
               Join thousands of students who trust Maniesta Suite for accurate,
-              fast academic calculations.
+              fast academic calculations and a personalised dashboard.
             </p>
-            <Link to="/gpa" className="btn-primary text-lg px-10 py-4">
-              Get started for free
+            <Link
+              to="/dashboard"
+              className="btn-primary text-base sm:text-lg px-6 py-3 sm:px-10 sm:py-4 inline-flex items-center gap-2"
+            >
+              Launch Dashboard <RocketIcon className="w-4 h-4 sm:w-5 sm:h-5" />
             </Link>
           </div>
         </motion.div>

@@ -5,6 +5,7 @@ import { GRADES, SCALES } from "../../utils/grades";
 import { generatePDFBlob, generateCSVBlob } from "../../utils/exportHelpers";
 import { logEvent } from "../../services/firebase";
 import { trackExport } from "../../services/exportTracker";
+import { useDashboard } from "../../contexts/DashboardProvider"; 
 import CourseCard from "./CourseCard";
 import ResultCard from "./ResultCard";
 import { GradeProgressBar, TargetGPACalculator } from "./GradeExtras";
@@ -16,6 +17,8 @@ const useGradeScale = (scale) =>
   useMemo(() => SCALES[scale] || GRADES, [scale]);
 
 export default function GPACalculator({ scale, darkMode }) {
+  const { saveGPA } = useDashboard(); 
+
   const {
     courses,
     addCourse,
@@ -54,6 +57,17 @@ export default function GPACalculator({ scale, darkMode }) {
       setCalculating(false);
     });
   }, [calculate, scale, courses.length]);
+
+  // 👇 Save GPA to dashboard whenever result changes
+  useEffect(() => {
+    if (result) {
+      saveGPA({
+        gpa: result.gpa,
+        credits: result.credits,
+        timestamp: Date.now(),
+      });
+    }
+  }, [result, saveGPA]);
 
   useEffect(() => {
     if (result && result.gpa >= 3.5) {
@@ -116,7 +130,6 @@ export default function GPACalculator({ scale, darkMode }) {
             screenHeight: window.screen.height,
           },
         }).catch((err) => {
-          // Non‑critical failure: show toast but don't block downloads
           console.error("Firestore save failed (non‑blocking):", err);
           setToast({
             message: "Report saved locally but cloud backup failed.",
