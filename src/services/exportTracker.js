@@ -35,7 +35,7 @@ export async function trackExport(data) {
     studentName = '',
     studentId = '',
     university = '',
-    degree = '',               // ✅ Added degree field
+    degree = '',              
     semester = '',
     scale = '4.0',
     gpa = 0,
@@ -55,7 +55,7 @@ export async function trackExport(data) {
           studentName,
           studentId,
           university,
-          degree,               // ✅ Saved to Firestore
+          degree,               
           semester,
           scale,
           gpa,
