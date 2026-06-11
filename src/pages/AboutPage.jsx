@@ -1,27 +1,64 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import AboutSection from "../components/about/AboutSection";
 import SEO from "../components/SEO";
 
+/**
+ * Local hook to detect the user’s motion preference.
+ * (Can be extracted to a shared utility later.)
+ */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
+
 export default function AboutPage() {
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  // Conditional motion props – empty when reduced motion is preferred
+  const containerMotion = prefersReducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0 },
+        animate: { opacity: 1 },
+        transition: { duration: 0.4 },
+      };
+
+  const headingMotion = prefersReducedMotion
+    ? {}
+    : {
+        initial: { y: -20, opacity: 0 },
+        animate: { y: 0, opacity: 1 },
+      };
+
+  const cardMotion = prefersReducedMotion
+    ? {}
+    : {
+        initial: { y: 30, opacity: 0 },
+        animate: { y: 0, opacity: 1 },
+        transition: { delay: 0.2 },
+      };
+
   return (
     <>
       <SEO
         title="About Maniesta Suite"
         description="Learn about Maniesta Suite – our mission, vision, and the story behind the platform. Free academic tools for students worldwide."
-        keywords={["about", "academic tools", "student platform", "GPA calculator", "CGPA calculator", "Maniesta Suite"]}
+        keywords="about, academic tools, student platform, GPA calculator, CGPA calculator, Maniesta Suite"
         canonicalUrl="https://maniestasuite.netlify.app/about"
       />
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
-        className="max-w-5xl mx-auto space-y-8"
-      >
+      <motion.div {...containerMotion} className="max-w-5xl mx-auto space-y-8">
         {/* Page Header */}
         <div className="text-center space-y-3">
           <motion.h1
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            {...headingMotion}
             className="text-4xl md:text-5xl font-extrabold text-gradient"
           >
             About Maniesta Suite
@@ -33,9 +70,7 @@ export default function AboutPage() {
 
         {/* About Content Card */}
         <motion.div
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
+          {...cardMotion}
           className="glass-card p-6 md:p-8 rounded-3xl border border-white/20 dark:border-white/10 shadow-glass-lg"
         >
           <AboutSection />

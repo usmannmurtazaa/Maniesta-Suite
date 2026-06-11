@@ -15,6 +15,21 @@ import {
   ArrowRightIcon,
 } from "../components/icons";
 
+// -------------------------------------------------------------------
+// Utility hook: detect reduced motion preference
+// -------------------------------------------------------------------
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
+
 // ----- Tool definitions (icon components used inside the card) -----
 const tools = [
   {
@@ -81,8 +96,8 @@ const statsData = [
   { label: "Students", target: 50000 },
 ];
 
-// AnimatedCounter (unchanged, already pure)
-function AnimatedCounter({ target, label }) {
+// AnimatedCounter now respects reduced motion
+function AnimatedCounter({ target, label, reducedMotion }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const spring = useSpring(0, { stiffness: 80, damping: 20 });
@@ -90,13 +105,36 @@ function AnimatedCounter({ target, label }) {
 
   useEffect(() => {
     if (isInView) {
-      spring.set(target);
-      const unsubscribe = spring.on("change", (latest) => {
-        setDisplayValue(Math.round(latest));
-      });
-      return unsubscribe;
+      if (reducedMotion) {
+        setDisplayValue(target); // no spring animation
+      } else {
+        spring.set(target);
+        const unsubscribe = spring.on("change", (latest) => {
+          setDisplayValue(Math.round(latest));
+        });
+        return unsubscribe;
+      }
     }
-  }, [isInView, target, spring]);
+  }, [isInView, target, spring, reducedMotion]);
+
+  const formattedValue =
+    label === "Students"
+      ? `${(displayValue / 1000).toFixed(0)}k+`
+      : displayValue;
+
+  if (reducedMotion) {
+    // Static card without motion
+    return (
+      <div ref={ref} className="glass-card p-4 sm:p-6 text-center">
+        <div className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gradient mb-2">
+          {formattedValue}
+        </div>
+        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">
+          {label}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -108,9 +146,7 @@ function AnimatedCounter({ target, label }) {
       className="glass-card p-4 sm:p-6 text-center"
     >
       <div className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gradient mb-2">
-        {label === "Students"
-          ? `${(displayValue / 1000).toFixed(0)}k+`
-          : displayValue}
+        {formattedValue}
       </div>
       <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 font-medium">
         {label}
@@ -119,7 +155,7 @@ function AnimatedCounter({ target, label }) {
   );
 }
 
-// ========== localStorage helper hook (unchanged) ==========
+// ========== localStorage helper hook (optimized) ==========
 const STORAGE_KEYS = {
   RECENT_ACTIONS: "maniesta_recent_actions",
   LAST_GPA: "maniesta_last_gpa",
@@ -129,38 +165,49 @@ const STORAGE_KEYS = {
 };
 
 function useUserActivity() {
-  const [lastGPA, setLastGPA] = useState(null);
-  const [lastCurrency, setLastCurrency] = useState(null);
-  const [lastExport, setLastExport] = useState(null);
-  const [favoriteTools, setFavoriteTools] = useState([]);
-  const [recentActions, setRecentActions] = useState([]);
+  const [activity, setActivity] = useState({
+    lastGPA: null,
+    lastCurrency: null,
+    lastExport: null,
+    favoriteTools: [],
+    recentActions: [],
+  });
 
   useEffect(() => {
     const handleStorageUpdate = () => {
-      setLastGPA(
-        JSON.parse(localStorage.getItem(STORAGE_KEYS.LAST_GPA) || "null"),
+      const lastGPA = JSON.parse(
+        localStorage.getItem(STORAGE_KEYS.LAST_GPA) || "null",
       );
-      setLastCurrency(
-        JSON.parse(localStorage.getItem(STORAGE_KEYS.LAST_CURRENCY) || "null"),
+      const lastCurrency = JSON.parse(
+        localStorage.getItem(STORAGE_KEYS.LAST_CURRENCY) || "null",
       );
       const exports = JSON.parse(
         localStorage.getItem(STORAGE_KEYS.EXPORT_HISTORY) || "[]",
       );
-      setLastExport(exports[0] || null);
-      setFavoriteTools(
-        JSON.parse(localStorage.getItem(STORAGE_KEYS.FAVORITE_TOOLS) || "[]"),
+      const lastExport = exports[0] || null;
+      const favoriteTools = JSON.parse(
+        localStorage.getItem(STORAGE_KEYS.FAVORITE_TOOLS) || "[]",
       );
-      setRecentActions(
-        JSON.parse(localStorage.getItem(STORAGE_KEYS.RECENT_ACTIONS) || "[]"),
+      const recentActions = JSON.parse(
+        localStorage.getItem(STORAGE_KEYS.RECENT_ACTIONS) || "[]",
       );
+      // Single state update to avoid cascading re-renders
+      setActivity({
+        lastGPA,
+        lastCurrency,
+        lastExport,
+        favoriteTools,
+        recentActions,
+      });
     };
+
     handleStorageUpdate();
     window.addEventListener("storage-update", handleStorageUpdate);
     return () =>
       window.removeEventListener("storage-update", handleStorageUpdate);
   }, []);
 
-  return { lastGPA, lastCurrency, lastExport, favoriteTools, recentActions };
+  return { ...activity };
 }
 
 // ========== Activity Insight Panel (no emojis) ==========
@@ -230,9 +277,9 @@ function QuickAccessStrip({ lastGPA, lastCurrency, lastExport }) {
   return (
     <div className="container mx-auto px-4 my-6 sm:my-8">
       <div className="glass p-2 sm:p-3 rounded-full overflow-x-auto flex gap-2 items-center whitespace-nowrap scrollbar-hide">
-        {items.map((item, idx) => (
+        {items.map((item) => (
           <Link
-            key={idx}
+            key={`${item.link}-${item.label}`}
             to={item.link}
             className="glass inline-flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm hover:bg-white/20 transition-colors"
           >
@@ -248,6 +295,7 @@ function QuickAccessStrip({ lastGPA, lastCurrency, lastExport }) {
 export default function Home() {
   const { lastGPA, lastCurrency, lastExport, favoriteTools, recentActions } =
     useUserActivity();
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const recentToolPath = (() => {
     const action = recentActions.find(
@@ -260,6 +308,36 @@ export default function Home() {
 
   const memoizedTools = useMemo(() => tools, []);
 
+  // Motion props that respect reduced motion
+  const heroMotion = prefersReducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 40 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.7, ease: "easeOut" },
+      };
+  const badgeMotion = prefersReducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 20 },
+        animate: { opacity: 1, y: 0 },
+        transition: { delay: 0.2 },
+      };
+  const featuresHeadingMotion = prefersReducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0 },
+        whileInView: { opacity: 1 },
+        viewport: { once: true },
+      };
+  const finalCTAMotion = prefersReducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, scale: 0.95 },
+        whileInView: { opacity: 1, scale: 1 },
+        viewport: { once: true },
+      };
+
   return (
     <div className="space-y-24 sm:space-y-28 lg:space-y-32">
       {/* Hero Section */}
@@ -271,15 +349,11 @@ export default function Home() {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: "easeOut" }}
+          {...heroMotion}
           className="container mx-auto px-4 sm:px-6 max-w-5xl text-center relative"
         >
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            {...badgeMotion}
             className="inline-flex items-center gap-2 glass rounded-full px-4 py-1.5 sm:px-5 sm:py-2 mb-6 sm:mb-8 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300"
           >
             <SparkleIcon className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400" />
@@ -322,6 +396,7 @@ export default function Home() {
                 key={stat.label}
                 target={stat.target}
                 label={stat.label}
+                reducedMotion={prefersReducedMotion}
               />
             ))}
           </div>
@@ -383,9 +458,7 @@ export default function Home() {
       {/* Features Grid */}
       <section id="features" className="container mx-auto px-4 sm:px-6">
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          {...featuresHeadingMotion}
           className="text-center mb-10 sm:mb-16"
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
@@ -402,14 +475,18 @@ export default function Home() {
               tool.path.replace("/", ""),
             );
             const isRecent = recentToolPath === tool.path;
+
+            const cardMotion = prefersReducedMotion
+              ? {}
+              : {
+                  initial: { opacity: 0, y: 40 },
+                  whileInView: { opacity: 1, y: 0 },
+                  viewport: { once: true, margin: "-50px" },
+                  transition: { delay: i * 0.05 },
+                };
+
             return (
-              <motion.div
-                key={tool.name}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ delay: i * 0.05 }}
-              >
+              <motion.div key={tool.name} {...cardMotion}>
                 <Link
                   to={tool.path}
                   className="glass-card group relative overflow-hidden p-4 sm:p-6 h-full block"
@@ -450,9 +527,7 @@ export default function Home() {
       {/* Final CTA */}
       <section className="container mx-auto px-4 sm:px-6 max-w-4xl pb-16 sm:pb-20">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
+          {...finalCTAMotion}
           className="glass-card p-6 sm:p-10 md:p-16 text-center relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-mesh-gradient opacity-30" />

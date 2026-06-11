@@ -1,7 +1,23 @@
 // file: src/components/about/AboutSection.jsx
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
+
+// -------------------------------------------------------------------
+// Local hook: detect reduced motion preference
+// (Can be extracted to a shared utility later.)
+// -------------------------------------------------------------------
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
 
 // Professional SVG Icons (replacing emojis)
 const AccuracyIcon = () => (
@@ -122,7 +138,7 @@ const whyPoints = [
   {
     title: "Always Free",
     desc: "No paywalls, no ads, no limits. Built for students, forever free.",
-    link: "/",
+    link: null, // FIXED: was "/" – now no misleading link
   },
   {
     title: "Modern Tech",
@@ -147,14 +163,22 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 },
 };
 
-function ScrollReveal({ children, className }) {
+/**
+ * ScrollReveal wrapper – respects reduced motion
+ */
+function ScrollReveal({ children, className, reducedMotion }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  if (reducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, y: 30 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 1, y: 0 }} // intentionally simple – both branches identical, clean now
       transition={{ duration: 0.5, ease: "easeOut" }}
       className={className}
     >
@@ -164,10 +188,17 @@ function ScrollReveal({ children, className }) {
 }
 
 export default function AboutSection() {
+  const reducedMotion = usePrefersReducedMotion();
+
+  // Dynamic classes that depend on motion preference
+  const hoverTranslateClass = reducedMotion ? "" : "hover:-translate-y-1";
+  const hoverScaleClass = reducedMotion ? "" : "group-hover:scale-125";
+  const transitionClass = "transition-all"; // keep transition for colors/opacity maybe, but we can leave as is
+
   return (
     <div className="space-y-16">
       {/* Story & Founder */}
-      <ScrollReveal>
+      <ScrollReveal reducedMotion={reducedMotion}>
         <div className="grid md:grid-cols-2 gap-8">
           <div className="glass-card p-6 md:p-8 break-words">
             <h2 className="text-2xl font-bold mb-4 text-gradient">Our Story</h2>
@@ -208,6 +239,7 @@ export default function AboutSection() {
             </div>
             {/* Social Links Row */}
             <div className="flex gap-3 text-gray-500 dark:text-gray-400">
+              {/* Placeholder links – replace with real profiles */}
               <a
                 href="https://github.com"
                 target="_blank"
@@ -258,7 +290,7 @@ export default function AboutSection() {
         </div>
       </ScrollReveal>
 
-      <ScrollReveal>
+      <ScrollReveal reducedMotion={reducedMotion}>
         <div className="glass-card p-6 md:p-8 text-center break-words">
           <h2 className="text-2xl font-bold mb-4 text-gradient">Our Vision</h2>
           <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
@@ -269,85 +301,143 @@ export default function AboutSection() {
         </div>
       </ScrollReveal>
 
-      {/* Why Maniesta Suite – with staggerChildren and internal links */}
-      <ScrollReveal>
+      {/* Why Maniesta Suite – with staggerChildren (only if motion allowed) */}
+      <ScrollReveal reducedMotion={reducedMotion}>
         <div className="glass-card p-6 md:p-8 break-words">
           <h2 className="text-2xl font-bold mb-6 text-gradient text-center">
             Why Maniesta Suite?
           </h2>
-          <motion.div
-            className="grid sm:grid-cols-2 gap-5"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-          >
-            {whyPoints.map((point) => {
-              const content = (
-                <div className="flex gap-3">
-                  <span className="shrink-0 mt-0.5" aria-hidden="true">
-                    <SparkleIcon />
-                  </span>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      {point.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {point.desc}
-                    </p>
+
+          {reducedMotion ? (
+            <div className="grid sm:grid-cols-2 gap-5">
+              {whyPoints.map((point) => {
+                const content = (
+                  <div className="flex gap-3">
+                    <span className="shrink-0 mt-0.5" aria-hidden="true">
+                      <SparkleIcon />
+                    </span>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                        {point.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {point.desc}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              );
-              return point.link ? (
-                <motion.div key={point.title} variants={itemVariants}>
+                );
+                return point.link ? (
                   <Link
+                    key={point.title}
                     to={point.link}
                     className="block hover:opacity-80 transition-opacity"
                   >
                     {content}
                   </Link>
-                </motion.div>
-              ) : (
-                <motion.div key={point.title} variants={itemVariants}>
-                  {content}
-                </motion.div>
-              );
-            })}
-          </motion.div>
+                ) : (
+                  <div key={point.title}>{content}</div>
+                );
+              })}
+            </div>
+          ) : (
+            <motion.div
+              className="grid sm:grid-cols-2 gap-5"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+            >
+              {whyPoints.map((point) => {
+                const content = (
+                  <div className="flex gap-3">
+                    <span className="shrink-0 mt-0.5" aria-hidden="true">
+                      <SparkleIcon />
+                    </span>
+                    <div>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                        {point.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {point.desc}
+                      </p>
+                    </div>
+                  </div>
+                );
+                return point.link ? (
+                  <motion.div key={point.title} variants={itemVariants}>
+                    <Link
+                      to={point.link}
+                      className="block hover:opacity-80 transition-opacity"
+                    >
+                      {content}
+                    </Link>
+                  </motion.div>
+                ) : (
+                  <motion.div key={point.title} variants={itemVariants}>
+                    {content}
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          )}
         </div>
       </ScrollReveal>
 
-      {/* Core Values – with staggerChildren */}
-      <ScrollReveal>
+      {/* Core Values – with staggerChildren (only if motion allowed) */}
+      <ScrollReveal reducedMotion={reducedMotion}>
         <div>
           <h2 className="text-2xl font-bold mb-6 text-gradient text-center">
             Our Values
           </h2>
-          <motion.div
-            className="grid sm:grid-cols-2 gap-5"
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-          >
-            {values.map((item) => (
-              <motion.div
-                key={item.title}
-                variants={itemVariants}
-                className="glass-card p-5 flex gap-4 group hover:shadow-glass-lg hover:-translate-y-1 transition-all break-words"
-              >
-                <span className="shrink-0 transform group-hover:scale-125 transition-transform duration-300 text-gray-800 dark:text-gray-200">
-                  {item.icon}
-                </span>
-                <div>
-                  <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {item.desc}
-                  </p>
+
+          {reducedMotion ? (
+            <div className="grid sm:grid-cols-2 gap-5">
+              {values.map((item) => (
+                <div
+                  key={item.title}
+                  className={`glass-card p-5 flex gap-4 group break-words ${transitionClass}`}
+                >
+                  <span className="shrink-0 text-gray-800 dark:text-gray-200">
+                    {item.icon}
+                  </span>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {item.desc}
+                    </p>
+                  </div>
                 </div>
-              </motion.div>
-            ))}
-          </motion.div>
+              ))}
+            </div>
+          ) : (
+            <motion.div
+              className="grid sm:grid-cols-2 gap-5"
+              variants={containerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-80px" }}
+            >
+              {values.map((item) => (
+                <motion.div
+                  key={item.title}
+                  variants={itemVariants}
+                  className={`glass-card p-5 flex gap-4 group ${hoverTranslateClass} ${transitionClass} break-words`}
+                >
+                  <span
+                    className={`shrink-0 transform ${hoverScaleClass} transition-transform duration-300 text-gray-800 dark:text-gray-200`}
+                  >
+                    {item.icon}
+                  </span>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {item.desc}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
         </div>
       </ScrollReveal>
     </div>

@@ -39,6 +39,21 @@ const ErrorIcon = () => (
   </svg>
 );
 
+/**
+ * Local hook: detect reduced motion preference
+ */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
+
 export default function ContactForm() {
   const [form, setForm] = useState({
     name: "",
@@ -51,11 +66,16 @@ export default function ContactForm() {
   const [errors, setErrors] = useState({});
   const nameInputRef = useRef(null);
   const statusLiveRef = useRef(null);
+  const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
     if (status.type === "success") {
       const timer = setTimeout(() => {
         setStatus({ type: "", message: "" });
+        // Clear the live region when the status message disappears
+        if (statusLiveRef.current) {
+          statusLiveRef.current.textContent = "";
+        }
       }, SUCCESS_MESSAGE_DURATION);
       return () => clearTimeout(timer);
     }
@@ -115,6 +135,25 @@ export default function ContactForm() {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
+  // Helper to render error messages – plain span if reduced motion
+  const renderError = (field, message) => {
+    if (!message) return null;
+    return reducedMotion ? (
+      <span id={`${field}-error`} className="text-red-500 text-xs">
+        {message}
+      </span>
+    ) : (
+      <motion.span
+        id={`${field}-error`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-red-500 text-xs"
+      >
+        {message}
+      </motion.span>
+    );
+  };
+
   return (
     <div className="relative">
       {/* Live region for screen reader announcements */}
@@ -127,211 +166,204 @@ export default function ContactForm() {
 
       {/* Decorative floating blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          className="absolute -top-20 -right-20 w-72 h-72 bg-brand-500/20 rounded-full blur-3xl"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          className="absolute -bottom-10 -left-10 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl"
-          animate={{ scale: [1.1, 0.9, 1.1], opacity: [0.2, 0.4, 0.2] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        />
+        {reducedMotion ? (
+          <>
+            <div className="absolute -top-20 -right-20 w-72 h-72 bg-brand-500/20 rounded-full blur-3xl" />
+            <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl" />
+          </>
+        ) : (
+          <>
+            <motion.div
+              className="absolute -top-20 -right-20 w-72 h-72 bg-brand-500/20 rounded-full blur-3xl"
+              animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute -bottom-10 -left-10 w-64 h-64 bg-purple-500/20 rounded-full blur-3xl"
+              animate={{ scale: [1.1, 0.9, 1.1], opacity: [0.2, 0.4, 0.2] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            />
+          </>
+        )}
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="glass-card p-8 md:p-12 relative z-10 break-words"
-      >
-        <h2 className="text-3xl font-bold text-gradient mb-6">Get in Touch</h2>
-        <p className="text-gray-600 dark:text-gray-400 mb-8">
-          Have a question or feedback? Fill out the form and we’ll get back to
-          you within 24 hours. You can also use our{" "}
-          <a href="#" className="text-brand-500 hover:underline">
-            AI Chat Assistant
-          </a>{" "}
-          for instant help with our calculators.
-        </p>
+      {reducedMotion ? (
+        <div className="glass-card p-8 md:p-12 relative z-10 break-words">
+          {/* static card content – same as below, no motion */}
+          <h2 className="text-3xl font-bold text-gradient mb-6">
+            Get in Touch
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            Have a question or feedback? Fill out the form and we’ll get back to
+            you within 24 hours. You can also use the{" "}
+            <span className="font-medium text-brand-500">
+              AI Chat Assistant
+            </span>{" "}
+            (via the chat button) for instant help with our calculators.
+          </p>
 
-        <form onSubmit={handleSubmit} noValidate className="space-y-6">
-          {/* Name */}
-          <div className="relative">
-            <input
-              ref={nameInputRef}
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              className={`peer w-full bg-transparent border-b-2 pb-2 pt-4 text-lg outline-none transition-colors ${
-                errors.name
-                  ? "border-red-500"
-                  : "border-gray-200 dark:border-gray-700 focus:border-brand-500"
-              }`}
-              placeholder=" "
-              required
-              aria-label="Full name"
-              aria-invalid={!!errors.name}
-              aria-describedby={errors.name ? "name-error" : undefined}
-              disabled={loading}
-            />
-            <label className="absolute left-0 top-1 text-sm text-gray-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500">
-              Full name *
-            </label>
-            {errors.name && (
-              <motion.span
-                id="name-error"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-red-500 text-xs"
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
+            {/* Name */}
+            <div className="relative">
+              <input
+                ref={nameInputRef}
+                id="contact-name"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                className={`peer w-full bg-transparent border-b-2 pb-2 pt-4 text-lg outline-none transition-colors ${
+                  errors.name
+                    ? "border-red-500"
+                    : "border-gray-200 dark:border-gray-700 focus:border-brand-500"
+                }`}
+                placeholder=" "
+                required
+                aria-label="Full name"
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? "name-error" : undefined}
+                disabled={loading}
+              />
+              <label
+                htmlFor="contact-name"
+                className="absolute left-0 top-1 text-sm text-gray-400 dark:text-gray-500 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500"
               >
-                {errors.name}
-              </motion.span>
-            )}
-          </div>
-
-          {/* Email */}
-          <div className="relative">
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              className={`peer w-full bg-transparent border-b-2 pb-2 pt-4 text-lg outline-none transition-colors ${
-                errors.email
-                  ? "border-red-500"
-                  : "border-gray-200 dark:border-gray-700 focus:border-brand-500"
-              }`}
-              placeholder=" "
-              required
-              aria-label="Email address"
-              aria-invalid={!!errors.email}
-              aria-describedby={errors.email ? "email-error" : undefined}
-              disabled={loading}
-            />
-            <label className="absolute left-0 top-1 text-sm text-gray-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500">
-              Email address *
-            </label>
-            {errors.email && (
-              <motion.span
-                id="email-error"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-red-500 text-xs"
-              >
-                {errors.email}
-              </motion.span>
-            )}
-          </div>
-
-          {/* Subject */}
-          <div className="relative">
-            <input
-              name="subject"
-              value={form.subject}
-              onChange={handleChange}
-              className={`peer w-full bg-transparent border-b-2 pb-2 pt-4 text-lg outline-none transition-colors ${
-                errors.subject
-                  ? "border-red-500"
-                  : "border-gray-200 dark:border-gray-700 focus:border-brand-500"
-              }`}
-              placeholder=" "
-              required
-              aria-label="Subject"
-              aria-invalid={!!errors.subject}
-              aria-describedby={errors.subject ? "subject-error" : undefined}
-              disabled={loading}
-            />
-            <label className="absolute left-0 top-1 text-sm text-gray-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500">
-              Subject *
-            </label>
-            {errors.subject && (
-              <motion.span
-                id="subject-error"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-red-500 text-xs"
-              >
-                {errors.subject}
-              </motion.span>
-            )}
-          </div>
-
-          {/* Message */}
-          <div className="relative">
-            <textarea
-              name="message"
-              rows="4"
-              value={form.message}
-              onChange={handleChange}
-              maxLength={MAX_MESSAGE_LENGTH}
-              className={`peer w-full bg-transparent border-b-2 pb-2 pt-4 text-lg outline-none transition-colors resize-none ${
-                errors.message
-                  ? "border-red-500"
-                  : "border-gray-200 dark:border-gray-700 focus:border-brand-500"
-              }`}
-              placeholder=" "
-              required
-              aria-label="Message"
-              aria-invalid={!!errors.message}
-              aria-describedby={errors.message ? "message-error" : undefined}
-              disabled={loading}
-            />
-            <label className="absolute left-0 top-1 text-sm text-gray-400 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500">
-              Message *
-            </label>
-            <div className="flex justify-between text-xs text-gray-400 mt-1">
-              {errors.message ? (
-                <span id="message-error" className="text-red-500">
-                  {errors.message}
-                </span>
-              ) : (
-                <span>Min. 10 characters</span>
-              )}
-              <span>
-                {form.message.length}/{MAX_MESSAGE_LENGTH}
-              </span>
+                Full name *
+              </label>
+              {renderError("name", errors.name)}
             </div>
-          </div>
 
-          {/* Submit button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary w-full py-3 text-lg flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
-          >
-            {loading ? (
-              <>
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                  />
-                </svg>
-                Sending...
-              </>
-            ) : (
-              "Send message"
-            )}
-          </button>
+            {/* Email */}
+            <div className="relative">
+              <input
+                type="email"
+                id="contact-email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                className={`peer w-full bg-transparent border-b-2 pb-2 pt-4 text-lg outline-none transition-colors ${
+                  errors.email
+                    ? "border-red-500"
+                    : "border-gray-200 dark:border-gray-700 focus:border-brand-500"
+                }`}
+                placeholder=" "
+                required
+                aria-label="Email address"
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
+                disabled={loading}
+              />
+              <label
+                htmlFor="contact-email"
+                className="absolute left-0 top-1 text-sm text-gray-400 dark:text-gray-500 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500"
+              >
+                Email address *
+              </label>
+              {renderError("email", errors.email)}
+            </div>
 
-          {/* Status message */}
-          <AnimatePresence>
+            {/* Subject */}
+            <div className="relative">
+              <input
+                id="contact-subject"
+                name="subject"
+                value={form.subject}
+                onChange={handleChange}
+                className={`peer w-full bg-transparent border-b-2 pb-2 pt-4 text-lg outline-none transition-colors ${
+                  errors.subject
+                    ? "border-red-500"
+                    : "border-gray-200 dark:border-gray-700 focus:border-brand-500"
+                }`}
+                placeholder=" "
+                required
+                aria-label="Subject"
+                aria-invalid={!!errors.subject}
+                aria-describedby={errors.subject ? "subject-error" : undefined}
+                disabled={loading}
+              />
+              <label
+                htmlFor="contact-subject"
+                className="absolute left-0 top-1 text-sm text-gray-400 dark:text-gray-500 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500"
+              >
+                Subject *
+              </label>
+              {renderError("subject", errors.subject)}
+            </div>
+
+            {/* Message */}
+            <div className="relative">
+              <textarea
+                id="contact-message"
+                name="message"
+                rows="4"
+                value={form.message}
+                onChange={handleChange}
+                maxLength={MAX_MESSAGE_LENGTH}
+                className={`peer w-full bg-transparent border-b-2 pb-2 pt-4 text-lg outline-none transition-colors resize-none ${
+                  errors.message
+                    ? "border-red-500"
+                    : "border-gray-200 dark:border-gray-700 focus:border-brand-500"
+                }`}
+                placeholder=" "
+                required
+                aria-label="Message"
+                aria-invalid={!!errors.message}
+                aria-describedby={errors.message ? "message-error" : undefined}
+                disabled={loading}
+              />
+              <label
+                htmlFor="contact-message"
+                className="absolute left-0 top-1 text-sm text-gray-400 dark:text-gray-500 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500"
+              >
+                Message *
+              </label>
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                {errors.message ? (
+                  <span id="message-error" className="text-red-500">
+                    {errors.message}
+                  </span>
+                ) : (
+                  <span>Min. 10 characters</span>
+                )}
+                <span>
+                  {form.message.length}/{MAX_MESSAGE_LENGTH}
+                </span>
+              </div>
+            </div>
+
+            {/* Submit button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full py-3 text-lg flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+            >
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
+                  </svg>
+                  Sending...
+                </>
+              ) : (
+                "Send message"
+              )}
+            </button>
+
+            {/* Status message – static if reducedMotion */}
             {status.message && (
-              <motion.div
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
+              <div
                 className={`flex items-center gap-2 text-sm p-3 rounded-lg ${
                   status.type === "success"
                     ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20"
@@ -341,11 +373,210 @@ export default function ContactForm() {
               >
                 {status.type === "success" ? <SuccessIcon /> : <ErrorIcon />}
                 <span>{status.message}</span>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
-        </form>
-      </motion.div>
+          </form>
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="glass-card p-8 md:p-12 relative z-10 break-words"
+        >
+          <h2 className="text-3xl font-bold text-gradient mb-6">
+            Get in Touch
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            Have a question or feedback? Fill out the form and we’ll get back to
+            you within 24 hours. You can also use the{" "}
+            <span className="font-medium text-brand-500">
+              AI Chat Assistant
+            </span>{" "}
+            (via the chat button) for instant help with our calculators.
+          </p>
+
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
+            {/* Name */}
+            <div className="relative">
+              <input
+                ref={nameInputRef}
+                id="contact-name"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                className={`peer w-full bg-transparent border-b-2 pb-2 pt-4 text-lg outline-none transition-colors ${
+                  errors.name
+                    ? "border-red-500"
+                    : "border-gray-200 dark:border-gray-700 focus:border-brand-500"
+                }`}
+                placeholder=" "
+                required
+                aria-label="Full name"
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? "name-error" : undefined}
+                disabled={loading}
+              />
+              <label
+                htmlFor="contact-name"
+                className="absolute left-0 top-1 text-sm text-gray-400 dark:text-gray-500 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500"
+              >
+                Full name *
+              </label>
+              {renderError("name", errors.name)}
+            </div>
+
+            {/* Email */}
+            <div className="relative">
+              <input
+                type="email"
+                id="contact-email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                className={`peer w-full bg-transparent border-b-2 pb-2 pt-4 text-lg outline-none transition-colors ${
+                  errors.email
+                    ? "border-red-500"
+                    : "border-gray-200 dark:border-gray-700 focus:border-brand-500"
+                }`}
+                placeholder=" "
+                required
+                aria-label="Email address"
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
+                disabled={loading}
+              />
+              <label
+                htmlFor="contact-email"
+                className="absolute left-0 top-1 text-sm text-gray-400 dark:text-gray-500 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500"
+              >
+                Email address *
+              </label>
+              {renderError("email", errors.email)}
+            </div>
+
+            {/* Subject */}
+            <div className="relative">
+              <input
+                id="contact-subject"
+                name="subject"
+                value={form.subject}
+                onChange={handleChange}
+                className={`peer w-full bg-transparent border-b-2 pb-2 pt-4 text-lg outline-none transition-colors ${
+                  errors.subject
+                    ? "border-red-500"
+                    : "border-gray-200 dark:border-gray-700 focus:border-brand-500"
+                }`}
+                placeholder=" "
+                required
+                aria-label="Subject"
+                aria-invalid={!!errors.subject}
+                aria-describedby={errors.subject ? "subject-error" : undefined}
+                disabled={loading}
+              />
+              <label
+                htmlFor="contact-subject"
+                className="absolute left-0 top-1 text-sm text-gray-400 dark:text-gray-500 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500"
+              >
+                Subject *
+              </label>
+              {renderError("subject", errors.subject)}
+            </div>
+
+            {/* Message */}
+            <div className="relative">
+              <textarea
+                id="contact-message"
+                name="message"
+                rows="4"
+                value={form.message}
+                onChange={handleChange}
+                maxLength={MAX_MESSAGE_LENGTH}
+                className={`peer w-full bg-transparent border-b-2 pb-2 pt-4 text-lg outline-none transition-colors resize-none ${
+                  errors.message
+                    ? "border-red-500"
+                    : "border-gray-200 dark:border-gray-700 focus:border-brand-500"
+                }`}
+                placeholder=" "
+                required
+                aria-label="Message"
+                aria-invalid={!!errors.message}
+                aria-describedby={errors.message ? "message-error" : undefined}
+                disabled={loading}
+              />
+              <label
+                htmlFor="contact-message"
+                className="absolute left-0 top-1 text-sm text-gray-400 dark:text-gray-500 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-sm peer-focus:text-brand-500"
+              >
+                Message *
+              </label>
+              <div className="flex justify-between text-xs text-gray-400 mt-1">
+                {errors.message ? (
+                  <span id="message-error" className="text-red-500">
+                    {errors.message}
+                  </span>
+                ) : (
+                  <span>Min. 10 characters</span>
+                )}
+                <span>
+                  {form.message.length}/{MAX_MESSAGE_LENGTH}
+                </span>
+              </div>
+            </div>
+
+            {/* Submit button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary w-full py-3 text-lg flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+            >
+              {loading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                      fill="none"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
+                  </svg>
+                  Sending...
+                </>
+              ) : (
+                "Send message"
+              )}
+            </button>
+
+            {/* Status message – animated */}
+            <AnimatePresence>
+              {status.message && (
+                <motion.div
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className={`flex items-center gap-2 text-sm p-3 rounded-lg ${
+                    status.type === "success"
+                      ? "bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20"
+                      : "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20"
+                  } backdrop-blur`}
+                  role="alert"
+                >
+                  {status.type === "success" ? <SuccessIcon /> : <ErrorIcon />}
+                  <span>{status.message}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </form>
+        </motion.div>
+      )}
     </div>
   );
 }

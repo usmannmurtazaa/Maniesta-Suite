@@ -54,7 +54,9 @@ class SystemErrorBoundary extends React.Component {
               The Maniesta Suite encountered an unexpected issue. Please reload
               the application to restore your session.
             </p>
+            {/* Ensure .btn-primary has a visible :focus-visible style when .user-is-tabbing is active */}
             <button
+              type="button"
               onClick={this.handleRecovery}
               className="btn-primary w-full"
             >

@@ -1,7 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import ThemeToggle from "../common/ThemeToggle";
+
+/**
+ * Local hook to detect reduced‑motion preference.
+ * (Can be extracted to a shared utility later.)
+ */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
 
 const links = [
   { to: "/dashboard", label: "Dashboard" },
@@ -19,13 +35,24 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+  const prefersReducedMotion = usePrefersReducedMotion();
+
+  // Store previous scrolled state to avoid unnecessary re‑renders
+  const scrolledRef = useRef(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => {
+      const isScrolled = window.scrollY > 20;
+      if (isScrolled !== scrolledRef.current) {
+        scrolledRef.current = isScrolled;
+        setScrolled(isScrolled);
+      }
+    };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
@@ -55,6 +82,7 @@ export default function Header() {
               <Link
                 key={link.to}
                 to={link.to}
+                aria-current={isActive ? "page" : undefined}
                 className={`relative px-4 py-2 text-sm font-medium rounded-xl transition-all ${
                   isActive
                     ? "text-white"
@@ -84,6 +112,8 @@ export default function Header() {
             onClick={() => setMobileOpen(!mobileOpen)}
             className="glass w-10 h-10 flex items-center justify-center rounded-xl"
             aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
+            type="button"
           >
             <svg
               width="20"
@@ -110,20 +140,18 @@ export default function Header() {
       </div>
 
       {/* Mobile nav drawer */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="md:hidden overflow-hidden glass border-t border-white/20 dark:border-white/10"
-          >
+      {prefersReducedMotion ? (
+        // Static open/close – no animation
+        mobileOpen && (
+          <div className="md:hidden overflow-hidden glass border-t border-white/20 dark:border-white/10">
             <div className="container mx-auto py-4 space-y-1">
               {links.map((link) => (
                 <Link
                   key={link.to}
                   to={link.to}
+                  aria-current={
+                    location.pathname === link.to ? "page" : undefined
+                  }
                   className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${
                     location.pathname === link.to
                       ? "bg-gradient-brand text-white"
@@ -134,9 +162,40 @@ export default function Header() {
                 </Link>
               ))}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        )
+      ) : (
+        <AnimatePresence>
+          {mobileOpen && (
+            <motion.div
+              initial={{ maxHeight: 0, opacity: 0 }}
+              animate={{ maxHeight: 500, opacity: 1 }}
+              exit={{ maxHeight: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="md:hidden overflow-hidden glass border-t border-white/20 dark:border-white/10"
+            >
+              <div className="container mx-auto py-4 space-y-1">
+                {links.map((link) => (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    aria-current={
+                      location.pathname === link.to ? "page" : undefined
+                    }
+                    className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${
+                      location.pathname === link.to
+                        ? "bg-gradient-brand text-white"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-white/10"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      )}
     </header>
   );
 }

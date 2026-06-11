@@ -1,9 +1,25 @@
 // file: src/components/layout/Footer.jsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
 const year = new Date().getFullYear();
+
+/**
+ * Local hook to detect reduced‑motion preference.
+ * (Can be extracted to a shared utility later.)
+ */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+  return prefers;
+}
 
 const columns = [
   {
@@ -19,7 +35,7 @@ const columns = [
     title: "Converters",
     links: [
       { to: "/converter", label: "Unit Converter" },
-      { to: "/currency-converter", label: "Currency Converter" },
+      { to: "/currencyconverter", label: "Currency Converter" }, // FIXED: was "/currency-converter"
     ],
   },
   {
@@ -54,7 +70,7 @@ const columns = [
 
 const socialLinks = [
   {
-    href: "https://github.com",
+    href: "https://github.com", // Placeholder – replace with actual profile
     label: "GitHub",
     icon: (
       <svg
@@ -70,7 +86,7 @@ const socialLinks = [
     ),
   },
   {
-    href: "https://twitter.com",
+    href: "https://twitter.com", // Placeholder – replace with actual profile
     label: "Twitter",
     icon: (
       <svg
@@ -86,7 +102,7 @@ const socialLinks = [
     ),
   },
   {
-    href: "https://linkedin.com",
+    href: "https://linkedin.com", // Placeholder – replace with actual profile
     label: "LinkedIn",
     icon: (
       <svg
@@ -105,14 +121,28 @@ const socialLinks = [
 
 export default function Footer() {
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const showBackToTopRef = useRef(false);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    const handleScroll = () => setShowBackToTop(window.scrollY > 500);
+    const handleScroll = () => {
+      const shouldShow = window.scrollY > 500;
+      if (shouldShow !== showBackToTopRef.current) {
+        showBackToTopRef.current = shouldShow;
+        setShowBackToTop(shouldShow);
+      }
+    };
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
+  // Conditionally disable hover transforms for reduced‑motion users
+  const hoverScaleClass = prefersReducedMotion ? "" : "hover:scale-110";
+  const hoverTranslateXClass = prefersReducedMotion
+    ? ""
+    : "hover:translate-x-1";
 
   return (
     <footer className="relative mt-20 border-t border-white/20 dark:border-white/10 backdrop-blur-xl bg-white/70 dark:bg-gray-900/70">
@@ -128,13 +158,10 @@ export default function Footer() {
             </Link>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
               Modern academic tools for students worldwide. Need help?{" "}
-              <Link
-                to="/"
-                className="text-brand-500 hover:underline hover:text-brand-600 transition-all"
-              >
+              <span className="font-medium text-brand-500">
                 AI Chat Assistant
-              </Link>{" "}
-              is here for you.
+              </span>{" "}
+              is available via the chat button.
             </p>
             <div className="flex gap-3 mt-4">
               {socialLinks.map((social) => (
@@ -143,7 +170,7 @@ export default function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-brand-500 transition-all transform hover:scale-110 hover:rotate-3"
+                  className={`text-gray-400 hover:text-brand-500 transition-all transform ${hoverScaleClass}`}
                   aria-label={social.label}
                 >
                   {social.icon}
@@ -162,7 +189,7 @@ export default function Footer() {
                   <li key={link.to}>
                     <Link
                       to={link.to}
-                      className="text-sm text-gray-600 dark:text-gray-400 hover:text-brand-500 transition-all duration-200 hover:translate-x-1 inline-block"
+                      className={`text-sm text-gray-600 dark:text-gray-400 hover:text-brand-500 transition-all duration-200 ${hoverTranslateXClass} inline-block`}
                     >
                       {link.label}
                     </Link>
@@ -205,12 +232,11 @@ export default function Footer() {
       </div>
 
       {/* Back to top */}
-      <AnimatePresence>
-        {showBackToTop && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
+      {prefersReducedMotion ? (
+        // Static button without animation
+        showBackToTop && (
+          <button
+            type="button"
             onClick={scrollToTop}
             className="fixed bottom-6 right-6 glass w-12 h-12 rounded-full flex items-center justify-center shadow-glass-lg hover:shadow-brand-lg hover:scale-110 transition-all z-50 group"
             aria-label="Back to top"
@@ -230,9 +256,39 @@ export default function Footer() {
             >
               <polyline points="18 15 12 9 6 15" />
             </svg>
-          </motion.button>
-        )}
-      </AnimatePresence>
+          </button>
+        )
+      ) : (
+        <AnimatePresence>
+          {showBackToTop && (
+            <motion.button
+              type="button"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              onClick={scrollToTop}
+              className="fixed bottom-6 right-6 glass w-12 h-12 rounded-full flex items-center justify-center shadow-glass-lg hover:shadow-brand-lg hover:scale-110 transition-all z-50 group"
+              aria-label="Back to top"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="group-hover:-translate-y-0.5 transition-transform"
+                aria-hidden="true"
+              >
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+            </motion.button>
+          )}
+        </AnimatePresence>
+      )}
     </footer>
   );
 }
