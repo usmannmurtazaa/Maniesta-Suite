@@ -1,106 +1,86 @@
 <!doctype html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
 
     <!-- Updated CSP: added 'unsafe-eval' to allow Function() constructor for calculator -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com data:;
-        connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://www.google-analytics.com https://*.google.com wss://*.firebaseio.com https://api.exchangerate-api.com https://pagead2.googlesyndication.com;
-        img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        font-src 'self' https://fonts.gstatic.com;
-        frame-src 'self';"
-    />
+    <meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline' 'unsafe-eval'
+    https://www.gstatic.com
+    https://www.googletagmanager.com
+    https://www.google-analytics.com
+    https://pagead2.googlesyndication.com
+    data:;
+  connect-src 'self'
+    https://*.googleapis.com
+    https://*.firebaseio.com
+    https://www.google-analytics.com
+    https://*.google.com
+    wss://*.firebaseio.com
+    https://api.exchangerate-api.com
+    https://pagead2.googlesyndication.com
+    https://*.googlesyndication.com
+    https://*.doubleclick.net;
+  img-src 'self' data:
+    https://www.google-analytics.com
+    https://www.googletagmanager.com
+    https://*.google.com
+    https://*.googlesyndication.com;
+  style-src 'self' 'unsafe-inline'
+    https://fonts.googleapis.com;
+  font-src 'self'
+    https://fonts.gstatic.com;
+  frame-src 'self'
+    https://googleads.g.doubleclick.net
+    https://tpc.googlesyndication.com
+    https://pagead2.googlesyndication.com;
+">
 
     <title>Maniesta Suite – Academic Tools Platform</title>
-    <meta
-      name="description"
-      content="Modern academic tools platform for students. GPA, CGPA, scientific calculators, unit converters, interest calculators, and more."
-    />
-    <meta
-      name="keywords"
-      content="GPA calculator, CGPA calculator, scientific calculator, unit converter, interest calculator, student tools, academic platform, Maniesta Suite"
-    />
+    <meta name="description"
+        content="Modern academic tools platform for students. GPA, CGPA, scientific calculators, unit converters, interest calculators, and more." />
+    <meta name="keywords"
+        content="GPA calculator, CGPA calculator, scientific calculator, unit converter, interest calculator, student tools, academic platform, Maniesta Suite" />
     <meta name="author" content="Usman Murtaza" />
     <meta name="robots" content="index, follow" />
     <link rel="canonical" href="https://maniestasuite.netlify.app" />
     <meta property="og:site_name" content="Maniesta Suite" />
-    <meta
-      property="og:title"
-      content="Maniesta Suite – Academic Tools Platform"
-    />
-    <meta
-      property="og:description"
-      content="Modern academic tools for students: GPA, CGPA, scientific calculator, converters, and more."
-    />
+    <meta property="og:title" content="Maniesta Suite – Academic Tools Platform" />
+    <meta property="og:description"
+        content="Modern academic tools for students: GPA, CGPA, scientific calculator, converters, and more." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://maniestasuite.netlify.app" />
-    <meta
-      property="og:image"
-      content="https://maniestasuite.netlify.app/og-image.png"
-    />
+    <meta property="og:image" content="https://maniestasuite.netlify.app/og-image.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta
-      name="google-site-verification"
-      content="nRp_FIypNX6wvvUJ0XQ92Bz_hj8oJZCdJszwf45pYSc"
-    />
+    <meta name="google-site-verification" content="nRp_FIypNX6wvvUJ0XQ92Bz_hj8oJZCdJszwf45pYSc" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Maniesta Suite" />
-    <meta
-      name="twitter:description"
-      content="Modern academic tools platform for students"
-    />
-    <meta
-      name="twitter:image"
-      content="https://maniestasuite.netlify.app/og-image.png"
-    />
+    <meta name="twitter:description" content="Modern academic tools platform for students" />
+    <meta name="twitter:image" content="https://maniestasuite.netlify.app/og-image.png" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <meta
-      name="theme-color"
-      content="#6c63ff"
-      media="(prefers-color-scheme: light)"
-    />
-    <meta
-      name="theme-color"
-      content="#1a1a2e"
-      media="(prefers-color-scheme: dark)"
-    />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#6c63ff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1a1a2e" media="(prefers-color-scheme: dark)" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <!-- Load all required fonts: Agbalumo, Playfair Display, Google Sans (fallback Inter), JetBrains Mono, STIX Two Math -->
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=STIX+Two+Math&display=swap"
-    />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=STIX+Two+Math&display=swap"
-      media="print"
-      onload="this.media = 'all'"
-    />
-    <noscript>
-      <link
-        rel="stylesheet"
+    <link rel="preload" as="style"
+        href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=STIX+Two+Math&display=swap" />
+    <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=STIX+Two+Math&display=swap"
-      />
+        media="print" onload="this.media = 'all'" />
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=STIX+Two+Math&display=swap" />
     </noscript>
 
     <script type="application/ld+json">
@@ -119,71 +99,69 @@
         }
       }
     </script>
-    <script
-      async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3564932413499136"
-      crossorigin="anonymous"
-    ></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3564932413499136"
+        crossorigin="anonymous"></script>
 
     <style>
-      *,
-      *::before,
-      *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-      html {
-        font-size: 16px;
-        -webkit-text-size-adjust: 100%;
-      }
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+        }
 
-      body {
-        font-family:
-          '"Google Sans"',
-          "Inter",
-          -apple-system,
-          BlinkMacSystemFont,
-          "Segoe UI",
-          Roboto,
-          sans-serif;
-        background: #f5f7fa;
-        color: #1a1a2e;
-        transition:
-          background 0.3s,
-          color 0.3s;
-      }
+        body {
+            font-family:
+                '"Google Sans"',
+                "Inter",
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Roboto,
+                sans-serif;
+            background: #f5f7fa;
+            color: #1a1a2e;
+            transition:
+                background 0.3s,
+                color 0.3s;
+        }
 
-      .dark body,
-      html.dark body {
-        background: #0b0d17;
-        color: #f1f1f5;
-      }
+        .dark body,
+        html.dark body {
+            background: #0b0d17;
+            color: #f1f1f5;
+        }
     </style>
     <script>
-      (function () {
-        const theme = localStorage.getItem("theme");
-        const prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)",
-        ).matches;
-        if (theme === "dark" || (!theme && prefersDark)) {
-          document.documentElement.classList.add("dark");
-        } else if (theme === "light") {
-          document.documentElement.classList.remove("dark");
-        }
-        // Freeze transitions to prevent flash
-        document.documentElement.style.transition = "none";
-        // Re-enable after first paint
-        setTimeout(function () {
-          document.documentElement.style.transition = "";
-        }, 0);
-      })();
+        (function () {
+            const theme = localStorage.getItem("theme");
+            const prefersDark = window.matchMedia(
+                "(prefers-color-scheme: dark)",
+            ).matches;
+            if (theme === "dark" || (!theme && prefersDark)) {
+                document.documentElement.classList.add("dark");
+            } else if (theme === "light") {
+                document.documentElement.classList.remove("dark");
+            }
+            // Freeze transitions to prevent flash
+            document.documentElement.style.transition = "none";
+            // Re-enable after first paint
+            setTimeout(function () {
+                document.documentElement.style.transition = "";
+            }, 0);
+        })();
     </script>
-  </head>
+</head>
 
-  <body>
+<body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-  </body>
+</body>
+
 </html>
