@@ -325,8 +325,8 @@ export default function Home() {
 
   return (
     <div className="space-y-24 sm:space-y-28 lg:space-y-32">
-      {/* Hero Section */}
-      <section className="relative pt-12 sm:pt-16 md:pt-20">
+      {/* Hero Section – added overflow-hidden to prevent blob overflow */}
+      <section className="relative pt-12 sm:pt-16 md:pt-20 overflow-hidden">
         <div className="absolute inset-0 -z-10 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-[300px] h-[300px] sm:w-[600px] sm:h-[600px] bg-violet-400/20 dark:bg-violet-600/10 rounded-full blur-3xl animate-float" />
           <div className="absolute top-1/3 right-0 w-[250px] h-[250px] sm:w-[500px] sm:h-[500px] bg-pink-400/20 dark:bg-pink-600/10 rounded-full blur-3xl animate-float animate-delay-1000" />

@@ -37,6 +37,7 @@ export default function Header() {
   const drawerRef = useRef(null);
   const closeBtnRef = useRef(null);
 
+  // Scroll detection
   useEffect(() => {
     const onScroll = () => {
       const isScrolled = window.scrollY > 20;
@@ -49,16 +50,31 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Close on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
 
+  // Body scroll lock when drawer is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
+
+  // Focus management
   useEffect(() => {
     if (mobileOpen) {
       setTimeout(() => closeBtnRef.current?.focus(), 100);
     }
   }, [mobileOpen]);
 
+  // Trap focus inside drawer
   useEffect(() => {
     if (!mobileOpen || !drawerRef.current) return;
 
@@ -83,9 +99,10 @@ export default function Header() {
     return () => document.removeEventListener("keydown", trapFocus);
   }, [mobileOpen]);
 
+  // Drawer content – close button sticky inside scroll area
   const MobileDrawerContent = (
     <div className="flex flex-col" ref={drawerRef}>
-      <div className="flex justify-end px-4 pt-3 pb-1">
+      <div className="sticky top-0 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl z-10 flex justify-end px-4 pt-3 pb-1 border-b border-white/20 dark:border-white/10">
         <button
           ref={closeBtnRef}
           type="button"
@@ -105,7 +122,7 @@ export default function Header() {
           </svg>
         </button>
       </div>
-      <div className="container mx-auto py-4 space-y-1 overflow-y-auto">
+      <div className="container mx-auto py-4 space-y-1">
         {links.map((link) => (
           <Link
             key={link.to}
@@ -211,7 +228,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile nav drawer with overlay */}
+      {/* Overlay – locks background scroll when open */}
       {mobileOpen && (
         <div
           className="md:hidden fixed inset-0 z-40 bg-black/50"
@@ -220,6 +237,7 @@ export default function Header() {
         />
       )}
 
+      {/* Mobile nav drawer */}
       {prefersReducedMotion ? (
         mobileOpen && (
           <div className="md:hidden overflow-y-auto glass border-t border-white/20 dark:border-white/10 pb-[env(safe-area-inset-bottom,0px)] max-h-[80vh] z-50 relative">
