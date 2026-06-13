@@ -27,6 +27,8 @@
     https://www.googletagmanager.com
     https://www.google-analytics.com
     https://pagead2.googlesyndication.com
+    https://*.google.com
+    https://*.google
     data:;
   connect-src 'self'
     https://*.googleapis.com
