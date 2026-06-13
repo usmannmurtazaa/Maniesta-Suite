@@ -14,7 +14,6 @@ const INITIAL_USER_DATA = {
   semester: "",
 };
 
-// Inline SVG error icon – replaces ⚠️
 const ErrorAlertIcon = () => (
   <svg
     className="w-5 h-5 text-red-500 shrink-0"
@@ -223,7 +222,6 @@ export default function ExportModal({
       </motion.div>
     );
 
-  // Compact overlay with internal scroll
   return (
     <AnimatePresence>
       {isOpen && (
@@ -231,7 +229,10 @@ export default function ExportModal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm overflow-hidden"
+          style={{
+            padding: `calc(1rem + env(safe-area-inset-top)) calc(1rem + env(safe-area-inset-right)) calc(1rem + env(safe-area-inset-bottom)) calc(1rem + env(safe-area-inset-left))`,
+          }}
           onClick={handleClose}
         >
           <motion.div
@@ -244,7 +245,13 @@ export default function ExportModal({
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: "spring", stiffness: 260, damping: 22 }}
-            className="glass w-full max-w-md max-h-[85dvh] rounded-2xl overflow-hidden flex flex-col shadow-glass-lg border border-white/20 dark:border-white/10"
+            className="glass rounded-2xl overflow-hidden flex flex-col shadow-glass-lg border border-white/20 dark:border-white/10 relative"
+            style={{
+              width: "calc(100% - 2rem)",
+              maxWidth: "min(90vw, 600px)",
+              maxHeight: "min(85dvh, 600px)",
+              height: "auto",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close button */}
