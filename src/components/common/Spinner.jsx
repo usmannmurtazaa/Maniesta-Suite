@@ -1,6 +1,32 @@
 // src/components/common/Spinner.jsx
+import { useState, useEffect } from 'react';
 
-export default function Spinner({ className = '', size = 'md', logo = false }) {
+/**
+ * Local hook to detect the user’s motion preference.
+ * Used as a fallback if the consumer doesn’t pass `reducedMotion`.
+ */
+function usePrefersReducedMotion() {
+  const [prefers, setPrefers] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    setPrefers(mq.matches);
+    const handler = (e) => setPrefers(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
+  return prefers;
+}
+
+export default function Spinner({
+  className = '',
+  size = 'md',
+  logo = false,
+  reducedMotion, // optional: parent can pass this directly
+}) {
+  // If parent doesn’t supply reducedMotion, use the local hook
+  const systemReducedMotion = usePrefersReducedMotion();
+  const shouldAnimate = reducedMotion === undefined ? !systemReducedMotion : !reducedMotion;
+
   const sizeClasses = {
     sm: 'w-4 h-4 border-2',
     md: 'w-6 h-6 border-2',
@@ -10,7 +36,7 @@ export default function Spinner({ className = '', size = 'md', logo = false }) {
   // Maniesta logo SVG – only rendered when `logo` is true
   const LogoMark = logo ? (
     <svg
-      className="absolute inset-0 m-auto w-4 h-4 text-brand-500"
+      className="absolute inset-0 m-auto w-4 h-4 font-brand text-2xl"
       fill="currentColor"
       viewBox="0 0 24 24"
       aria-hidden="true"
@@ -20,9 +46,13 @@ export default function Spinner({ className = '', size = 'md', logo = false }) {
   ) : null;
 
   return (
-    <div className={`relative inline-flex items-center justify-center ${className}`} role="status" aria-label="Loading">
+    <div
+      className={`relative inline-flex items-center justify-center ${className}`}
+      role="status"
+      aria-label="Loading"
+    >
       <div
-        className={`${sizeClasses[size] || sizeClasses.md} border-t-brand-500 border-gray-200 dark:border-gray-700 rounded-full animate-spin`}
+        className={`${sizeClasses[size] || sizeClasses.md} border-t-brand-500 border-gray-200 dark:border-gray-700 rounded-full ${shouldAnimate ? 'animate-spin' : ''}`}
       />
       {LogoMark}
     </div>

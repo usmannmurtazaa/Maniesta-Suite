@@ -5,7 +5,20 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                sans: ['"Google Sans"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                heading: ['"Google Sans"', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                brand: ['"Agbalumo"', 'system-ui'],
+                hero: ['"Playfair Display"', 'serif'],
+                mono: ['"JetBrains Mono"', 'Fira Code', 'monospace'],
+                math: ['"STIX Two Math"', 'serif'],
+            },
+            fontSize: {
+                'h1': ['clamp(2rem, 5vw, 4rem)', { lineHeight: '1.15', fontWeight: '700' }],
+                'h2': ['clamp(1.5rem, 3.5vw, 2.5rem)', { lineHeight: '1.25', fontWeight: '600' }],
+                'h3': ['clamp(1.25rem, 2.5vw, 1.75rem)', { lineHeight: '1.35', fontWeight: '600' }],
+                'body': ['1rem', { lineHeight: '1.6' }],
+                'body-sm': ['0.875rem', { lineHeight: '1.5' }],
+                'caption': ['0.75rem', { lineHeight: '1.4' }],
             },
             colors: {
                 brand: {

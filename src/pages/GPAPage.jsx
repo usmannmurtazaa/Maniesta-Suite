@@ -73,7 +73,7 @@ export default function GPAPage() {
         <div className="text-center space-y-3">
           <motion.h1
             {...headingMotion}
-            className="text-4xl md:text-5xl font-extrabold text-gradient"
+            className="font-hero text-4xl md:text-5xl font-extrabold text-gradient"
           >
             GPA Calculator
           </motion.h1>

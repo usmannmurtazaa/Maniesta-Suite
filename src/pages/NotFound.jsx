@@ -88,7 +88,7 @@ export default function NotFound() {
       <div className="text-center glass-card p-10 md:p-16 max-w-lg w-full relative z-10">
         <motion.h1
           {...headingProps}
-          className="text-7xl md:text-8xl font-extrabold text-gradient mb-4"
+          className="font-hero text-7xl md:text-8xl font-extrabold text-gradient mb-4"
         >
           404
         </motion.h1>

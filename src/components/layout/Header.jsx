@@ -1,12 +1,9 @@
+// src/components/layout/Header.jsx
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import ThemeToggle from "../common/ThemeToggle";
 
-/**
- * Local hook to detect reduced‑motion preference.
- * (Can be extracted to a shared utility later.)
- */
 function usePrefersReducedMotion() {
   const [prefers, setPrefers] = useState(false);
   useEffect(() => {
@@ -36,9 +33,9 @@ export default function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const prefersReducedMotion = usePrefersReducedMotion();
-
-  // Store previous scrolled state to avoid unnecessary re‑renders
   const scrolledRef = useRef(false);
+  const drawerRef = useRef(null);
+  const closeBtnRef = useRef(null);
 
   useEffect(() => {
     const onScroll = () => {
@@ -52,10 +49,83 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close mobile menu on route change
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (mobileOpen) {
+      setTimeout(() => closeBtnRef.current?.focus(), 100);
+    }
+  }, [mobileOpen]);
+
+  useEffect(() => {
+    if (!mobileOpen || !drawerRef.current) return;
+
+    const trapFocus = (e) => {
+      if (e.key !== "Tab") return;
+      const focusable = drawerRef.current.querySelectorAll(
+        'a, button, input, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", trapFocus);
+    return () => document.removeEventListener("keydown", trapFocus);
+  }, [mobileOpen]);
+
+  const MobileDrawerContent = (
+    <div className="flex flex-col" ref={drawerRef}>
+      <div className="flex justify-end px-4 pt-3 pb-1">
+        <button
+          ref={closeBtnRef}
+          type="button"
+          onClick={() => setMobileOpen(false)}
+          className="glass w-11 h-11 flex items-center justify-center rounded-xl"
+          aria-label="Close menu"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div className="container mx-auto py-4 space-y-1 overflow-y-auto">
+        {links.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            onClick={() => setMobileOpen(false)}
+            aria-current={
+              location.pathname === link.to ? "page" : undefined
+            }
+            className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${
+              location.pathname === link.to
+                ? "bg-gradient-brand text-white"
+                : "text-gray-600 dark:text-gray-300 hover:bg-white/10"
+            }`}
+          >
+            {link.label}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <header
@@ -66,10 +136,12 @@ export default function Header() {
       }`}
     >
       <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between h-16 md:h-20">
-        {/* Logo */}
+        {/* Enhanced Logo */}
         <Link
           to="/"
-          className="text-2xl md:text-3xl font-extrabold text-gradient tracking-tight hover:opacity-80 transition-opacity"
+          className={`font-brand text-2xl md:text-3xl font-extrabold text-gradient text-gradient-animate tracking-tight hover:opacity-80 transition-opacity ${
+            prefersReducedMotion ? "" : "animate-pulse-soft"
+          }`}
         >
           Maniesta
         </Link>
@@ -110,7 +182,7 @@ export default function Header() {
           <ThemeToggle />
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="glass w-10 h-10 flex items-center justify-center rounded-xl"
+            className="glass w-11 h-11 flex items-center justify-center rounded-xl"
             aria-label="Toggle menu"
             aria-expanded={mobileOpen}
             type="button"
@@ -139,29 +211,19 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile nav drawer */}
+      {/* Mobile nav drawer with overlay */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/50"
+          onClick={() => setMobileOpen(false)}
+          role="presentation"
+        />
+      )}
+
       {prefersReducedMotion ? (
-        // Static open/close – no animation
         mobileOpen && (
-          <div className="md:hidden overflow-hidden glass border-t border-white/20 dark:border-white/10">
-            <div className="container mx-auto py-4 space-y-1">
-              {links.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  aria-current={
-                    location.pathname === link.to ? "page" : undefined
-                  }
-                  className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${
-                    location.pathname === link.to
-                      ? "bg-gradient-brand text-white"
-                      : "text-gray-600 dark:text-gray-300 hover:bg-white/10"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
+          <div className="md:hidden overflow-y-auto glass border-t border-white/20 dark:border-white/10 pb-[env(safe-area-inset-bottom,0px)] max-h-[80vh] z-50 relative">
+            {MobileDrawerContent}
           </div>
         )
       ) : (
@@ -172,26 +234,9 @@ export default function Header() {
               animate={{ maxHeight: 500, opacity: 1 }}
               exit={{ maxHeight: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="md:hidden overflow-hidden glass border-t border-white/20 dark:border-white/10"
+              className="md:hidden overflow-y-auto glass border-t border-white/20 dark:border-white/10 pb-[env(safe-area-inset-bottom,0px)] max-h-[80vh] z-50 relative"
             >
-              <div className="container mx-auto py-4 space-y-1">
-                {links.map((link) => (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    aria-current={
-                      location.pathname === link.to ? "page" : undefined
-                    }
-                    className={`block px-4 py-3 rounded-xl text-base font-medium transition-all ${
-                      location.pathname === link.to
-                        ? "bg-gradient-brand text-white"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-white/10"
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
+              {MobileDrawerContent}
             </motion.div>
           )}
         </AnimatePresence>

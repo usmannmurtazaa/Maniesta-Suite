@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 export default function GPAWidget({ lastGPA }) {
   return (
     <div className="glass-card p-5">
-      <h3 className="font-semibold text-lg mb-2">Current GPA</h3>
+      <h3 className="font-heading font-semibold text-lg mb-2">Current GPA</h3>
       {lastGPA ? (
         <>
           <p className="text-3xl font-bold text-gradient">{lastGPA.gpa}</p>

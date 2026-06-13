@@ -16,17 +16,17 @@ export default function GPA_Guide() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="glass-card p-6 md:p-8 rounded-2xl">
-          <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-2">GPA Guide – What Is GPA and How to Calculate It</h1>
+          <h1 className="font-hero text-3xl md:text-4xl font-bold text-gradient mb-2">GPA Guide – What Is GPA and How to Calculate It</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-8">Your complete reference for Grade Point Average.</p>
 
           <div className="space-y-8 text-gray-700 dark:text-gray-300">
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">What Does GPA Stand For?</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">What Does GPA Stand For?</h2>
               <p>GPA stands for <strong>Grade Point Average</strong>. It is a number that represents your average academic performance over a semester or course.</p>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Why Is GPA Important?</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Why Is GPA Important?</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li>Determines eligibility for scholarships and honours programmes.</li>
                 <li>Used by employers (especially for internships and graduate roles).</li>
@@ -36,7 +36,7 @@ export default function GPA_Guide() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">How to Calculate Your GPA (Step by Step)</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">How to Calculate Your GPA (Step by Step)</h2>
               <ol className="list-decimal pl-6 space-y-3">
                 <li><strong>Know your grade scale</strong> – Most universities use 4.0, 5.0, or 10.0. Our calculator supports all three.</li>
                 <li><strong>Convert each grade to points</strong> – Example 4.0 scale: A=4.0, B=3.0, C=2.0, D=1.0, F=0.0. (See full table below).</li>
@@ -47,7 +47,7 @@ export default function GPA_Guide() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Example Calculation (4.0 Scale)</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Example Calculation (4.0 Scale)</h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white/50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-700">
                   <thead>
@@ -72,7 +72,7 @@ export default function GPA_Guide() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Weighted vs Unweighted GPA</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Weighted vs Unweighted GPA</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li><strong>Unweighted</strong> – uses 0‑4.0 scale, regardless of course difficulty.</li>
                 <li><strong>Weighted</strong> – adds extra points for AP/IB/honours courses (e.g., A = 5.0). Our calculator uses unweighted by default – check with your school.</li>
@@ -80,12 +80,12 @@ export default function GPA_Guide() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Different Grading Scales (4.0, 5.0, 10.0)</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Different Grading Scales (4.0, 5.0, 10.0)</h2>
               <p>Maniesta Suite supports all three. The calculation method remains the same – only the grade point values change. For a 5.0 scale, an A = 5.0; for a 10.0 scale, a perfect score = 10.0.</p>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Tips to Improve Your GPA</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Tips to Improve Your GPA</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li>Focus on high‑credit courses – they impact your GPA more.</li>
                 <li>Retake courses if your school allows grade replacement.</li>

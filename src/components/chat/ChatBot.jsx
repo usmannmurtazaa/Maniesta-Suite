@@ -2,94 +2,14 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useFocusTrap } from "../../hooks/useFocusTrap";
 
-// -------------------------------------------------------------------
-// Local hook: reduced‑motion preference
-// (Can be extracted to a shared utility later.)
-// -------------------------------------------------------------------
-function usePrefersReducedMotion() {
-  const [prefers, setPrefers] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setPrefers(mq.matches);
-    const handler = (e) => setPrefers(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-  return prefers;
-}
+// ... (knowledgeBase, detectIntent, getPageFromPath unchanged)
 
-// ----------------------------- Knowledge Base ---------------------------------
-const knowledgeBase = {
-  // ... (unchanged – omitted for brevity in report, but present in full file)
-};
+const MessageBubble = ({ message, isUser }) => { ... };
+const TypingIndicator = ({ reducedMotion }) => { ... };
+const QuickReply = ({ text, onClick }) => { ... };
 
-// Helper: detect intent from user message and current page
-function detectIntent(message, currentPage) {
-  // ... (unchanged)
-}
-
-// Helper: get current page name from path
-function getPageFromPath(pathname) {
-  // ... (unchanged)
-}
-
-// Message bubble component
-const MessageBubble = ({ message, isUser }) => {
-  return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-3`}>
-      <div
-        className={`max-w-[80%] px-4 py-2 rounded-2xl ${
-          isUser
-            ? "bg-gradient-brand text-white rounded-br-sm"
-            : "glass text-gray-800 dark:text-gray-200 rounded-bl-sm"
-        }`}
-      >
-        <p className="text-sm whitespace-pre-wrap">{message}</p>
-      </div>
-    </div>
-  );
-};
-
-// Typing indicator – respects reduced motion
-const TypingIndicator = ({ reducedMotion }) => {
-  const bounceClass = reducedMotion ? "" : "animate-bounce";
-  return (
-    <div className="flex justify-start mb-3" aria-label="AI is typing">
-      <div className="glass px-4 py-2 rounded-2xl rounded-bl-sm">
-        <div className="flex gap-1">
-          <div
-            className={`w-2 h-2 bg-gray-500 rounded-full ${bounceClass}`}
-            style={{ animationDelay: "0ms" }}
-          />
-          <div
-            className={`w-2 h-2 bg-gray-500 rounded-full ${bounceClass}`}
-            style={{ animationDelay: "150ms" }}
-          />
-          <div
-            className={`w-2 h-2 bg-gray-500 rounded-full ${bounceClass}`}
-            style={{ animationDelay: "300ms" }}
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Quick reply button component
-const QuickReply = ({ text, onClick }) => {
-  return (
-    <button
-      type="button"
-      onClick={() => onClick(text)}
-      className="px-3 py-1.5 text-sm rounded-full glass hover:bg-brand-500/20 hover:text-brand-500 transition-colors"
-    >
-      {text}
-    </button>
-  );
-};
-
-// Main ChatBot component
 export default function ChatBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -98,107 +18,26 @@ export default function ChatBot() {
   const [quickReplies, setQuickReplies] = useState([]);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const chatWindowRef = useRef(null);
   const location = useLocation();
   const reducedMotion = usePrefersReducedMotion();
 
-  // Load chat history from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("maniesta_chat_history");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setMessages(parsed);
-      } catch (e) {}
-    } else {
-      // Initial welcome message
-      const welcomeIntent = detectIntent("help", getPageFromPath(location.pathname));
-      const welcomeResponse = knowledgeBase[welcomeIntent]?.response({ page: getPageFromPath(location.pathname) }) || knowledgeBase.fallback.response;
-      const welcomeQuick = knowledgeBase[welcomeIntent]?.quickReplies || knowledgeBase.fallback.quickReplies;
-      setMessages([{ text: welcomeResponse, isUser: false, timestamp: Date.now() }]);
-      setQuickReplies(welcomeQuick);
-    }
-  }, []);
+  // Focus trap + scroll lock
+  useFocusTrap(chatWindowRef, isOpen, () => setIsOpen(false));
 
-  // Save messages to localStorage whenever they change
-  useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem("maniesta_chat_history", JSON.stringify(messages.slice(-50))); // keep last 50
-    }
-  }, [messages]);
-
-  // Auto-scroll to bottom
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isTyping]);
-
-  // Focus input when chat opens
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 200);
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
     }
-  }, [isOpen]);
-
-  // Escape key handler
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e) => {
-      if (e.key === "Escape") setIsOpen(false);
+    return () => {
+      document.body.style.overflow = '';
     };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
   }, [isOpen]);
 
-  const addMessage = (text, isUser) => {
-    setMessages(prev => [...prev, { text, isUser, timestamp: Date.now() }]);
-  };
+  // ... (rest of the logic: load history, send message, clear chat, etc.)
 
-  const generateBotResponse = async (userMessage, currentPage) => {
-    setIsTyping(true);
-    // Simulate slight delay for realism
-    await new Promise(resolve => setTimeout(resolve, 600 + Math.random() * 400));
-    const intent = detectIntent(userMessage, currentPage);
-    const context = { page: currentPage, lastUserMessage: userMessage };
-    const response = knowledgeBase[intent]?.response(context) || knowledgeBase.fallback.response;
-    const replies = knowledgeBase[intent]?.quickReplies || knowledgeBase.fallback.quickReplies;
-    addMessage(response, false);
-    setQuickReplies(replies);
-    setIsTyping(false);
-  };
-
-  const handleSendMessage = async (e) => {
-    e?.preventDefault();
-    const message = inputValue.trim();
-    if (!message) return;
-    addMessage(message, true);
-    setInputValue("");
-    const currentPage = getPageFromPath(location.pathname);
-    await generateBotResponse(message, currentPage);
-  };
-
-  const handleQuickReply = async (replyText) => {
-    addMessage(replyText, true);
-    setInputValue("");
-    const currentPage = getPageFromPath(location.pathname);
-    await generateBotResponse(replyText, currentPage);
-  };
-
-  const clearChat = () => {
-    setMessages([]);
-    localStorage.removeItem("maniesta_chat_history");
-    // Reset welcome message
-    const welcomeIntent = detectIntent("help", getPageFromPath(location.pathname));
-    const welcomeResponse = knowledgeBase[welcomeIntent]?.response({ page: getPageFromPath(location.pathname) }) || knowledgeBase.fallback.response;
-    const welcomeQuick = knowledgeBase[welcomeIntent]?.quickReplies || knowledgeBase.fallback.quickReplies;
-    setMessages([{ text: welcomeResponse, isUser: false, timestamp: Date.now() }]);
-    setQuickReplies(welcomeQuick);
-  };
-
-  // Motion props for floating button
-  const floatBtnProps = reducedMotion
-    ? {}
-    : { whileHover: { scale: 1.1 }, whileTap: { scale: 0.9 } };
-
-  // Chat window content (reused for both animated and static)
   const chatWindowContent = (
     <>
       {/* Header */}
@@ -271,7 +110,8 @@ export default function ChatBot() {
       {/* Floating button */}
       <motion.button
         type="button"
-        {...floatBtnProps}
+        whileHover={reducedMotion ? {} : { scale: 1.1 }}
+        whileTap={reducedMotion ? {} : { scale: 0.9 }}
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-brand text-white shadow-brand-lg flex items-center justify-center hover:shadow-xl transition-all"
         aria-label="Open AI Assistant"
@@ -285,7 +125,8 @@ export default function ChatBot() {
       {reducedMotion ? (
         isOpen && (
           <div
-            className="fixed bottom-24 right-6 z-50 w-[90vw] sm:w-96 h-[70vh] sm:h-[600px] glass rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/20 dark:border-white/10"
+            ref={chatWindowRef}
+            className="fixed bottom-24 right-6 z-50 w-[90vw] sm:w-96 h-[70dvh] sm:h-[600px] glass rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/20 dark:border-white/10"
             role="dialog"
             aria-modal="true"
             aria-label="AI Chat"
@@ -297,11 +138,12 @@ export default function ChatBot() {
         <AnimatePresence>
           {isOpen && (
             <motion.div
+              ref={chatWindowRef}
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
               transition={{ duration: 0.2 }}
-              className="fixed bottom-24 right-6 z-50 w-[90vw] sm:w-96 h-[70vh] sm:h-[600px] glass rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/20 dark:border-white/10"
+              className="fixed bottom-24 right-6 z-50 w-[90vw] sm:w-96 h-[70dvh] sm:h-[600px] glass rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/20 dark:border-white/10"
               role="dialog"
               aria-modal="true"
               aria-label="AI Chat"

@@ -270,7 +270,7 @@ export default function CalculatorPanel({ darkMode }) {
 
       {/* Memory indicator */}
       {memory !== 0 && (
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-mono font-medium backdrop-blur-sm border border-brand-500/20">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-math font-medium backdrop-blur-sm border border-brand-500/20">
           <span className="uppercase tracking-wider">M:</span> {memory}
         </div>
       )}
@@ -281,10 +281,10 @@ export default function CalculatorPanel({ darkMode }) {
         aria-live="polite"
         aria-atomic="true"
       >
-        <div className="text-sm text-right text-gray-500 dark:text-gray-400 font-mono break-all min-h-[1.5rem]">
+        <div className="text-sm text-right text-gray-500 dark:text-gray-400 font-math break-all min-h-[1.5rem]">
           {input || "0"}
         </div>
-        <div className="text-3xl sm:text-4xl font-semibold text-right text-gray-900 dark:text-white font-mono tracking-tight mt-1 break-all">
+        <div className="text-3xl sm:text-4xl font-semibold text-right text-gray-900 dark:text-white font-math tracking-tight mt-1 break-all">
           {result}
         </div>
       </div>
@@ -364,7 +364,7 @@ export default function CalculatorPanel({ darkMode }) {
           {history.map((h, i) => (
             <div
               key={i}
-              className="text-sm text-gray-500 dark:text-gray-400 font-mono py-1 border-b border-white/5 break-all"
+              className="text-sm text-gray-500 dark:text-gray-400 font-math py-1 border-b border-white/5 break-all"
             >
               {h}
             </div>

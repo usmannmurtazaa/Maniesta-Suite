@@ -143,7 +143,7 @@ export default function FavoriteToolsWidget({ favorites }) {
 
   return (
     <div className="glass-card p-5">
-      <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+      <h3 className="font-heading font-semibold text-lg mb-3 flex items-center gap-2">
         <FilledStar />
         Favorite Tools
       </h3>

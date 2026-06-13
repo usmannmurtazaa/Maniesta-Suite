@@ -58,7 +58,7 @@ export default function InterestPage() {
         <div className="text-center space-y-3">
           <motion.h1
             {...headingMotion}
-            className="text-4xl md:text-5xl font-extrabold text-gradient"
+            className="font-hero text-4xl md:text-5xl font-extrabold text-gradient"
           >
             Interest Calculator
           </motion.h1>

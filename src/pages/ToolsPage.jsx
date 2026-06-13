@@ -286,7 +286,7 @@ export default function Tools() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         {/* Hero Section */}
         <motion.div {...heroProps} className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gradient mb-4">
+          <h1 className="font-hero text-4xl md:text-5xl font-extrabold text-gradient mb-4">
             All Tools in One Place
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -315,7 +315,7 @@ export default function Tools() {
             <div className="space-y-16">
               {groupedTools.map((group) => (
                 <div key={group.category}>
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center md:text-left">
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center md:text-left">
                     {group.category}
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -325,7 +325,7 @@ export default function Tools() {
                           <div className="p-2 rounded-xl bg-brand-50 dark:bg-brand-900/20">
                             {tool.icon}
                           </div>
-                          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                          <h3 className="font-heading text-xl font-semibold text-gray-900 dark:text-white">
                             {tool.name}
                           </h3>
                           <p className="text-gray-600 dark:text-gray-400 text-sm">
@@ -361,7 +361,7 @@ export default function Tools() {
                     visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
                   }}
                 >
-                  <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center md:text-left">
+                  <h2 className="font-heading text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6 text-center md:text-left">
                     {group.category}
                   </h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -375,7 +375,7 @@ export default function Tools() {
                           <div className="p-2 rounded-xl bg-brand-50 dark:bg-brand-900/20">
                             {tool.icon}
                           </div>
-                          <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                          <h3 className="font-heading text-xl font-semibold text-gray-900 dark:text-white">
                             {tool.name}
                           </h3>
                           <p className="text-gray-600 dark:text-gray-400 text-sm">

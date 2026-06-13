@@ -1,8 +1,9 @@
-// src/pages/CurrencyConverter.jsx
+// src/pages/CurrencyConverterPage.jsx
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
+import Dropdown from "../components/common/Dropdown";
 
 /* ── SVG Icons ────────────────────────────────────────────────────── */
 const ErrorAlertIcon = () => (
@@ -78,7 +79,7 @@ const currencies = [
 // Cache duration in milliseconds (1 hour)
 const CACHE_DURATION = 60 * 60 * 1000;
 
-export default function CurrencyConverter() {
+export default function CurrencyConverterPage() {
   const [amount, setAmount] = useState(1);
   const [fromCurrency, setFromCurrency] = useState("USD");
   const [toCurrency, setToCurrency] = useState("EUR");
@@ -89,9 +90,14 @@ export default function CurrencyConverter() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const reducedMotion = usePrefersReducedMotion();
 
+  // Build options once
+  const currencyOptions = currencies.map((cur) => ({
+    value: cur.code,
+    label: `${cur.code} – ${cur.name}`,
+  }));
+
   // Fetch exchange rates (with localStorage caching)
   const fetchRates = useCallback(async () => {
-    // Check cache first
     const cached = localStorage.getItem("currency_rates");
     if (cached) {
       try {
@@ -103,14 +109,13 @@ export default function CurrencyConverter() {
           return;
         }
       } catch (e) {
-        // ignore cache parse error
+        // ignore
       }
     }
 
     setLoading(true);
     setError(null);
     try {
-      // Using free exchangerate-api.com (no API key required)
       const response = await fetch(
         "https://api.exchangerate-api.com/v4/latest/USD",
       );
@@ -132,12 +137,10 @@ export default function CurrencyConverter() {
     }
   }, []);
 
-  // Initial fetch
   useEffect(() => {
     fetchRates();
   }, [fetchRates]);
 
-  // Compute conversion whenever amount, currencies, or rates change
   useEffect(() => {
     if (rates && amount !== null && !isNaN(amount) && amount !== "") {
       const rateFrom = rates[fromCurrency];
@@ -163,7 +166,6 @@ export default function CurrencyConverter() {
     setAmount(value === "" ? "" : parseFloat(value));
   };
 
-  // Motion props for swap button
   const swapMotionProps = reducedMotion
     ? {}
     : {
@@ -181,7 +183,7 @@ export default function CurrencyConverter() {
       />
       <main className="max-w-2xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="glass-card p-6 md:p-8 rounded-2xl">
-          <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-2 text-center">
+          <h1 className="font-hero text-3xl md:text-4xl font-extrabold text-gradient mb-2 text-center">
             Currency Converter
           </h1>
           <p className="text-center text-gray-600 dark:text-gray-400 mb-8">
@@ -226,28 +228,15 @@ export default function CurrencyConverter() {
               </div>
 
               {/* From / To row with swap button */}
-              <div className="grid grid-cols-[1fr,auto,1fr] gap-3 items-end">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    From
-                  </label>
-                  <select
-                    value={fromCurrency}
-                    onChange={(e) => setFromCurrency(e.target.value)}
-                    className="input-base w-full appearance-none bg-no-repeat bg-[center_right_1rem]"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                    }}
-                  >
-                    {currencies.map((cur) => (
-                      <option key={cur.code} value={cur.code}>
-                        {cur.code} – {cur.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex justify-center pb-2">
+              <div className="flex flex-col sm:grid sm:grid-cols-[1fr,auto,1fr] gap-3 sm:gap-2 items-stretch sm:items-end">
+                <Dropdown
+                  id="from-currency"
+                  label="From"
+                  options={currencyOptions}
+                  value={fromCurrency}
+                  onChange={setFromCurrency}
+                />
+                <div className="flex justify-center sm:pb-2">
                   <motion.button
                     type="button"
                     {...swapMotionProps}
@@ -258,26 +247,13 @@ export default function CurrencyConverter() {
                     <SwapIcon />
                   </motion.button>
                 </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    To
-                  </label>
-                  <select
-                    value={toCurrency}
-                    onChange={(e) => setToCurrency(e.target.value)}
-                    className="input-base w-full appearance-none bg-no-repeat bg-[center_right_1rem]"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                    }}
-                  >
-                    {currencies.map((cur) => (
-                      <option key={cur.code} value={cur.code}>
-                        {cur.code} – {cur.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <Dropdown
+                  id="to-currency"
+                  label="To"
+                  options={currencyOptions}
+                  value={toCurrency}
+                  onChange={setToCurrency}
+                />
               </div>
 
               {/* Result display */}
@@ -307,7 +283,6 @@ export default function CurrencyConverter() {
             </div>
           )}
 
-          {/* Back to home link – now uses React Router Link */}
           <div className="mt-10 pt-6 border-t border-gray-200 dark:border-gray-800 text-center">
             <Link
               to="/"

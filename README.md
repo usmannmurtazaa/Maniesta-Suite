@@ -1,19 +1,33 @@
-```md
-# Maniesta Suite
+Here is a refined, production level version of your README with improved structure, consistency, clarity, and senior level documentation quality.
 
-Academic Productivity Dashboard System
+---
 
-A modern, frontend-first academic tools platform built for students to calculate, convert, export, and track their academic performance in one unified dashboard experience.
+<p align="center">
+  <img src="./src/assets/logo.png" alt="Maniesta Suite Logo" width="120" />
+</p>
 
-Built with React 19, Vite, Tailwind CSS, Framer Motion, Firebase, EmailJS, and a local-first data architecture.
+<h1 align="center">Maniesta Suite</h1>
+
+<p align="center">
+  <strong>Academic Productivity Dashboard System</strong><br/>
+  A modern frontend first platform for students to calculate, convert, export, and track academic performance in one unified dashboard.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React-18-61DAFB?logo=react" />
+  <img src="https://img.shields.io/badge/Vite-5-646CFF?logo=vite" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-3-38B2AC?logo=tailwind-css" />
+  <img src="https://img.shields.io/badge/Firebase-10-FFCA28?logo=firebase" />
+  <img src="https://img.shields.io/badge/License-MIT-green" />
+</p>
 
 ---
 
 ## Overview
 
-Maniesta Suite is a modular academic productivity system that replaces scattered student tools with a single unified interface.
+Maniesta Suite is a modular academic productivity system designed to replace scattered student tools with a unified interface.
 
-It combines calculators, converters, exports, and analytics into a dashboard-driven experience without requiring authentication or backend complexity.
+It provides calculators, converters, export systems, analytics, and a dashboard that tracks user activity locally without requiring authentication.
 
 ---
 
@@ -21,271 +35,187 @@ It combines calculators, converters, exports, and analytics into a dashboard-dri
 
 ### Academic Tools
 
-- GPA Calculator with real-time grade computation
-- CGPA Calculator with multi-semester tracking
-- Scientific and standard calculator with history support
-- Unit conversion across multiple categories
-- Interest calculator including EMI and compound interest
+* GPA Calculator with real time computation and target planning
+* CGPA Calculator with semester based tracking
+* Standard and scientific calculator with history support
+* Unit converter covering length, weight, temperature, area, time, speed
+* Interest calculator supporting simple, compound, and EMI
 
-### Financial Utility
+### Financial Tools
 
-- Live currency converter with exchange rate caching
-- 150+ currency support
-- Offline fallback using cached rates
+* Live currency converter supporting 150 plus currencies
+* Cached exchange rates for performance optimization
+* Swap and copy functionality for quick usage
 
 ### Export System
 
-- PDF report generation for GPA and CGPA
-- CSV export for structured academic data
-- Export history tracking in dashboard
+* PDF academic reports with branding
+* CSV structured data export
+* Export history tracking
+* Optional Firestore backup
 
-### Dashboard System
+### Dashboard Intelligence
 
-- Local-first analytics using localStorage
-- Recent activity tracking
-- Favorite tools system
-- Last calculation memory (GPA, currency, exports)
-- Quick action navigation
+* Tracks GPA, CGPA, currency conversions, and exports
+* Stores last activity state in localStorage
+* Cross tab synchronization using custom events
+* Favorite tools and recent activity tracking
 
 ### Contact System
 
-- EmailJS-powered contact form
-- Direct message delivery without backend server
+* EmailJS based contact form
+* Validation with accessible feedback
 
 ---
 
-## System Architecture
-
-### Frontend Architecture
-```
+## Architecture
 
 UI Layer
-↓
-Hooks Layer
-↓
-Services Layer
-↓
-Firebase / EmailJS / localStorage
-↓
-Utilities Layer (pure functions)
+React pages and components handle rendering and interaction
 
-```
+Hooks Layer
+Custom hooks manage domain logic like GPA, CGPA, currency, and activity tracking
+
+Services Layer
+Handles external integrations such as Firebase, EmailJS, exports, and analytics
+
+Utilities Layer
+Pure functions for calculations, validation, and formatting
+
+Storage Layer
+localStorage and Firebase for persistence
+
+---
+
+## Data Flow
+
+User Action → Component → Hook → Service → Storage
+Storage update → custom event → UI sync
 
 ---
 
 ## Project Structure
 
-```
-
-src/
-├── components/
-│ ├── dashboard/
-│ │ ├── widgets/
-│ │ ├── DashboardLayout.jsx
-│ ├── currency/
-│ ├── calculator/
-│ ├── common/
-│
-├── pages/
-│ ├── Home.jsx
-│ ├── GPA.jsx
-│ ├── CGPA.jsx
-│ ├── Dashboard.jsx
-│ ├── Contact.jsx
-│
-├── hooks/
-├── services/
-├── utils/
-├── constants/
-├── contexts/
-├── lib/firebase/
-├── styles/
-└── router/
-
-```
+src
+components reusable UI components
+pages route level screens
+hooks business logic hooks
+services external integrations and APIs
+utils pure functions
+constants fixed configuration values
+contexts theme and dashboard state
+store optional global state
+router routing configuration
+styles global styles
+main entry point
 
 ---
 
-## Data Flow Model
+## Design System
 
-```
-
-User Action
-↓
-React Component
-↓
-Custom Hook
-↓
-Service Layer
-↓
-localStorage / Firebase / EmailJS
-↓
-Dashboard Sync Event
-↓
-UI Auto Update
-
-```
+* Glassmorphism based UI design
+* Fully responsive from mobile to large desktop screens
+* Dark, light, and system theme support
+* Smooth Framer Motion transitions
+* SVG based icons only, no emojis in production UI
+* Consistent spacing and typography system
 
 ---
 
-## Key Design Principles
+## Typography System
 
-### 1. Local-First System
-- No authentication required
-- All user data stored in localStorage
-- Optional Firebase persistence for exports
-
-### 2. Dashboard-Centric UX
-- Every tool feeds into a central dashboard
-- All user activity is tracked automatically
-- Instant UI reflection without refresh
-
-### 3. Modular Service Layer
-- Separation of UI, logic, and storage
-- Reusable hooks across the system
-- Centralized data handling
-
-### 4. Performance Optimized
-- Lazy-loaded routes
-- Memoized components
-- Cached API responses (currency rates)
-- Minimal re-renders via context design
+* Brand and logo: Cinzel or Agbalumo
+* Headings: Playfair Display
+* Body text: Google Sans
+* Numbers and calculations: JetBrains Mono or STIX Two Math
 
 ---
 
 ## Tech Stack
 
 Frontend
-- React 19
-- React Router 6
-- Vite
+React, React Router, Vite
 
 Styling
-- Tailwind CSS
-- Glassmorphism UI system
-- Framer Motion animations
+Tailwind CSS, custom design tokens, Framer Motion
 
 Backend Services
-- Firebase Firestore (export storage only)
-- Firebase Analytics
-- EmailJS (contact system)
+Firebase Firestore, Firebase Analytics, EmailJS
 
 State Management
-- React Context API
-- localStorage persistence layer
+React Context, localStorage, optional Zustand
 
 Utilities
-- jsPDF (PDF exports)
-- CSV generator utilities
-- Currency API integration
+jsPDF, CSV generator, currency API integration
+
+Deployment
+Netlify
+
+---
+
+## Installation
+
+Clone repository
+git clone repository-url
+cd maniesta-suite
+
+Install dependencies
+npm install
+
+Start development server
+npm run dev
+
+Build production
+npm run build
 
 ---
 
 ## Environment Variables
 
-```
+Firebase configuration required for analytics and export backup
+EmailJS required for contact form functionality
 
-VITE_FIREBASE_API_KEY
-VITE_FIREBASE_AUTH_DOMAIN
-VITE_FIREBASE_PROJECT_ID
-VITE_FIREBASE_STORAGE_BUCKET
-VITE_FIREBASE_MESSAGING_SENDER_ID
-VITE_FIREBASE_APP_ID
-VITE_FIREBASE_MEASUREMENT_ID
-
-VITE_EMAILJS_SERVICE_ID
-VITE_EMAILJS_TEMPLATE_ID
-VITE_EMAILJS_PUBLIC_KEY
-
-VITE_APP_URL
-
-```
+Without these, core UI still works normally
 
 ---
 
-## Features Breakdown
+## Key Features
 
-### Dashboard Intelligence
-- Tracks GPA calculations automatically
-- Stores currency conversions history
-- Saves export activity logs
-- Highlights recent tool usage
+Dashboard Intelligence
+Tracks all tool usage automatically and updates in real time
 
-### Currency System
-- Live exchange rate fetching
-- 24-hour caching system
-- Offline fallback support
-- Swap animation between currencies
+Currency Converter
+Live rates with caching for performance optimization
 
-### GPA System
-- Dynamic course input
-- Weighted calculation engine
-- Instant result updates
-- Export-ready structured output
+GPA and CGPA System
+Dynamic grading system with target planning
 
-### Export Engine
-- PDF formatting for academic reports
-- CSV structured data output
-- Firebase export history logging
+Export Engine
+Generates PDF and CSV reports with structured formatting
+
+Theming System
+Persistent theme with system preference detection
 
 ---
 
 ## Performance Strategy
 
-- Route-based code splitting
-- Lazy loading for heavy calculators
-- Memoized widget rendering
-- Debounced input handling
-- Cached API responses for currency system
+* Lazy loading for route based code splitting
+* Memoized tool lists using useMemo
+* Local caching for API calls
+* Event based state synchronization
+* Reduced re renders via hook isolation
 
 ---
 
-## SEO Strategy
+## Contributing Guidelines
 
-- Fully indexable SPA routing
-- Meta tag support per route
-- OpenGraph + Twitter card optimization
-- Sitemap-ready route structure
-- Keyword-targeted landing content for academic tools
-
----
-
-## Deployment
-
-### Netlify
-- SPA redirect handling enabled
-- Build output: dist/
-- Environment variables injected at build time
-
-### Build Commands
-```
-
-npm install
-npm run dev
-npm run build
-npm run preview
-
-```
-
----
-
-## Roadmap
-
-Planned Enhancements
-- AI academic assistant chatbot
-- Smart study suggestions based on GPA trends
-- Cloud sync (optional login layer)
-- Multi-device dashboard sync
-- Advanced analytics visualization
-
----
-
-## Contribution Guidelines
-
-- Keep architecture modular
-- No direct logic inside UI components
-- Use services layer for all external calls
-- Maintain local-first design philosophy
+* Keep UI and logic separated
+* Use hooks for all business logic
+* Use services for external integrations
+* Maintain local first architecture
+* Avoid inline calculations inside components
+* Ensure full responsiveness on all screen sizes
 
 ---
 
@@ -297,6 +227,7 @@ MIT License
 
 ## Author
 
-Built by Usman Murtaza
-Focused on modern academic productivity systems and frontend architecture design.
-```
+Usman Murtaza
+Portfolio: https://usmanmurtaza.netlify.app/
+
+GitHub: @usmannmurtazaa

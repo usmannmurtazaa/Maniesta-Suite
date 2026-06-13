@@ -37,30 +37,30 @@ export default function GPAToPercentageGuide() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="glass-card p-6 md:p-8 rounded-2xl">
-          <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-4">GPA to Percentage Guide</h1>
+          <h1 className="font-hero text-3xl md:text-4xl font-bold text-gradient mb-4">GPA to Percentage Guide</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-8">How to convert your Grade Point Average to a percentage for applications or personal record.</p>
 
           <div className="space-y-8 text-gray-700 dark:text-gray-300">
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Why Convert GPA to Percentage?</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Why Convert GPA to Percentage?</h2>
               <p>Some scholarship applications, job portals, or graduate schools ask for percentage scores. Knowing your approximate percentage helps you compare with other grading systems.</p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Conversion Formulas (Common Methods)</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Conversion Formulas (Common Methods)</h2>
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-xl font-medium">4.0 Scale → Percentage</h3>
+                  <h3 className="font-heading text-xl font-medium">4.0 Scale → Percentage</h3>
                   <p><strong>Percentage = (GPA ÷ 4.0) × 100</strong></p>
                   <p className="text-sm text-gray-500">Example: 3.2 GPA → (3.2 ÷ 4) × 100 = 80%</p>
                 </div>
                 <div>
-                  <h3 className="text-xl font-medium">5.0 Scale → Percentage</h3>
+                  <h3 className="font-heading text-xl font-medium">5.0 Scale → Percentage</h3>
                   <p><strong>Percentage = (GPA ÷ 5.0) × 100</strong></p>
                   <p className="text-sm text-gray-500">Example: 4.0 GPA → (4 ÷ 5) × 100 = 80%</p>
                 </div>
                 <div>
-                  <h3 className="text-xl font-medium">10.0 Scale → Percentage</h3>
+                  <h3 className="font-heading text-xl font-medium">10.0 Scale → Percentage</h3>
                   <p><strong>Percentage = GPA × 10</strong> (for some Indian universities)</p>
                   <p className="text-sm text-gray-500">Example: 8.5 CGPA → 85%</p>
                   <p className="text-sm text-gray-500">Alternative formula: (GPA ÷ 10) × 100 = same result.</p>
@@ -73,7 +73,7 @@ export default function GPAToPercentageGuide() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Quick Reference Table (4.0 Scale)</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Quick Reference Table (4.0 Scale)</h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white/50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-700">
                   <thead><tr><th className="p-3">GPA</th><th className="p-3">Percentage</th><th className="p-3">Letter Grade</th></tr></thead>
@@ -90,25 +90,25 @@ export default function GPAToPercentageGuide() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Frequently Asked Questions</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Frequently Asked Questions</h2>
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-medium">Is there a universal conversion formula?</h3>
+                  <h3 className="font-heading text-lg font-medium">Is there a universal conversion formula?</h3>
                   <p>No – different schools and countries use different scales. Always verify with the organisation requesting the percentage.</p>
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium">Can I convert CGPA to percentage using the same method?</h3>
+                  <h3 className="font-heading text-lg font-medium">Can I convert CGPA to percentage using the same method?</h3>
                   <p>Yes – apply the same formula to your CGPA (e.g., CGPA 3.5 on a 4.0 scale = 87.5%).</p>
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium">What’s a good GPA in percentage terms?</h3>
+                  <h3 className="font-heading text-lg font-medium">What’s a good GPA in percentage terms?</h3>
                   <p>Above 80% (3.2+ on 4.0 scale) is generally considered good. For competitive programmes, aim for 85%+ (3.4+).</p>
                 </div>
               </div>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Related Resources</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Related Resources</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li><Link to="/grading-scale-guide" className="text-brand-500 hover:underline">GPA Grading Scale Guide</Link></li>
                 <li><Link to="/how-to-calculate-gpa" className="text-brand-500 hover:underline">How to Calculate GPA</Link></li>

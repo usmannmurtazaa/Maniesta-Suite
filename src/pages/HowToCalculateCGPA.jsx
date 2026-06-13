@@ -16,17 +16,17 @@ export default function HowToCalculateCGPA() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="glass-card p-6 md:p-8 rounded-2xl">
-          <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-4">How to Calculate CGPA</h1>
+          <h1 className="font-hero text-3xl md:text-4xl font-bold text-gradient mb-4">How to Calculate CGPA</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-8">CGPA (Cumulative Grade Point Average) tracks your overall academic performance.</p>
 
           <div className="space-y-8 text-gray-700 dark:text-gray-300">
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">What Is CGPA?</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">What Is CGPA?</h2>
               <p>CGPA is the average of your GPA across all completed semesters. Unlike semester GPA, CGPA does not reset – it accumulates and is used for graduation, scholarships, and job applications.</p>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Step‑by‑Step Calculation</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Step‑by‑Step Calculation</h2>
               <ol className="list-decimal pl-6 space-y-3">
                 <li><strong>List your semester GPAs</strong> – e.g., Semester 1: 3.2, Semester 2: 3.6, Semester 3: 3.4.</li>
                 <li><strong>Add them all together</strong> – 3.2 + 3.6 + 3.4 = 10.2.</li>
@@ -36,7 +36,7 @@ export default function HowToCalculateCGPA() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Example (Weighted by Credits)</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Example (Weighted by Credits)</h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white/50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-700">
                   <thead>
@@ -54,21 +54,21 @@ export default function HowToCalculateCGPA() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Frequently Asked Questions</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Frequently Asked Questions</h2>
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-medium">Can CGPA decrease even if I get a good GPA?</h3>
+                  <h3 className="font-heading text-lg font-medium">Can CGPA decrease even if I get a good GPA?</h3>
                   <p>Yes. If your current CGPA is high, a new semester GPA lower than your CGPA will pull it down. Use our <Link to="/gpa" className="text-brand-500 hover:underline">Target GPA Calculator</Link> to plan.</p>
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium">Is CGPA the same as overall percentage?</h3>
+                  <h3 className="font-heading text-lg font-medium">Is CGPA the same as overall percentage?</h3>
                   <p>No – CGPA is an average of grade points, not a percentage. See <Link to="/gpa-to-percentage" className="text-brand-500 hover:underline">GPA to Percentage Guide</Link>.</p>
                 </div>
               </div>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Related Resources</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Related Resources</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li><Link to="/cgpa-vs-gpa" className="text-brand-500 hover:underline">CGPA vs GPA – Key Differences</Link></li>
                 <li><Link to="/how-to-calculate-gpa" className="text-brand-500 hover:underline">How to Calculate GPA</Link></li>

@@ -128,7 +128,7 @@ export default function CurrencyConverter() {
       className="glass-card p-6 md:p-8 rounded-2xl max-w-2xl mx-auto"
       {...containerProps}
     >
-      <h2 className="text-2xl md:text-3xl font-bold text-gradient mb-2">Currency Converter</h2>
+      <h2 className="font-heading text-2xl md:text-3xl font-bold text-gradient mb-2">Currency Converter</h2>
       <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Live exchange rates – updated every 24h</p>
 
       <div className="space-y-4">

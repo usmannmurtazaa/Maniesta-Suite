@@ -328,9 +328,6 @@ export default function ConverterModule() {
     <motion.div {...containerMotion} className="max-w-2xl mx-auto px-4">
       <div className="glass-card p-4 sm:p-6 md:p-8 space-y-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gradient">
-            Unit Converter
-          </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             Quickly convert between common units.
           </p>

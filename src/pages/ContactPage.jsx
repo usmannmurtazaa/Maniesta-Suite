@@ -59,7 +59,7 @@ export default function ContactPage() {
         <div className="text-center space-y-3">
           <motion.h1
             {...headingMotion}
-            className="text-4xl md:text-5xl font-extrabold text-gradient"
+            className="font-hero text-4xl md:text-5xl font-extrabold text-gradient"
           >
             Get in Touch
           </motion.h1>

@@ -16,12 +16,12 @@ export default function HowToCalculateGPA() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="glass-card p-6 md:p-8 rounded-2xl">
-          <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-4">How to Calculate GPA</h1>
+          <h1 className="font-hero text-3xl md:text-4xl font-bold text-gradient mb-4">How to Calculate GPA</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-8">A simple, step‑by‑step guide to calculating your Grade Point Average (GPA).</p>
 
           <div className="space-y-8 text-gray-700 dark:text-gray-300">
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">What You Need</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">What You Need</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li>Your course grades (A, B+, C, etc.)</li>
                 <li>Credit hours for each course (usually 1–6)</li>
@@ -30,29 +30,29 @@ export default function HowToCalculateGPA() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Step‑by‑Step Calculation</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Step‑by‑Step Calculation</h2>
               <div className="space-y-5">
                 <div>
-                  <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200">1. Convert each grade to points</h3>
+                  <h3 className="font-heading text-xl font-medium text-gray-800 dark:text-gray-200">1. Convert each grade to points</h3>
                   <p>Use your school’s scale. For a typical 4.0 scale: A = 4.0, B = 3.0, C = 2.0, D = 1.0, F = 0.0. (See <Link to="/grading-scale-guide" className="text-brand-500 hover:underline">full grading scale guide</Link>).</p>
                 </div>
                 <div>
-                  <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200">2. Multiply by credit hours</h3>
+                  <h3 className="font-heading text-xl font-medium text-gray-800 dark:text-gray-200">2. Multiply by credit hours</h3>
                   <p>For each course: <strong>Grade points × Credit hours = Quality points</strong>.</p>
                 </div>
                 <div>
-                  <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200">3. Add up quality points and credit hours</h3>
+                  <h3 className="font-heading text-xl font-medium text-gray-800 dark:text-gray-200">3. Add up quality points and credit hours</h3>
                   <p>Sum all quality points from every course. Sum all credit hours.</p>
                 </div>
                 <div>
-                  <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200">4. Divide</h3>
+                  <h3 className="font-heading text-xl font-medium text-gray-800 dark:text-gray-200">4. Divide</h3>
                   <p><strong>GPA = Total quality points ÷ Total credit hours</strong></p>
                 </div>
               </div>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Example Calculation</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Example Calculation</h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white/50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-700">
                   <thead>
@@ -77,21 +77,21 @@ export default function HowToCalculateGPA() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Frequently Asked Questions</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Frequently Asked Questions</h2>
               <div className="space-y-4">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">What’s the difference between weighted and unweighted GPA?</h3>
+                  <h3 className="font-heading text-lg font-medium text-gray-800 dark:text-gray-200">What’s the difference between weighted and unweighted GPA?</h3>
                   <p>Unweighted uses the standard 0‑4.0 scale; weighted adds extra points for AP/IB courses (e.g., A = 5.0). Our calculator uses unweighted by default.</p>
                 </div>
                 <div>
-                  <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">Can I use the same method for a 5.0 or 10.0 scale?</h3>
+                  <h3 className="font-heading text-lg font-medium text-gray-800 dark:text-gray-200">Can I use the same method for a 5.0 or 10.0 scale?</h3>
                   <p>Yes – only the grade point values change. Check your school’s conversion table.</p>
                 </div>
               </div>
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Related Resources</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Related Resources</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li><Link to="/gpa-guide" className="text-brand-500 hover:underline">GPA Guide (full overview)</Link></li>
                 <li><Link to="/grading-scale-guide" className="text-brand-500 hover:underline">GPA Grading Scale Guide</Link></li>

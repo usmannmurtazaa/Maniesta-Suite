@@ -47,7 +47,7 @@ class SystemErrorBoundary extends React.Component {
                 <line x1="12" y1="16" x2="12.01" y2="16" />
               </svg>
             </div>
-            <h1 className="text-2xl font-bold mb-3 text-gray-900 dark:text-white">
+            <h1 className="font-hero text-2xl font-bold mb-3 text-gray-900 dark:text-white">
               Application Error
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-8">

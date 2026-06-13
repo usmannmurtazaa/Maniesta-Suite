@@ -135,7 +135,7 @@ export default function InterestCalculator() {
     const content = (
       <div className="text-xs text-gray-500 bg-white/30 dark:bg-gray-800/30 rounded-lg p-3">
         <p>{activeMode.desc}</p>
-        <p className="mt-1 font-mono">{activeMode.formula}</p>
+        <p className="mt-1 font-math">{activeMode.formula}</p>
       </div>
     );
     if (reducedMotion) return content;
@@ -190,15 +190,6 @@ export default function InterestCalculator() {
   return (
     <motion.div {...containerMotion} className="max-w-2xl mx-auto px-4">
       <div className="glass-card p-6 sm:p-8 space-y-6">
-        <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gradient">
-            Interest Calculator
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Compute simple interest, compound growth, or monthly loan payments.
-          </p>
-        </div>
-
         {/* Mode tabs */}
         <div className="flex flex-wrap gap-2" role="tablist">
           {MODES.map((m) => (

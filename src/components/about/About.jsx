@@ -201,7 +201,7 @@ export default function AboutSection() {
       <ScrollReveal reducedMotion={reducedMotion}>
         <div className="grid md:grid-cols-2 gap-8">
           <div className="glass-card p-6 md:p-8 break-words">
-            <h2 className="text-2xl font-bold mb-4 text-gradient">Our Story</h2>
+            <h2 className="font-heading text-2xl font-bold mb-4 text-gradient">Our Story</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
               Maniesta Suite was born from the frustration of cluttered academic
               tools. Our founder, Usman Murtaza, envisioned a single, elegant
@@ -218,7 +218,7 @@ export default function AboutSection() {
                 UM
               </div>
               <div>
-                <h3 className="text-xl font-semibold">
+                <h3 className="font-heading text-xl font-semibold">
                   <a
                     href="https://usmanmurtaza.netlify.app/"
                     target="_blank"
@@ -292,7 +292,7 @@ export default function AboutSection() {
 
       <ScrollReveal reducedMotion={reducedMotion}>
         <div className="glass-card p-6 md:p-8 text-center break-words">
-          <h2 className="text-2xl font-bold mb-4 text-gradient">Our Vision</h2>
+          <h2 className="font-heading text-2xl font-bold mb-4 text-gradient">Our Vision</h2>
           <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             To become the world’s most trusted academic toolkit – empowering
             every student with beautiful, accessible, and intelligent tools that
@@ -304,7 +304,7 @@ export default function AboutSection() {
       {/* Why Maniesta Suite – with staggerChildren (only if motion allowed) */}
       <ScrollReveal reducedMotion={reducedMotion}>
         <div className="glass-card p-6 md:p-8 break-words">
-          <h2 className="text-2xl font-bold mb-6 text-gradient text-center">
+          <h2 className="font-heading text-2xl font-bold mb-6 text-gradient text-center">
             Why Maniesta Suite?
           </h2>
 
@@ -317,7 +317,7 @@ export default function AboutSection() {
                       <SparkleIcon />
                     </span>
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                      <h3 className="font-heading font-semibold text-gray-900 dark:text-white">
                         {point.title}
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -354,7 +354,7 @@ export default function AboutSection() {
                       <SparkleIcon />
                     </span>
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">
+                      <h3 className="font-heading font-semibold text-gray-900 dark:text-white">
                         {point.title}
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -386,7 +386,7 @@ export default function AboutSection() {
       {/* Core Values – with staggerChildren (only if motion allowed) */}
       <ScrollReveal reducedMotion={reducedMotion}>
         <div>
-          <h2 className="text-2xl font-bold mb-6 text-gradient text-center">
+          <h2 className="font-heading text-2xl font-bold mb-6 text-gradient text-center">
             Our Values
           </h2>
 
@@ -401,7 +401,7 @@ export default function AboutSection() {
                     {item.icon}
                   </span>
                   <div>
-                    <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
+                    <h3 className="font-heading text-lg font-semibold mb-1">{item.title}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       {item.desc}
                     </p>
@@ -429,7 +429,7 @@ export default function AboutSection() {
                     {item.icon}
                   </span>
                   <div>
-                    <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
+                    <h3 className="font-heading text-lg font-semibold mb-1">{item.title}</h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
                       {item.desc}
                     </p>

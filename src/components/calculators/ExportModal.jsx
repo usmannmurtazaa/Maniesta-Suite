@@ -1,6 +1,6 @@
+// src/components/calculators/ExportModal.jsx
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import Modal from "../common/Modal";
 import { useDashboard } from "../../contexts/DashboardProvider";
 import { get, save } from "../../services/storageService";
 
@@ -31,10 +31,6 @@ const ErrorAlertIcon = () => (
   </svg>
 );
 
-/**
- * Local hook to detect reduced‑motion preference.
- * (Can be extracted to a shared utility later.)
- */
 function usePrefersReducedMotion() {
   const [prefers, setPrefers] = useState(false);
   useEffect(() => {
@@ -45,6 +41,75 @@ function usePrefersReducedMotion() {
     return () => mq.removeEventListener("change", handler);
   }, []);
   return prefers;
+}
+
+/* ── Lightweight focus trap & scroll lock (self‑contained) ───────── */
+function useModalAccessibility(isOpen, onClose, modalRef) {
+  const previousFocusRef = useRef(null);
+
+  // Scroll lock & scrollbar compensation
+  useEffect(() => {
+    if (!isOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    const originalPaddingRight = document.body.style.paddingRight;
+    document.body.style.overflow = "hidden";
+    if (scrollbarWidth > 0)
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+
+    const handleKey = (e) => {
+      if (e.key === "Escape") onClose?.();
+    };
+    document.addEventListener("keydown", handleKey);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [isOpen, onClose]);
+
+  // Focus trap
+  useEffect(() => {
+    if (!isOpen) return;
+    previousFocusRef.current = document.activeElement;
+    const timer = setTimeout(() => {
+      const el = modalRef.current;
+      if (!el) return;
+      const firstFocusable = el.querySelector(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (firstFocusable) firstFocusable.focus({ preventScroll: true });
+      else el.focus({ preventScroll: true });
+    }, 60);
+
+    const handleTab = (e) => {
+      if (e.key !== "Tab") return;
+      const container = modalRef.current;
+      if (!container) return;
+      const focusable = container.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleTab);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("keydown", handleTab);
+      previousFocusRef.current?.focus?.();
+    };
+  }, [isOpen, modalRef]);
 }
 
 export default function ExportModal({
@@ -60,16 +125,14 @@ export default function ExportModal({
   const [generationError, setGenerationError] = useState(null);
   const fullNameRef = useRef(null);
   const reducedMotion = usePrefersReducedMotion();
+  const modalRef = useRef(null);
 
-  // Load saved user details from localStorage when modal opens
+  useModalAccessibility(isOpen, onClose, modalRef);
+
   useEffect(() => {
     if (isOpen) {
       const saved = get(USER_DETAILS_KEY);
-      if (saved) {
-        setUserData(saved);
-      } else {
-        setUserData(INITIAL_USER_DATA);
-      }
+      setUserData(saved ?? INITIAL_USER_DATA);
       setFieldErrors({});
       setSuccessFiles(null);
       setGenerationError(null);
@@ -100,11 +163,7 @@ export default function ExportModal({
       const pdfUrl = URL.createObjectURL(files.pdfBlob);
       const csvUrl = URL.createObjectURL(files.csvBlob);
       setSuccessFiles({ pdfUrl, csvUrl });
-
-      // Save user details for future exports
       save(USER_DETAILS_KEY, userData);
-
-      // Add to dashboard export history
       addExportRecord({
         filename: `Academic_Record_${new Date().toISOString().slice(0, 19)}.pdf`,
         type: "pdf",
@@ -129,16 +188,14 @@ export default function ExportModal({
 
   const handleRetry = () => {
     setGenerationError(null);
-    // Re-submit the same user data
     handleSubmit({ preventDefault: () => {} });
   };
 
-  // Success checkmark – static if reduced motion
   const SuccessCheckmark = () =>
     reducedMotion ? (
-      <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center">
+      <div className="w-14 h-14 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center">
         <svg
-          className="w-8 h-8 text-emerald-500"
+          className="w-7 h-7 text-emerald-500"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -152,10 +209,10 @@ export default function ExportModal({
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ type: "spring", stiffness: 200 }}
-        className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center"
+        className="w-14 h-14 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center"
       >
         <svg
-          className="w-8 h-8 text-emerald-500"
+          className="w-7 h-7 text-emerald-500"
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
@@ -166,238 +223,286 @@ export default function ExportModal({
       </motion.div>
     );
 
+  // Compact overlay with internal scroll
   return (
-    <Modal isOpen={isOpen} onClose={!isExporting ? handleClose : undefined}>
-      {/* Main modal container with constrained height and flex layout */}
-      <div className="flex flex-col max-h-[85vh] min-h-[50vh]">
-        {successFiles ? (
-          // ── Success Screen ──
-          <div className="flex flex-col h-full">
-            <div className="shrink-0 pb-4 border-b border-white/20 dark:border-white/10">
-              <h3 className="text-2xl font-bold text-gradient text-center">
-                Export Ready!
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 text-center mt-1">
-                Your academic record has been generated.
-              </p>
-            </div>
-            <div className="flex-1 overflow-y-auto py-6 text-center space-y-6">
-              <SuccessCheckmark />
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <a
-                  href={successFiles.pdfUrl}
-                  download="Academic_Record.pdf"
-                  className="btn-primary py-3 px-6 flex items-center justify-center gap-2"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Download PDF
-                </a>
-                <a
-                  href={successFiles.csvUrl}
-                  download="Academic_Record.csv"
-                  className="btn-secondary py-3 px-6 flex items-center justify-center gap-2"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                  </svg>
-                  Download CSV
-                </a>
-              </div>
-            </div>
-            <div className="shrink-0 pt-4 border-t border-white/20 dark:border-white/10 text-center">
-              <button
-                onClick={handleClose}
-                className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 underline transition-colors py-2"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          onClick={handleClose}
+        >
+          <motion.div
+            ref={modalRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="export-modal-title"
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            transition={{ type: "spring", stiffness: 260, damping: 22 }}
+            className="glass w-full max-w-md max-h-[85dvh] rounded-2xl overflow-hidden flex flex-col shadow-glass-lg border border-white/20 dark:border-white/10"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={handleClose}
+              className="absolute top-3 right-3 z-10 w-10 h-10 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-200/40 dark:hover:bg-gray-700/40 transition-colors"
+              aria-label="Close"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
               >
-                Close
-              </button>
-            </div>
-          </div>
-        ) : (
-          // ── Form Screen ──
-          <>
-            <div className="shrink-0 pb-3 border-b border-white/20 dark:border-white/10">
-              <h3 className="text-2xl font-bold text-gradient">
-                Export Academic Record
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Fill your details to generate PDF and CSV files.
-              </p>
-            </div>
+                <path d="M18 6L6 18" />
+                <path d="M6 6l12 12" />
+              </svg>
+            </button>
 
-            <div className="flex-1 overflow-y-auto py-4">
-              <form
-                id="export-form"
-                onSubmit={handleSubmit}
-                className="space-y-5"
-              >
-                <div>
-                  <label
-                    htmlFor="fullName"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+            {/* Content area – scrollable */}
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-5 sm:p-6">
+              {successFiles ? (
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <h3
+                    id="export-modal-title"
+                    className="text-xl font-bold text-gradient"
                   >
-                    Full Name *
-                  </label>
-                  <input
-                    id="fullName"
-                    name="fullName"
-                    type="text"
-                    required
-                    ref={fullNameRef}
-                    value={userData.fullName}
-                    onChange={handleChange}
-                    className={`input-base ${fieldErrors.fullName ? "input-error" : ""}`}
-                    placeholder="Your Name"
-                  />
-                  {fieldErrors.fullName && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="mt-1 text-sm text-red-500"
+                    Export Ready!
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Your academic record has been generated.
+                  </p>
+                  <SuccessCheckmark />
+                  <div className="flex flex-col sm:flex-row gap-3 w-full">
+                    <a
+                      href={successFiles.pdfUrl}
+                      download="Academic_Record.pdf"
+                      className="btn-primary py-2.5 px-4 flex items-center justify-center gap-2 text-sm min-h-[44px] flex-1"
                     >
-                      {fieldErrors.fullName}
-                    </motion.p>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      htmlFor="studentId"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Download PDF
+                    </a>
+                    <a
+                      href={successFiles.csvUrl}
+                      download="Academic_Record.csv"
+                      className="btn-secondary py-2.5 px-4 flex items-center justify-center gap-2 text-sm min-h-[44px] flex-1"
                     >
-                      Student ID
-                    </label>
-                    <input
-                      id="studentId"
-                      name="studentId"
-                      type="text"
-                      value={userData.studentId}
-                      onChange={handleChange}
-                      className="input-base"
-                      placeholder="Your Student ID"
-                    />
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                      </svg>
+                      Download CSV
+                    </a>
                   </div>
-                  <div>
-                    <label
-                      htmlFor="semester"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                    >
-                      Semester
-                    </label>
-                    <input
-                      id="semester"
-                      name="semester"
-                      type="text"
-                      value={userData.semester}
-                      onChange={handleChange}
-                      className="input-base"
-                      placeholder="Your Semester"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="degree"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                  >
-                    Degree / Program
-                  </label>
-                  <input
-                    id="degree"
-                    name="degree"
-                    type="text"
-                    value={userData.degree}
-                    onChange={handleChange}
-                    className="input-base"
-                    placeholder="Your Degree or Program"
-                  />
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="university"
-                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                  >
-                    University
-                  </label>
-                  <input
-                    id="university"
-                    name="university"
-                    type="text"
-                    value={userData.university}
-                    onChange={handleChange}
-                    className="input-base"
-                    placeholder="Your University Name"
-                  />
-                </div>
-              </form>
-            </div>
-
-            <div className="shrink-0 pt-4 border-t border-white/20 dark:border-white/10">
-              {generationError && (
-                <div className="mb-3 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm flex justify-between items-center">
-                  <span className="flex items-center gap-2">
-                    <ErrorAlertIcon />
-                    {generationError}
-                  </span>
                   <button
-                    onClick={handleRetry}
-                    className="text-sm underline hover:no-underline"
+                    type="button"
+                    onClick={handleClose}
+                    className="text-sm text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 underline transition-colors py-2 min-h-[44px]"
                   >
-                    Retry
+                    Close
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-4">
+                  <h3
+                    id="export-modal-title"
+                    className="text-xl font-bold text-gradient"
+                  >
+                    Export Academic Record
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Fill your details to generate PDF and CSV files.
+                  </p>
+
+                  <form
+                    id="export-form"
+                    onSubmit={handleSubmit}
+                    className="space-y-4"
+                  >
+                    <div>
+                      <label
+                        htmlFor="fullName"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        Full Name *
+                      </label>
+                      <input
+                        id="fullName"
+                        name="fullName"
+                        type="text"
+                        required
+                        ref={fullNameRef}
+                        value={userData.fullName}
+                        onChange={handleChange}
+                        autoComplete="name"
+                        className={`input-base ${fieldErrors.fullName ? "input-error" : ""}`}
+                        placeholder="Your Name"
+                      />
+                      {fieldErrors.fullName && (
+                        <motion.p
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="mt-1 text-sm text-red-500"
+                        >
+                          {fieldErrors.fullName}
+                        </motion.p>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label
+                          htmlFor="studentId"
+                          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                          Student ID
+                        </label>
+                        <input
+                          id="studentId"
+                          name="studentId"
+                          type="text"
+                          value={userData.studentId}
+                          onChange={handleChange}
+                          autoComplete="on"
+                          className="input-base"
+                          placeholder="Your Student ID"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor="semester"
+                          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                        >
+                          Semester
+                        </label>
+                        <input
+                          id="semester"
+                          name="semester"
+                          type="text"
+                          value={userData.semester}
+                          onChange={handleChange}
+                          autoComplete="off"
+                          className="input-base"
+                          placeholder="Your Semester"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="degree"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        Degree / Program
+                      </label>
+                      <input
+                        id="degree"
+                        name="degree"
+                        type="text"
+                        value={userData.degree}
+                        onChange={handleChange}
+                        autoComplete="organization-title"
+                        className="input-base"
+                        placeholder="Your Degree or Program"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        htmlFor="university"
+                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                      >
+                        University
+                      </label>
+                      <input
+                        id="university"
+                        name="university"
+                        type="text"
+                        value={userData.university}
+                        onChange={handleChange}
+                        autoComplete="organization"
+                        className="input-base"
+                        placeholder="Your University Name"
+                      />
+                    </div>
+                  </form>
+
+                  {generationError && (
+                    <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm flex justify-between items-center">
+                      <span className="flex items-center gap-2">
+                        <ErrorAlertIcon />
+                        {generationError}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleRetry}
+                        className="text-sm underline hover:no-underline min-h-[44px]"
+                      >
+                        Retry
+                      </button>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    form="export-form"
+                    disabled={isExporting || !userData.fullName}
+                    className="btn-primary w-full py-3 flex items-center justify-center gap-2 min-h-[44px]"
+                  >
+                    {isExporting ? (
+                      <>
+                        <svg
+                          className="animate-spin h-5 w-5"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                            fill="none"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          />
+                        </svg>
+                        Generating files...
+                      </>
+                    ) : (
+                      "Generate Export Files"
+                    )}
                   </button>
                 </div>
               )}
-              <button
-                type="submit"
-                form="export-form"
-                disabled={isExporting || !userData.fullName}
-                className="btn-primary w-full py-3 flex items-center justify-center gap-2"
-              >
-                {isExporting ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                        fill="none"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      />
-                    </svg>
-                    Generating files...
-                  </>
-                ) : (
-                  "Generate Export Files"
-                )}
-              </button>
             </div>
-          </>
-        )}
-      </div>
-    </Modal>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

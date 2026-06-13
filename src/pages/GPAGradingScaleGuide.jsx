@@ -20,12 +20,12 @@ export default function GPAGradingScaleGuide() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="glass-card p-6 md:p-8 rounded-2xl">
-          <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-4">GPA Grading Scale Guide</h1>
+          <h1 className="font-hero text-3xl md:text-4xl font-bold text-gradient mb-4">GPA Grading Scale Guide</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-8">Common grading scales and how to convert letter grades to points.</p>
 
           <div className="space-y-8 text-gray-700 dark:text-gray-300">
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">4.0 Scale (Most Common)</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">4.0 Scale (Most Common)</h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white/50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-700">
                   <thead><tr><th className="p-3">Letter Grade</th><th className="p-3">Grade Points</th><th className="p-3">Percentage Equivalent (Typical)</th></tr></thead>
@@ -47,7 +47,7 @@ export default function GPAGradingScaleGuide() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">5.0 Scale (Weighted / Some Universities)</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">5.0 Scale (Weighted / Some Universities)</h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white/50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-700">
                   <thead><tr><th className="p-3">Letter Grade</th><th className="p-3">Grade Points</th></tr></thead>
@@ -65,7 +65,7 @@ export default function GPAGradingScaleGuide() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">10.0 Scale (Common in India)</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">10.0 Scale (Common in India)</h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full bg-white/50 dark:bg-black/20 rounded-xl border border-gray-200 dark:border-gray-700">
                   <thead><tr><th className="p-3">Grade</th><th className="p-3">Grade Points</th></tr></thead>
@@ -83,7 +83,7 @@ export default function GPAGradingScaleGuide() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Academic Standing (as calculated by Maniesta Suite)</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Academic Standing (as calculated by Maniesta Suite)</h2>
               <p className="mb-2">Our GPA calculator determines academic standing based on the percentage of the maximum scale value. For the 4.0 scale, the thresholds are:</p>
               <ul className="list-disc pl-6 space-y-1">
                 <li><strong>3.70 – 4.00</strong> (92.5%+): Outstanding / Dean’s List</li>
@@ -97,7 +97,7 @@ export default function GPAGradingScaleGuide() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Related Resources</h2>
+              <h2 className="font-heading text-2xl font-semibold mb-3 text-gray-900 dark:text-white">Related Resources</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li><Link to="/how-to-calculate-gpa" className="text-brand-500 hover:underline">How to Calculate GPA</Link></li>
                 <li><Link to="/gpa-to-percentage" className="text-brand-500 hover:underline">GPA to Percentage Guide</Link></li>

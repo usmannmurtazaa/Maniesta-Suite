@@ -1,5 +1,5 @@
 // src/pages/Home.jsx
-import { useRef, useState, useEffect, useMemo } from "react";
+import { useRef, useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { motion, useInView, useSpring } from "framer-motion";
 import {
@@ -30,12 +30,12 @@ function usePrefersReducedMotion() {
   return prefers;
 }
 
-// ----- Tool definitions (icon components used inside the card) -----
+// ----- Tool definitions -----
 const tools = [
   {
     name: "GPA Calculator",
     path: "/gpa",
-    Icon: CalculatorIcon, // reuse generic calculator? better to have GPAIcon, but for brevity keep.
+    Icon: CalculatorIcon,
     desc: "Compute semester GPA instantly.",
     gradient: "from-brand-400 to-violet-400",
   },
@@ -56,14 +56,14 @@ const tools = [
   {
     name: "Unit Converter",
     path: "/converter",
-    Icon: CalculatorIcon, // or specific UnitIcon
+    Icon: CalculatorIcon,
     desc: "Length, weight, temperature, and more.",
     gradient: "from-emerald-400 to-green-400",
   },
   {
     name: "Interest",
     path: "/interest",
-    Icon: ChartIcon, // or MoneyIcon
+    Icon: ChartIcon,
     desc: "Simple, compound, loan EMI.",
     gradient: "from-yellow-400 to-amber-400",
   },
@@ -96,7 +96,6 @@ const statsData = [
   { label: "Students", target: 50000 },
 ];
 
-// AnimatedCounter now respects reduced motion
 function AnimatedCounter({ target, label, reducedMotion }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -106,7 +105,7 @@ function AnimatedCounter({ target, label, reducedMotion }) {
   useEffect(() => {
     if (isInView) {
       if (reducedMotion) {
-        setDisplayValue(target); // no spring animation
+        setDisplayValue(target);
       } else {
         spring.set(target);
         const unsubscribe = spring.on("change", (latest) => {
@@ -123,7 +122,6 @@ function AnimatedCounter({ target, label, reducedMotion }) {
       : displayValue;
 
   if (reducedMotion) {
-    // Static card without motion
     return (
       <div ref={ref} className="glass-card p-4 sm:p-6 text-center">
         <div className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gradient mb-2">
@@ -155,7 +153,7 @@ function AnimatedCounter({ target, label, reducedMotion }) {
   );
 }
 
-// ========== localStorage helper hook (optimized) ==========
+// ========== localStorage helper hook ==========
 const STORAGE_KEYS = {
   RECENT_ACTIONS: "maniesta_recent_actions",
   LAST_GPA: "maniesta_last_gpa",
@@ -191,7 +189,6 @@ function useUserActivity() {
       const recentActions = JSON.parse(
         localStorage.getItem(STORAGE_KEYS.RECENT_ACTIONS) || "[]",
       );
-      // Single state update to avoid cascading re-renders
       setActivity({
         lastGPA,
         lastCurrency,
@@ -210,7 +207,7 @@ function useUserActivity() {
   return { ...activity };
 }
 
-// ========== Activity Insight Panel (no emojis) ==========
+// ========== Activity Insight Panel ==========
 function ActivityInsightPanel({ lastGPA, lastCurrency, lastExport }) {
   return (
     <div className="mt-6 sm:mt-8 flex flex-wrap justify-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
@@ -253,7 +250,7 @@ function ActivityInsightPanel({ lastGPA, lastCurrency, lastExport }) {
   );
 }
 
-// ========== Quick Access Strip (no emojis) ==========
+// ========== Quick Access Strip ==========
 function QuickAccessStrip({ lastGPA, lastCurrency, lastExport }) {
   const items = [];
   if (lastGPA)
@@ -292,6 +289,9 @@ function QuickAccessStrip({ lastGPA, lastCurrency, lastExport }) {
   );
 }
 
+// ─── Lazy‑loaded bottom section ──────────────────────────────────────
+const HomeBottom = lazy(() => import("./HomeBottom"));
+
 export default function Home() {
   const { lastGPA, lastCurrency, lastExport, favoriteTools, recentActions } =
     useUserActivity();
@@ -308,7 +308,6 @@ export default function Home() {
 
   const memoizedTools = useMemo(() => tools, []);
 
-  // Motion props that respect reduced motion
   const heroMotion = prefersReducedMotion
     ? {}
     : {
@@ -323,29 +322,15 @@ export default function Home() {
         animate: { opacity: 1, y: 0 },
         transition: { delay: 0.2 },
       };
-  const featuresHeadingMotion = prefersReducedMotion
-    ? {}
-    : {
-        initial: { opacity: 0 },
-        whileInView: { opacity: 1 },
-        viewport: { once: true },
-      };
-  const finalCTAMotion = prefersReducedMotion
-    ? {}
-    : {
-        initial: { opacity: 0, scale: 0.95 },
-        whileInView: { opacity: 1, scale: 1 },
-        viewport: { once: true },
-      };
 
   return (
     <div className="space-y-24 sm:space-y-28 lg:space-y-32">
       {/* Hero Section */}
       <section className="relative pt-12 sm:pt-16 md:pt-20">
         <div className="absolute inset-0 -z-10 pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-violet-400/20 dark:bg-violet-600/10 rounded-full blur-3xl animate-float" />
-          <div className="absolute top-1/3 right-0 w-[500px] h-[500px] bg-pink-400/20 dark:bg-pink-600/10 rounded-full blur-3xl animate-float animate-delay-1000" />
-          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-indigo-400/20 dark:bg-indigo-600/10 rounded-full blur-3xl animate-float animate-delay-2000" />
+          <div className="absolute top-0 left-1/4 w-[300px] h-[300px] sm:w-[600px] sm:h-[600px] bg-violet-400/20 dark:bg-violet-600/10 rounded-full blur-3xl animate-float" />
+          <div className="absolute top-1/3 right-0 w-[250px] h-[250px] sm:w-[500px] sm:h-[500px] bg-pink-400/20 dark:bg-pink-600/10 rounded-full blur-3xl animate-float animate-delay-1000" />
+          <div className="absolute bottom-0 left-0 w-[200px] h-[200px] sm:w-[400px] sm:h-[400px] bg-indigo-400/20 dark:bg-indigo-600/10 rounded-full blur-3xl animate-float animate-delay-2000" />
         </div>
 
         <motion.div
@@ -360,18 +345,19 @@ export default function Home() {
             <span>New: Live Currency Converter & Dashboard</span>
           </motion.div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight text-gradient mb-4 sm:mb-6">
-            Academic Tools,
+          <h1 className="font-hero text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold tracking-tight text-gradient mb-4 sm:mb-6">
+            Outperform,
             <br />
             <span className="text-gradient-animate">
-              Precision for Students.
+              your own expectations.
             </span>
           </h1>
 
           <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-300 mb-6 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-2">
-            Maniesta Suite provides elegant, intuitive calculators for students.
-            GPA, CGPA, conversions, live currency, and a personal dashboard —
-            all in one premium platform.
+            Maniesta Suite is an academic control center designed to help you
+            track, calculate, and organize your academic progress with precision
+            and confidence. Everything from GPA and CGPA to conversions, live
+            currency, and your personal dashboard - all in one premium platform.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
@@ -389,7 +375,6 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Stats counters */}
           <div className="mt-12 sm:mt-16 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 md:gap-6 max-w-3xl mx-auto">
             {statsData.map((stat) => (
               <AnimatedCounter
@@ -409,7 +394,6 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Quick Access Strip */}
       <QuickAccessStrip
         lastGPA={lastGPA}
         lastCurrency={lastCurrency}
@@ -419,7 +403,7 @@ export default function Home() {
       {/* SEO Content Preview */}
       <div className="container mx-auto px-4 sm:px-6 max-w-3xl">
         <div className="text-center mb-8 p-4 sm:p-6 glass rounded-2xl">
-          <h3 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 dark:text-white">
+          <h3 className="font-heading text-lg sm:text-xl font-semibold mb-3 text-gray-900 dark:text-white">
             Academic Tools Quick Guide
           </h3>
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 sm:gap-x-6 text-xs sm:text-sm">
@@ -455,99 +439,22 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Features Grid */}
-      <section id="features" className="container mx-auto px-4 sm:px-6">
-        <motion.div
-          {...featuresHeadingMotion}
-          className="text-center mb-10 sm:mb-16"
-        >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
-            Everything a student needs
-          </h2>
-          <p className="text-sm sm:text-base md:text-lg text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-            Eight powerful tools + a smart dashboard in one unified experience.
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
-          {memoizedTools.map((tool, i) => {
-            const isFavorited = favoriteTools.includes(
-              tool.path.replace("/", ""),
-            );
-            const isRecent = recentToolPath === tool.path;
-
-            const cardMotion = prefersReducedMotion
-              ? {}
-              : {
-                  initial: { opacity: 0, y: 40 },
-                  whileInView: { opacity: 1, y: 0 },
-                  viewport: { once: true, margin: "-50px" },
-                  transition: { delay: i * 0.05 },
-                };
-
-            return (
-              <motion.div key={tool.name} {...cardMotion}>
-                <Link
-                  to={tool.path}
-                  className="glass-card group relative overflow-hidden p-4 sm:p-6 h-full block"
-                >
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${tool.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none`}
-                  />
-                  <div className="relative z-10">
-                    {isRecent && (
-                      <span className="absolute -top-2 -right-2 bg-brand-500 text-white text-xs px-2 py-0.5 rounded-full shadow-lg z-20 inline-flex items-center gap-1">
-                        Continue <ArrowRightIcon className="w-3 h-3" />
-                      </span>
-                    )}
-                    {isFavorited && (
-                      <span className="absolute top-0 left-0 text-yellow-400 z-20">
-                        <StarIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-                      </span>
-                    )}
-                    <div
-                      className={`w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${tool.gradient} p-2 sm:p-3 text-white mb-3 sm:mb-5 group-hover:scale-110 transition-transform duration-300`}
-                    >
-                      <tool.Icon className="w-full h-full" />
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-semibold mb-1 sm:mb-2 text-gray-900 dark:text-white group-hover:text-brand-500 transition-colors">
-                      {tool.name}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                      {tool.desc}
-                    </p>
-                  </div>
-                </Link>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="container mx-auto px-4 sm:px-6 max-w-4xl pb-16 sm:pb-20">
-        <motion.div
-          {...finalCTAMotion}
-          className="glass-card p-6 sm:p-10 md:p-16 text-center relative overflow-hidden"
-        >
-          <div className="absolute inset-0 bg-mesh-gradient opacity-30" />
-          <div className="relative z-10">
-            <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
-              Ready to simplify your studies?
-            </h2>
-            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-300 mb-6 sm:mb-8 max-w-xl mx-auto">
-              Join thousands of students who trust Maniesta Suite for accurate,
-              fast academic calculations and a personalised dashboard.
-            </p>
-            <Link
-              to="/dashboard"
-              className="btn-primary text-base sm:text-lg px-6 py-3 sm:px-10 sm:py-4 inline-flex items-center gap-2"
-            >
-              Launch Dashboard <RocketIcon className="w-4 h-4 sm:w-5 sm:h-5" />
-            </Link>
+      {/* Lazy‑loaded below‑fold sections */}
+      <Suspense
+        fallback={
+          <div className="container mx-auto px-4 sm:px-6 space-y-24">
+            <div className="glass-card h-64 animate-pulse" />
+            <div className="glass-card h-48 animate-pulse" />
           </div>
-        </motion.div>
-      </section>
+        }
+      >
+        <HomeBottom
+          favoriteTools={favoriteTools}
+          recentToolPath={recentToolPath}
+          memoizedTools={memoizedTools}
+          prefersReducedMotion={prefersReducedMotion}
+        />
+      </Suspense>
     </div>
   );
 }

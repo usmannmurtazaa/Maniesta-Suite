@@ -42,11 +42,14 @@ const theme = {
   borderRadius: {
     sm: 8, md: 12, lg: 16, xl: 20, full: 9999,
   },
-  // Fonts now match the global app stack (Inter)
+  // Updated to match the new premium typography system
   fonts: {
-    heading: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    brand: "'Agbalumo', system-ui",
+    hero: "'Playfair Display', serif",
+    heading: "'Google Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    body: "'Google Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     mono: "'JetBrains Mono', monospace",
+    math: "'STIX Two Math', serif",
   },
   shadows: {
     sm: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06)',

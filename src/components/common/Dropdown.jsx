@@ -1,10 +1,13 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+// src/components/common/Dropdown.jsx
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
 
-/**
- * Local hook to detect reduced‑motion preference.
- * (Can be extracted to a shared utility later.)
- */
+/* ── Stable unique ID generator ─────────────────────────────────── */
+let uidCounter = 0;
+const nextUid = () => `dropdown-${++uidCounter}`;
+
+/* ── Reduced‑motion hook ────────────────────────────────────────── */
 function usePrefersReducedMotion() {
   const [prefers, setPrefers] = useState(false);
   useEffect(() => {
@@ -17,6 +20,72 @@ function usePrefersReducedMotion() {
   return prefers;
 }
 
+/* ── Icons ──────────────────────────────────────────────────────── */
+const Chevron = ({ open }) => (
+  <motion.svg
+    animate={{ rotate: open ? 180 : 0 }}
+    transition={{ duration: 0.15, ease: "easeInOut" }}
+    className="w-4 h-4 text-gray-400 dark:text-gray-500 ml-2 shrink-0"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path d="M6 9l6 6 6-6" />
+  </motion.svg>
+);
+
+const CheckIcon = () => (
+  <svg
+    className="w-4 h-4 text-brand-500 ml-2 shrink-0"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth="2.5"
+  >
+    <path d="M5 13l4 4L19 7" />
+  </svg>
+);
+
+/* ── Positioning utility (viewport coordinates) ─────────────────── */
+function computePortalPosition(triggerRect, listHeight = 280, margin = 4) {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+
+  const spaceBelow = vh - triggerRect.bottom - margin;
+  const spaceAbove = triggerRect.top - margin;
+
+  let top, maxHeight;
+
+  if (spaceBelow >= 200 || spaceBelow >= spaceAbove) {
+    top = triggerRect.bottom + margin;
+    maxHeight = Math.min(listHeight, spaceBelow);
+  } else {
+    maxHeight = Math.min(listHeight, spaceAbove);
+    top = triggerRect.top - maxHeight - margin;
+  }
+
+  if (top < margin) {
+    maxHeight -= margin - top;
+    top = margin;
+  }
+  maxHeight = Math.max(44, Math.floor(maxHeight));
+
+  let left = triggerRect.left;
+  let width = triggerRect.width;
+
+  if (left + width + margin > vw) {
+    left = vw - width - margin;
+    if (left < margin) {
+      left = margin;
+      width = vw - margin * 2;
+    }
+  }
+
+  return { top, left, width: Math.max(width, 0), maxHeight };
+}
+
+/* ── Main component ─────────────────────────────────────────────── */
 export default function Dropdown({
   options = [],
   value,
@@ -27,261 +96,241 @@ export default function Dropdown({
   className = "",
   optionClassName = "",
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [pos, setPos] = useState({ top: 0, left: 0, width: 0, maxHeight: 0 });
+
   const containerRef = useRef(null);
+  const buttonRef = useRef(null);
   const listRef = useRef(null);
+  const portalRef = useRef(null);
+
+  const uid = useRef(id || nextUid());
+  const buttonId = `${uid.current}-button`;
+  const listboxId = `${uid.current}-listbox`;
+
   const reducedMotion = usePrefersReducedMotion();
 
-  const selectedOption = options.find((opt) => opt.value === value);
-
-  // Close on click outside
-  const handleClickOutside = useCallback((e) => {
-    if (containerRef.current && !containerRef.current.contains(e.target)) {
-      setIsOpen(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-      const idx = options.findIndex((opt) => opt.value === value);
-      setActiveIndex(idx >= 0 ? idx : 0);
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen, handleClickOutside, options, value]);
-
-  // Scroll active option into view
-  useEffect(() => {
-    if (isOpen && activeIndex >= 0 && listRef.current) {
-      const el = listRef.current.children[activeIndex];
-      if (el) el.scrollIntoView({ block: "nearest" });
-    }
-  }, [activeIndex, isOpen]);
-
-  const handleKeyDown = (e) => {
-    if (!isOpen) {
-      if (["Enter", " ", "ArrowDown"].includes(e.key)) {
-        e.preventDefault();
-        setIsOpen(true);
-        return;
-      }
-      return;
-    }
-    switch (e.key) {
-      case "Escape":
-        e.preventDefault();
-        setIsOpen(false);
-        break;
-      case "ArrowDown":
-        e.preventDefault();
-        setActiveIndex((prev) => Math.min(prev + 1, options.length - 1));
-        break;
-      case "ArrowUp":
-        e.preventDefault();
-        setActiveIndex((prev) => Math.max(prev - 1, 0));
-        break;
-      case "Enter":
-      case " ":
-        e.preventDefault();
-        if (activeIndex >= 0 && options[activeIndex]) {
-          onChange(options[activeIndex].value);
-          setIsOpen(false);
-        }
-        break;
-    }
-  };
-
-  const handleSelect = (optValue) => {
-    onChange(optValue);
-    setIsOpen(false);
-  };
-
-  // Chevron icon – static rotation when reduced motion
-  const Chevron = reducedMotion ? (
-    <svg
-      className="w-4 h-4 text-gray-400 shrink-0 ml-2"
-      style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path d="M6 9l6 6 6-6" />
-    </svg>
-  ) : (
-    <motion.svg
-      animate={{ rotate: isOpen ? 180 : 0 }}
-      transition={{ duration: 0.2 }}
-      className="w-4 h-4 text-gray-400 shrink-0 ml-2"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth="2"
-    >
-      <path d="M6 9l6 6 6-6" />
-    </motion.svg>
+  const selectedOption = useMemo(
+    () => options.find((o) => o.value === value) || null,
+    [options, value]
   );
 
-  // Checkmark – static when reduced motion
-  const renderCheckmark = () => {
-    const icon = (
-      <svg
-        className="w-4 h-4 text-brand-500 ml-2 shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth="2.5"
-      >
-        <path d="M5 13l4 4L19 7" />
-      </svg>
-    );
-    if (reducedMotion) return icon;
-    return (
-      <motion.svg
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        className="w-4 h-4 text-brand-500 ml-2 shrink-0"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth="2.5"
-      >
-        <path d="M5 13l4 4L19 7" />
-      </motion.svg>
-    );
-  };
+  // ── Position updater ──────────────────────────────────────────
+  const updatePosition = useCallback(() => {
+    if (!buttonRef.current) return;
+    const rect = buttonRef.current.getBoundingClientRect();
+    setPos(computePortalPosition(rect));
+  }, []);
 
-  // Options list – static or animated
-  const renderDropdownList = () => {
-    if (!isOpen) return null;
-    if (reducedMotion) {
-      return (
-        <div
-          className="absolute z-50 mt-2 w-full glass shadow-glass-lg rounded-xl overflow-hidden border border-white/20 dark:border-white/10"
-          role="listbox"
-          aria-label={label || "Select option"}
-        >
-          <ul
-            ref={listRef}
-            className="max-h-52 overflow-y-auto py-1"
-            role="presentation"
-          >
-            {options.map((opt, idx) => {
-              const isSelected = opt.value === value;
-              const isActive = idx === activeIndex;
-              return (
-                <li
-                  key={opt.value}
-                  role="option"
-                  aria-selected={isSelected}
-                  onClick={() => handleSelect(opt.value)}
-                  onMouseEnter={() => setActiveIndex(idx)}
-                  className={`flex items-center justify-between px-4 py-2.5 text-sm cursor-pointer transition-colors ${optionClassName} ${
-                    isSelected
-                      ? "bg-brand-500/10 text-brand-600 dark:text-brand-400 font-medium"
-                      : isActive
-                        ? "bg-white/10 dark:bg-white/5 text-gray-900 dark:text-white"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-white/5 dark:hover:bg-white/5"
-                  }`}
-                >
-                  {opt.icon && <span className="mr-2 text-lg">{opt.icon}</span>}
-                  <span className="flex-1">{opt.label}</span>
-                  {opt.sub && (
-                    <span className="text-xs text-gray-400 ml-2">
-                      {opt.sub}
-                    </span>
-                  )}
-                  {isSelected && renderCheckmark()}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      );
+  // ── Close & focus return ──────────────────────────────────────
+  const close = useCallback(() => {
+    setOpen(false);
+    buttonRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  // ── Outside click / focus ─────────────────────────────────────
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e) => {
+      const inside =
+        containerRef.current?.contains(e.target) ||
+        portalRef.current?.contains(e.target);
+      if (!inside) close();
+    };
+    document.addEventListener("mousedown", handler);
+    document.addEventListener("focusin", handler);
+    return () => {
+      document.removeEventListener("mousedown", handler);
+      document.removeEventListener("focusin", handler);
+    };
+  }, [open, close]);
+
+  // ── Reposition on scroll / resize / button size change ─────────
+  useEffect(() => {
+    if (!open) return;
+    updatePosition();
+    const ro = new ResizeObserver(updatePosition);
+    ro.observe(buttonRef.current);
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [open, updatePosition]);
+
+  // ── Active index init ─────────────────────────────────────────
+  useEffect(() => {
+    if (!open) return;
+    const idx = options.findIndex((o) => o.value === value);
+    setActiveIndex(idx >= 0 ? idx : 0);
+  }, [open, options, value]);
+
+  // ── Scroll active option into view ────────────────────────────
+  useEffect(() => {
+    if (open && activeIndex >= 0 && listRef.current) {
+      const el = listRef.current.children[activeIndex];
+      el?.scrollIntoView({ block: "nearest" });
     }
+  }, [activeIndex, open]);
 
-    return (
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, y: -8, scale: 0.96 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -8, scale: 0.96 }}
-          transition={{ duration: 0.15, ease: "easeOut" }}
-          className="absolute z-50 mt-2 w-full glass shadow-glass-lg rounded-xl overflow-hidden border border-white/20 dark:border-white/10"
-          role="listbox"
-          aria-label={label || "Select option"}
-        >
-          <ul
-            ref={listRef}
-            className="max-h-52 overflow-y-auto py-1"
-            role="presentation"
-          >
-            {options.map((opt, idx) => {
-              const isSelected = opt.value === value;
-              const isActive = idx === activeIndex;
-              return (
-                <li
-                  key={opt.value}
+  // ── Handlers ──────────────────────────────────────────────────
+  const handleSelect = useCallback(
+    (val) => {
+      onChange(val);
+      close();
+    },
+    [onChange, close]
+  );
+
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (!open) {
+        if (["Enter", " ", "ArrowDown"].includes(e.key)) {
+          e.preventDefault();
+          setOpen(true);
+        }
+        return;
+      }
+      switch (e.key) {
+        case "Escape":
+          e.preventDefault();
+          close();
+          break;
+        case "ArrowDown":
+          e.preventDefault();
+          setActiveIndex((p) => Math.min(p + 1, options.length - 1));
+          break;
+        case "ArrowUp":
+          e.preventDefault();
+          setActiveIndex((p) => Math.max(p - 1, 0));
+          break;
+        case "Enter":
+        case " ":
+          e.preventDefault();
+          if (options[activeIndex]) handleSelect(options[activeIndex].value);
+          break;
+      }
+    },
+    [open, options, activeIndex, handleSelect, close]
+  );
+
+  const getOptionId = useCallback(
+    (idx) => `${listboxId}-option-${idx}`,
+    [listboxId]
+  );
+
+  // ── Animation variants (super fast, no stagger) ────────────────
+  const dropdownVariants = reducedMotion
+    ? { initial: { opacity: 0 }, animate: { opacity: 1 } }
+    : {
+        initial: { opacity: 0, scale: 0.98, y: -4 },
+        animate: { opacity: 1, scale: 1, y: 0 },
+      };
+
+  // ── Portal content ────────────────────────────────────────────
+  const dropdownContent = open ? (
+    <motion.div
+      ref={portalRef}
+      role="listbox"
+      aria-label={label || "Select option"}
+      className="glass rounded-xl overflow-hidden"
+      style={{
+        position: "fixed",
+        top: pos.top,
+        left: pos.left,
+        width: pos.width || "auto",
+        maxHeight: pos.maxHeight,
+        zIndex: 9999,
+      }}
+      variants={dropdownVariants}
+      initial="initial"
+      animate="animate"
+      transition={{ duration: 0.15, ease: "easeOut" }}
+    >
+      <ul
+        ref={listRef}
+        className="relative overflow-y-auto py-1"
+        role="presentation"
+      >
+        {options.length === 0 ? (
+          <li className="px-4 py-3 text-sm text-gray-400 italic">
+            No options available
+          </li>
+        ) : (
+          options.map((opt, idx) => {
+            const isSelected = opt.value === value;
+            const isActive = idx === activeIndex;
+            return (
+              <li key={opt.value} role="presentation">
+                <button
+                  id={getOptionId(idx)}
+                  type="button"
                   role="option"
                   aria-selected={isSelected}
                   onClick={() => handleSelect(opt.value)}
                   onMouseEnter={() => setActiveIndex(idx)}
-                  className={`flex items-center justify-between px-4 py-2.5 text-sm cursor-pointer transition-colors ${optionClassName} ${
+                  onFocus={() => setActiveIndex(idx)}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 text-sm text-left transition-colors duration-75 ${optionClassName} ${
                     isSelected
                       ? "bg-brand-500/10 text-brand-600 dark:text-brand-400 font-medium"
                       : isActive
-                        ? "bg-white/10 dark:bg-white/5 text-gray-900 dark:text-white"
-                        : "text-gray-700 dark:text-gray-300 hover:bg-white/5 dark:hover:bg-white/5"
+                        ? "bg-black/5 dark:bg-white/10 text-gray-900 dark:text-white"
+                        : "text-gray-700 dark:text-gray-300 hover:bg-black/5 dark:hover:bg-white/5"
                   }`}
                 >
-                  {opt.icon && <span className="mr-2 text-lg">{opt.icon}</span>}
-                  <span className="flex-1">{opt.label}</span>
-                  {opt.sub && (
-                    <span className="text-xs text-gray-400 ml-2">
-                      {opt.sub}
-                    </span>
-                  )}
-                  {isSelected && renderCheckmark()}
-                </li>
-              );
-            })}
-          </ul>
-        </motion.div>
-      </AnimatePresence>
-    );
-  };
+                  <span className="flex-1 truncate">{opt.label}</span>
+                  {isSelected && <CheckIcon />}
+                </button>
+              </li>
+            );
+          })
+        )}
+      </ul>
+    </motion.div>
+  ) : null;
 
+  // ── Render ────────────────────────────────────────────────────
   return (
     <div ref={containerRef} className={`relative ${className}`}>
       {label && (
         <label
-          htmlFor={id}
+          htmlFor={buttonId}
           className="block text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5"
         >
           {label}
         </label>
       )}
+
       <button
-        id={id}
+        ref={buttonRef}
+        id={buttonId}
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setOpen((p) => !p)}
         onKeyDown={handleKeyDown}
         className="w-full px-4 py-2.5 rounded-xl bg-white/70 dark:bg-gray-900/70 border border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all flex items-center justify-between text-left"
         aria-haspopup="listbox"
-        aria-expanded={isOpen}
+        aria-expanded={open}
+        aria-controls={listboxId}
+        aria-activedescendant={
+          open && activeIndex >= 0 ? getOptionId(activeIndex) : undefined
+        }
       >
         <span
           className={
-            selectedOption ? "text-gray-900 dark:text-white" : "text-gray-400"
+            selectedOption
+              ? "text-gray-900 dark:text-white truncate"
+              : "text-gray-400 truncate"
           }
         >
           {selectedOption?.label ?? placeholder}
         </span>
-        {Chevron}
+        <Chevron open={open} />
       </button>
 
-      {renderDropdownList()}
+      {typeof document !== "undefined" && createPortal(dropdownContent, document.body)}
     </div>
   );
 }

@@ -9,7 +9,7 @@ export default function ExportHistoryWidget({ exports }) {
   }
   return (
     <div className="glass-card p-5">
-      <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+      <h3 className="font-heading font-semibold text-lg mb-3 flex items-center gap-2">
         {/* Inline SVG icon – replaces 📎 */}
         <svg
           className="w-5 h-5 text-brand-500"

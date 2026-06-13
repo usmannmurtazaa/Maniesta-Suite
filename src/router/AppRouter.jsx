@@ -74,7 +74,8 @@ export default function AppRouter() {
 
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <Routes location={location} key={location.pathname}>
+      {/* Removed key={location.pathname} to prevent unnecessary remounting */}
+      <Routes location={location}>
         {/* Existing routes */}
         <Route path="/" element={<Home />} />
         <Route path="/gpa" element={<GPAPage />} />

@@ -238,7 +238,7 @@ export default function CGPACalculator({ scale = 4.0 }) {
       {!reducedMotion && <CelebrationOverlay show={showCelebration} />}
 
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
+        <h2 className="font-heading text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-400">
           Semester GPAs
         </h2>
         <span className="text-xs font-mono px-3 py-1.5 rounded-full bg-brand-50 dark:bg-brand-900/30 text-brand-600 dark:text-brand-300 border border-brand-200/40 dark:border-brand-500/30">

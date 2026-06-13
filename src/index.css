@@ -2,12 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Custom Keyframes (added for missing animations) ───────────────── */
-@keyframes gradientMove {
-  0% { background-position: 0% center; }
-  100% { background-position: 200% center; }
-}
-
+/* ── Custom Keyframes (used by blobs, etc.) ───────────────────────── */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50% { transform: translateY(-20px); }
@@ -54,11 +49,6 @@
     /* Typography */
     .text-gradient {
         @apply bg-gradient-brand bg-clip-text text-transparent;
-    }
-
-    .text-gradient-animate {
-        background-size: 200% auto;
-        animation: gradientMove 4s linear infinite;
     }
 
     /* Buttons */
@@ -143,4 +133,53 @@
   .btn-outline:hover {
     transform: none !important;
   }
+  .animate-spin {
+    animation: none !important;
+  }
+}
+
+/* ── Print styles ──────────────────────────────────────────────────── */
+@media print {
+  .floating-blob,
+  .glass-card::before,
+  .glass-card::after {
+    display: none !important;
+  }
+  .glass,
+  .glass-card,
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-outline {
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+}
+
+/* ── Enterprise‑grade brand logo animation ───────────────────────── */
+@keyframes shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.text-gradient-animate {
+  background-image: linear-gradient(
+    120deg,
+    #6d28d9 0%,
+    #a78bfa 20%,
+    #b46ffe 40%,
+    #a855f7 60%,
+    #6366f1 80%,
+    #6d28d9 100%
+  );
+  background-size: 200% auto;
+  animation: shimmer 3s ease-in-out infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }

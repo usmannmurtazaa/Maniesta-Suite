@@ -13,12 +13,12 @@ export default function PrivacyPolicy() {
       />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="glass-card p-6 md:p-8 rounded-2xl">
-          <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-2">Privacy Policy</h1>
+          <h1 className="font-hero text-3xl md:text-4xl font-bold text-gradient mb-2">Privacy Policy</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">Last updated: June 10, 2026</p>
 
           <div className="space-y-8 text-gray-700 dark:text-gray-300">
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Information We Collect</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Information We Collect</h2>
               <p className="mb-2">Maniesta Suite does <strong>not</strong> require you to create an account. When you use our tools:</p>
               <ul className="list-disc pl-6 space-y-1">
                 <li><strong>Export data:</strong> If you generate a PDF or CSV report, the information you enter (name, student ID, university, degree, semester) is temporarily stored in your browser and saved to our secure Firebase database. This helps us understand how students use our tools and improve the platform.</li>
@@ -29,7 +29,7 @@ export default function PrivacyPolicy() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">How We Use Your Information</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">How We Use Your Information</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li>To provide and improve our calculators and export features.</li>
                 <li>To analyze usage patterns and fix bugs.</li>
@@ -38,12 +38,12 @@ export default function PrivacyPolicy() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Cookies & Tracking</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Cookies & Tracking</h2>
               <p>You can disable cookies in your browser settings. However, some features (like theme preference) may not work as expected.</p>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Third‑Party Services</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Third‑Party Services</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li><strong>Firebase (Google):</strong> Stores export records securely. Data is encrypted in transit and at rest.</li>
                 <li><strong>Google Analytics:</strong> Collects anonymous traffic data.</li>
@@ -52,12 +52,12 @@ export default function PrivacyPolicy() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Data Security</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Data Security</h2>
               <p>We use industry‑standard security measures. However, no online service is 100% secure. By using Maniesta Suite, you acknowledge this risk.</p>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Your Rights & Choices</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Your Rights & Choices</h2>
               <ul className="list-disc pl-6 space-y-1">
                 <li>You can request deletion of your export records by emailing us.</li>
                 <li>You can opt out of Google Analytics using the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer" className="text-brand-500 hover:underline">Google Analytics Opt‑out Browser Add‑on</a>.</li>
@@ -65,12 +65,12 @@ export default function PrivacyPolicy() {
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Changes to This Policy</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Changes to This Policy</h2>
               <p>We will update this page if our practices change. The “Last updated” date will reflect changes.</p>
             </section>
 
             <section>
-              <h2 className="text-xl font-semibold mb-3 text-gray-900 dark:text-white">Contact Us</h2>
+              <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Contact Us</h2>
               <p>For privacy questions, email: <a href="mailto:privacy@maniestasuite.netlify.app" className="text-brand-500 hover:underline">privacy@maniestasuite.netlify.app</a></p>
             </section>
           </div>

@@ -22,7 +22,7 @@ export default function CurrencyWidget({ lastCurrency }) {
   if (!lastCurrency) {
     return (
       <div className="glass-card p-5">
-        <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+        <h3 className="font-heading font-semibold text-lg mb-2 flex items-center gap-2">
           <CurrencyIcon />
           Last Conversion
         </h3>
@@ -38,7 +38,7 @@ export default function CurrencyWidget({ lastCurrency }) {
   }
   return (
     <div className="glass-card p-5">
-      <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+      <h3 className="font-heading font-semibold text-lg mb-2 flex items-center gap-2">
         <CurrencyIcon />
         Last Conversion
       </h3>

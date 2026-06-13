@@ -189,10 +189,6 @@ export default function ContactForm() {
 
       {reducedMotion ? (
         <div className="glass-card p-8 md:p-12 relative z-10 break-words">
-          {/* static card content – same as below, no motion */}
-          <h2 className="text-3xl font-bold text-gradient mb-6">
-            Get in Touch
-          </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-8">
             Have a question or feedback? Fill out the form and we’ll get back to
             you within 24 hours. You can also use the{" "}
@@ -384,9 +380,6 @@ export default function ContactForm() {
           viewport={{ once: true }}
           className="glass-card p-8 md:p-12 relative z-10 break-words"
         >
-          <h2 className="text-3xl font-bold text-gradient mb-6">
-            Get in Touch
-          </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-8">
             Have a question or feedback? Fill out the form and we’ll get back to
             you within 24 hours. You can also use the{" "}

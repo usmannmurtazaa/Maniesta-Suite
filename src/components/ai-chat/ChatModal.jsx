@@ -1,10 +1,10 @@
 // src/components/ai-chat/ChatModal.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
-/* ── Local reduced‑motion hook ──────────────────────────────────── */
 function usePrefersReducedMotion() {
   const [prefers, setPrefers] = useState(false);
   useEffect(() => {
@@ -28,25 +28,27 @@ export default function ChatModal({
   onClear,
 }) {
   const reducedMotion = usePrefersReducedMotion();
+  const modalRef = useRef(null);
 
-  // Close on Escape key
+  // Scroll lock + focus trap
+  useFocusTrap(modalRef, isOpen, onClose);
+
   useEffect(() => {
-    if (!isOpen) return;
-    const handleKey = (e) => {
-      if (e.key === 'Escape') onClose?.();
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
     };
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
-  // Common container classes
   const containerClasses =
-    'fixed bottom-24 right-6 z-50 w-[90vw] sm:w-96 h-[70vh] sm:h-[600px] glass rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/20 dark:border-white/10';
+    'fixed bottom-24 right-6 z-50 w-[90vw] sm:w-96 h-[70dvh] sm:h-[600px] glass rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-white/20 dark:border-white/10';
 
-  // Header and content (reused in both animated and static versions)
   const chatContent = (
     <>
-      {/* Header */}
       <div className="shrink-0 px-4 py-3 border-b border-white/20 dark:border-white/10 flex justify-between items-center bg-white/50 dark:bg-gray-900/50 backdrop-blur">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full bg-gradient-brand flex items-center justify-center text-white font-bold">AI</div>
@@ -76,33 +78,24 @@ export default function ChatModal({
         </div>
       </div>
 
-      {/* Messages */}
       <ChatMessages messages={messages} isTyping={isTyping} />
-
-      {/* Input + Quick replies */}
       <ChatInput onSend={onSendMessage} onQuickReply={onQuickReply} quickReplies={quickReplies} />
     </>
   );
 
-  // Reduced motion: static modal, no AnimatePresence
   if (reducedMotion) {
     return isOpen ? (
-      <div
-        className={containerClasses}
-        role="dialog"
-        aria-modal="true"
-        aria-label="AI Chat"
-      >
+      <div ref={modalRef} className={containerClasses} role="dialog" aria-modal="true" aria-label="AI Chat">
         {chatContent}
       </div>
     ) : null;
   }
 
-  // Animated modal
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          ref={modalRef}
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}

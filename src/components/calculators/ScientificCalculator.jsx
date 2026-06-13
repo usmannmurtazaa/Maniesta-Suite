@@ -252,7 +252,7 @@ export default function ScientificCalculator() {
   // History panel – static if reduced motion
   const historyPanel = showHistory && history.length > 0 && (
     <div className="mt-4 border-t border-gray-200/30 dark:border-white/10 pt-3">
-      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+      <h4 className="font-heading text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
         History
       </h4>
       <div className="max-h-36 overflow-y-auto space-y-1">
@@ -262,7 +262,7 @@ export default function ScientificCalculator() {
             className="flex justify-between text-xs text-gray-600 dark:text-gray-400 hover:bg-white/20 dark:hover:bg-white/5 p-1 rounded transition-colors"
           >
             <span className="truncate mr-2">{h.expression}</span>
-            <span className="font-mono font-medium text-gray-900 dark:text-white">
+            <span className="font-math font-medium text-gray-900 dark:text-white">
               = {h.result}
             </span>
           </div>
@@ -283,7 +283,7 @@ export default function ScientificCalculator() {
       {/* Display */}
       <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur p-3 rounded-xl mb-4 text-right overflow-hidden border border-white/20 dark:border-white/10">
         <div
-          className="text-2xl sm:text-3xl font-mono font-light text-gray-900 dark:text-white truncate"
+          className="text-2xl sm:text-3xl font-math font-light text-gray-900 dark:text-white truncate"
           aria-live="polite"
         >
           {display}

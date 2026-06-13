@@ -152,7 +152,7 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-1">
             <Link
               to="/"
-              className="text-2xl font-bold text-gradient hover:opacity-80 transition-opacity"
+              className="font-brand text-2xl font-bold text-gradient hover:opacity-80 transition-opacity"
             >
               Maniesta
             </Link>
@@ -181,7 +181,7 @@ export default function Footer() {
 
           {columns.map((col) => (
             <div key={col.title}>
-              <h4 className="text-xs font-semibold mb-3 text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+              <h4 className="font-heading text-xs font-semibold mb-3 text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                 {col.title}
               </h4>
               <ul className="space-y-2">

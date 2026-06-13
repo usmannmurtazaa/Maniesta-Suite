@@ -61,7 +61,7 @@ function FAQItem({ question, answer, isOpen, onClick }) {
         onClick={onClick}
         className="w-full text-left py-4 flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-lg"
       >
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{question}</h3>
+        <h3 className="font-heading text-lg font-semibold text-gray-900 dark:text-white">{question}</h3>
         <span className="text-2xl text-brand-500 transition-transform duration-200" style={{ transform: isOpen ? "rotate(45deg)" : "rotate(0)" }}>
           +
         </span>
@@ -87,7 +87,7 @@ export default function FAQ() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="glass-card p-6 md:p-8 rounded-2xl">
-          <h1 className="text-3xl md:text-4xl font-bold text-gradient mb-2">Frequently Asked Questions</h1>
+          <h1 className="font-hero text-3xl md:text-4xl font-bold text-gradient mb-2">Frequently Asked Questions</h1>
           <p className="text-gray-600 dark:text-gray-400 mb-8">Everything you need to know about using Maniesta Suite.</p>
 
           <div className="space-y-1">

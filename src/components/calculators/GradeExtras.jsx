@@ -243,7 +243,7 @@ export function TargetGPACalculator({ currentGPA, totalCredits, darkMode }) {
         <span aria-hidden="true">
           <TargetIcon />
         </span>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="font-heading text-lg font-semibold text-gray-900 dark:text-white">
           Target GPA Calculator
         </h3>
       </div>

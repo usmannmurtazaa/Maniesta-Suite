@@ -54,7 +54,7 @@ export default function DashboardLayout({ children }) {
       {/* Desktop Sidebar */}
       <aside className="hidden md:block w-64 shrink-0 glass border-r border-white/20 dark:border-white/10 h-screen sticky top-0 overflow-y-auto">
         <div className="p-5">
-          <Link to="/" className="text-2xl font-bold text-gradient block mb-8">
+          <Link to="/" className="font-brand text-2xl font-bold text-gradient block mb-8">
             Maniesta
           </Link>
           <nav className="space-y-1">
@@ -139,7 +139,7 @@ export default function DashboardLayout({ children }) {
               />
             </svg>
           </button>
-          <Link to="/" className="text-xl font-bold text-gradient">
+          <Link to="/" className="font-brand text-xl font-bold text-gradient">
             Maniesta
           </Link>
           <div className="w-8" />
@@ -157,7 +157,7 @@ export default function DashboardLayout({ children }) {
               <aside className="fixed top-0 left-0 h-full w-64 glass z-50 md:hidden shadow-xl">
                 <div className="p-5">
                   <div className="flex justify-between items-center mb-8">
-                    <Link to="/" className="text-2xl font-bold text-gradient">
+                    <Link to="/" className="font-brand text-2xl font-bold text-gradient">
                       Maniesta
                     </Link>
                     <button
@@ -223,7 +223,7 @@ export default function DashboardLayout({ children }) {
                 >
                   <div className="p-5">
                     <div className="flex justify-between items-center mb-8">
-                      <Link to="/" className="text-2xl font-bold text-gradient">
+                      <Link to="/" className="font-brand text-2xl font-bold text-gradient">
                         Maniesta
                       </Link>
                       <button

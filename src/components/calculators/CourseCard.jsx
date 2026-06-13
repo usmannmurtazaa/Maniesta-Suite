@@ -1,3 +1,4 @@
+// src/components/calculators/CourseCard.jsx
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { getGradeScale } from "../../utils/grades";
@@ -94,14 +95,14 @@ export default function CourseCard({
         COURSE {index + 1}
       </span>
 
-      {/* Remove button */}
+      {/* Remove button – enlarged to 44×44 px touch target */}
       {removable && (
         <motion.button
           type="button"
           {...removeBtnHover}
           {...removeBtnTap}
           onClick={() => onRemove(id)}
-          className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-lg bg-red-500/15 border border-red-500/30 text-red-500 hover:bg-red-500/30 transition-colors z-10"
+          className="absolute top-3 right-3 w-11 h-11 flex items-center justify-center rounded-lg bg-red-500/15 border border-red-500/30 text-red-500 hover:bg-red-500/30 transition-colors z-10"
           aria-label={`Remove course ${index + 1}`}
         >
           <svg
@@ -126,7 +127,7 @@ export default function CourseCard({
         <div>
           <label
             htmlFor={`course-code-${id}`}
-            className="block text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5"
+            className="block text-caption font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5"
           >
             Course Code
           </label>
@@ -135,13 +136,13 @@ export default function CourseCard({
             type="text"
             value={data.code}
             maxLength={12}
-            placeholder="e.g. CS-301"
+            placeholder="e.g. ABC-123"
             onChange={(e) => onChange(id, "code", e.target.value)}
             className="input-base w-full focus:ring-2 focus:ring-brand-400/50 focus:border-brand-400 transition-all"
             aria-describedby={`code-hint-${id}`}
           />
           <span id={`code-hint-${id}`} className="sr-only">
-            Enter the course code, like CS-301
+            Enter the course code, like ABC-123
           </span>
         </div>
 
