@@ -139,10 +139,10 @@ export default function MediaKit() {
             <p>
               <strong>Email:</strong>{" "}
               <a
-                href="mailto:partner@maniestasuite.netlify.app"
+                href="mailto:maniestasuite@gmail.com"
                 className="text-brand-500 hover:underline"
               >
-                partner@maniestasuite.netlify.app
+                maniestasuite@gmail.com
               </a>
             </p>
             <p>
