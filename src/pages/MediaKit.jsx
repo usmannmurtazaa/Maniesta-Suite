@@ -11,7 +11,7 @@ export default function MediaKit() {
           name="description"
           content="Media kit for Maniesta Suite – an academic and productivity tools platform. Audience, traffic, and partnership details."
         />
-        <link rel="canonical" href="https://maniestasuite.netlify.app/media-kit" />
+        <link rel="canonical" href="https://maniestasuite.netlify.app/mediakit" />
       </Helmet>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">
