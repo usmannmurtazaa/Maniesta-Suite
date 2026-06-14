@@ -36,7 +36,7 @@ const GPAToPercentageGuide = lazy(
   () => import("../pages/GPAToPercentageGuide"),
 );
 const ToolsPage = lazy(() => import("../pages/ToolsPage"));
-
+const MediaKit = lazy(() => import("../pages/MediaKit"));
 // Dashboard page
 const DashboardPage = lazy(() => import("../pages/DashboardPage"));
 
