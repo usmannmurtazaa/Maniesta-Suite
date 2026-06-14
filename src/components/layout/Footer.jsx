@@ -64,6 +64,7 @@ const columns = [
       { to: "/about", label: "About" },
       { to: "/contact", label: "Contact" },
       { to: "/tools", label: "All Tools" },
+      { to: "/Mediakit", label: "Media Kit" },
     ],
   },
 ];
