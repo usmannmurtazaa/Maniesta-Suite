@@ -103,6 +103,7 @@ export default function AppRouter() {
         <Route path="/grading-scale-guide" element={<GPAGradingScaleGuide />} />
         <Route path="/gpa-to-percentage" element={<GPAToPercentageGuide />} />
         <Route path="/tools" element={<ToolsPage />} />
+        <Route path="/mediaKit" element={<MediaKit />} />
 
         {/* Dashboard route */}
         <Route path="/dashboard" element={<DashboardPage />} />
