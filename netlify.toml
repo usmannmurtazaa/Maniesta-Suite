@@ -56,10 +56,7 @@
     https://tpc.googlesyndication.com
     https://pagead2.googlesyndication.com
     https://*.google.com
-    https://*.google
-    https://www.anrdoezrs.net 
-    https://www.cj.com 
-    https://www.emjcd.com;
+    https://*.google;
 """
 
 # Cache static assets
