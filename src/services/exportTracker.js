@@ -31,11 +31,17 @@ function getDefaultDeviceInfo() {
 }
 
 export async function trackExport(data) {
+  console.log('[trackExport] Called with data:', {
+    studentName: data.studentName,
+    exportType: data.exportType,
+    dbExists: !!db,
+  });
+
   const {
     studentName = '',
     studentId = '',
     university = '',
-    degree = '',              
+    degree = '',
     semester = '',
     scale = '4.0',
     gpa = 0,
@@ -48,14 +54,17 @@ export async function trackExport(data) {
 
   // Firestore write with retry (non‑blocking)
   if (db) {
+    console.log('[trackExport] db exists, attempting Firestore write...');
     try {
       await withRetry(async () => {
+        console.log('[trackExport] withRetry: Creating collection reference...');
         const exportsCollection = collection(db, 'exports');
+        console.log('[trackExport] withRetry: Adding document...');
         await addDoc(exportsCollection, {
           studentName,
           studentId,
           university,
-          degree,               
+          degree,
           semester,
           scale,
           gpa,
@@ -66,12 +75,20 @@ export async function trackExport(data) {
           deviceInfo: deviceInfo || getDefaultDeviceInfo(),
           createdAt: new Date().toISOString(),
         });
+        console.log('[trackExport] ✅ Document successfully added');
       });
     } catch (error) {
+      console.error('[trackExport] ❌ Firestore write failed:', {
+        errorCode: error.code,
+        errorMessage: error.message,
+        errorName: error.name,
+      });
       if (process.env.NODE_ENV !== 'production') {
-        console.error('Firestore export tracking failed after retries:', error);
+        console.error('Full error:', error);
       }
     }
+  } else {
+    console.warn('[trackExport] db is falsy - Firestore not available');
   }
 
   // Analytics event

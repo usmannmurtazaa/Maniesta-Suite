@@ -13,19 +13,41 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
+console.log('[Firebase] Config loaded:', {
+  hasApiKey: !!firebaseConfig.apiKey,
+  hasProjectId: !!firebaseConfig.projectId,
+  projectId: firebaseConfig.projectId,
+  authDomain: firebaseConfig.authDomain,
+});
+
 function getFirebaseApp() {
-  if (getApps().length > 0) return getApp();
-  return initializeApp(firebaseConfig);
+  const existingApps = getApps().length;
+  console.log('[Firebase] getFirebaseApp called, existing apps:', existingApps);
+  if (existingApps > 0) {
+    const app = getApp();
+    console.log('[Firebase] Returning existing app');
+    return app;
+  }
+  console.log('[Firebase] Initializing new Firebase app...');
+  const newApp = initializeApp(firebaseConfig);
+  console.log('[Firebase] ✅ App initialized');
+  return newApp;
 }
 
 const app = getFirebaseApp();
+console.log('[Firebase] app instance created:', !!app);
 
 let db;
 try {
+  console.log('[Firebase] Attempting initializeFirestore with persistent cache...');
   db = initializeFirestore(app, { localCache: persistentLocalCache() });
-} catch {
+  console.log('[Firebase] ✅ Firestore initialized with persistent cache');
+} catch (error) {
+  console.warn('[Firebase] initializeFirestore failed, falling back to getFirestore:', error.message);
   db = getFirestore(app);
+  console.log('[Firebase] ✅ Firestore initialized (fallback)');
 }
+console.log('[Firebase] db instance exported:', !!db);
 export { db };
 
 let analytics = null;
