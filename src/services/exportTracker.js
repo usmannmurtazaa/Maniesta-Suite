@@ -1,6 +1,14 @@
-// src/services/exportTracker.js
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, logEvent } from './firebase';
+
+function throwIfNoDb() {
+  if (!db) {
+    // This error cannot be stripped and will appear in the console / UI.
+    const err = new Error('Firestore instance (db) is not available');
+    err.code = 'firestore/unavailable';
+    throw err;
+  }
+}
 
 async function withRetry(fn, maxRetries = 3, baseDelayMs = 500) {
   let lastError;
@@ -31,13 +39,8 @@ function getDefaultDeviceInfo() {
 }
 
 export async function trackExport(data) {
-  // 1) Fail fast if Firestore is not available
-  if (!db) {
-    const err = new Error('Firestore is not initialized');
-    err.code = 'firestore/unavailable';
-    console.error('[exportTracker]', err);
-    throw err;
-  }
+  // 1. Fail loudly if Firestore is missing – no silent skip
+  throwIfNoDb();
 
   const {
     studentName = '',
@@ -54,39 +57,27 @@ export async function trackExport(data) {
     deviceInfo,
   } = data;
 
-  // 2) Attempt the write with retries
-  try {
-    await withRetry(async () => {
-      const exportsCollection = collection(db, 'exports');
-      await addDoc(exportsCollection, {
-        studentName,
-        studentId,
-        university,
-        degree,
-        semester,
-        scale,
-        gpa,
-        credits,
-        date,
-        exportType,
-        timestamp: serverTimestamp(),
-        deviceInfo: deviceInfo || getDefaultDeviceInfo(),
-        createdAt: new Date().toISOString(),
-      });
+  // 2. Write with retries
+  await withRetry(async () => {
+    const exportsCollection = collection(db, 'exports');
+    await addDoc(exportsCollection, {
+      studentName,
+      studentId,
+      university,
+      degree,
+      semester,
+      scale,
+      gpa,
+      credits,
+      date,
+      exportType,
+      timestamp: serverTimestamp(),
+      deviceInfo: deviceInfo || getDefaultDeviceInfo(),
+      createdAt: new Date().toISOString(),
     });
-  } catch (error) {
-    // 3) Always log the full error (production included)
-    console.error('[exportTracker] Firestore write failed', {
-      code: error.code,
-      message: error.message,
-      name: error.name,
-    });
+  });
 
-    // 4) Re‑throw so the caller can show a toast and the developer sees it
-    throw error;
-  }
-
-  // 5) Analytics event (only fires if the write succeeded)
+  // 3. Analytics only after a successful write
   logEvent('export_tracked', {
     export_type: exportType,
     scale,
