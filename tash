@@ -1,0 +1,13 @@
+[1mdiff --git a/src/components/layout/Footer.jsx b/src/components/layout/Footer.jsx[m
+[1mindex 4557277..2f21360 100644[m
+[1m--- a/src/components/layout/Footer.jsx[m
+[1m+++ b/src/components/layout/Footer.jsx[m
+[36m@@ -102,7 +102,7 @@[m [mconst socialLinks = [[m
+     ),[m
+   },[m
+   {[m
+[31m-    href: "https://linkedin.com", // Placeholder – replace with actual profile[m
+[32m+[m[32m    href: "https://www.linkedin.com/in/maniestasuite",[m[41m [m
+     label: "LinkedIn",[m
+     icon: ([m
+       <svg[m

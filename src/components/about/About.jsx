@@ -271,7 +271,7 @@ export default function AboutSection() {
                 </svg>
               </a>
               <a
-                href="https://linkedin.com"
+                href="https://www.linkedin.com/in/maniestasuite"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-brand-500 transition-colors"

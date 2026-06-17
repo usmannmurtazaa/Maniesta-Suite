@@ -4,8 +4,15 @@
 
 /* ── Custom Keyframes (used by blobs, etc.) ───────────────────────── */
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
 }
 
 /* ── Base styles ──────────────────────────────────────────────────── */
@@ -15,7 +22,12 @@
     }
 
     body {
-        @apply antialiased bg-gray-50 dark:bg-gray-950 transition-colors duration-500;
+        @apply antialiased bg-gray-50 dark:bg-gray-950 transition-colors duration-500 overflow-x-hidden;
+    }
+
+    /* Accessible focus outlines for keyboard navigation */
+    *:focus-visible {
+        @apply outline-2 outline-offset-2 outline-brand-500;
     }
 
     ::-webkit-scrollbar {
@@ -117,69 +129,73 @@
 
 /* ── Global reduced‑motion: disable all animations & transitions ──── */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-  .glass-card:hover,
-  .btn-primary:hover,
-  .btn-secondary:hover,
-  .btn:hover,
-  .btn-ghost:hover,
-  .btn-outline:hover {
-    transform: none !important;
-  }
-  .animate-spin {
-    animation: none !important;
-  }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .glass-card:hover,
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .btn:hover,
+    .btn-ghost:hover,
+    .btn-outline:hover {
+        transform: none !important;
+    }
+
+    .animate-spin {
+        animation: none !important;
+    }
 }
 
 /* ── Print styles ──────────────────────────────────────────────────── */
 @media print {
-  .floating-blob,
-  .glass-card::before,
-  .glass-card::after {
-    display: none !important;
-  }
-  .glass,
-  .glass-card,
-  .btn,
-  .btn-primary,
-  .btn-secondary,
-  .btn-ghost,
-  .btn-outline {
-    box-shadow: none !important;
-    backdrop-filter: none !important;
-  }
+
+    .floating-blob,
+    .glass-card::before,
+    .glass-card::after {
+        display: none !important;
+    }
+
+    .glass,
+    .glass-card,
+    .btn,
+    .btn-primary,
+    .btn-secondary,
+    .btn-ghost,
+    .btn-outline {
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+    }
 }
 
 /* ── Enterprise‑grade brand logo animation ───────────────────────── */
 @keyframes shimmer {
-  0% {
-    background-position: -200% center;
-  }
-  100% {
-    background-position: 200% center;
-  }
+    0% {
+        background-position: -200% center;
+    }
+
+    100% {
+        background-position: 200% center;
+    }
 }
 
 .text-gradient-animate {
-  background-image: linear-gradient(
-    120deg,
-    #6d28d9 0%,
-    #a78bfa 20%,
-    #b46ffe 40%,
-    #a855f7 60%,
-    #6366f1 80%,
-    #6d28d9 100%
-  );
-  background-size: 200% auto;
-  animation: shimmer 3s ease-in-out infinite;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+    background-image: linear-gradient(120deg,
+            #6d28d9 0%,
+            #a78bfa 20%,
+            #b46ffe 40%,
+            #a855f7 60%,
+            #6366f1 80%,
+            #6d28d9 100%);
+    background-size: 200% auto;
+    animation: shimmer 3s ease-in-out infinite;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
