@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { saveExportData as saveExportDataService } from '../services/firestore';
+import { performSave as saveExportDataService } from '../services/firestore';
 
 export function useFirestore() {
   const [loading, setLoading] = useState(false);
@@ -27,7 +27,7 @@ export function useFirestore() {
    * @param {AbortSignal} [options.signal] – external abort signal.
    * @returns {Promise<string|null>} docId if successful.
    */
-  const saveExportData = useCallback(async (data, options = {}) => {
+  const performSave = useCallback(async (data, options = {}) => {
     if (!isMountedRef.current) return null;
 
     // Abort any previous save still in progress
@@ -87,5 +87,5 @@ export function useFirestore() {
     }
   }, []);
 
-  return { saveExportData, loading, error, success, reset };
+  return { performSave, loading, error, success, reset };
 }

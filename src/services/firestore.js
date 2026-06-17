@@ -53,7 +53,7 @@ function validateExportPayload(payload) {
  * @param {AbortSignal} [options.signal] – external AbortSignal to cancel the operation.
  * @returns {Promise<string>} The Firestore document ID.
  */
-export async function saveExportData(exportData, options = {}) {
+export async function performSave(exportData, options = {}) {
   if (!db) throw new Error('Firestore is not configured.');
 
   // Validate the payload before proceeding

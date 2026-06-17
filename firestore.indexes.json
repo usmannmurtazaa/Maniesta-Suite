@@ -1,17 +1,5 @@
 {
-  "indexes": [
-    {
-      "collectionGroup": "exports",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "studentName", "order": "ASCENDING" },
-        { "fieldPath": "studentId", "order": "ASCENDING" },
-        { "fieldPath": "semester", "order": "ASCENDING" },
-        { "fieldPath": "degree", "order": "ASCENDING" },
-        { "fieldPath": "university", "order": "ASCENDING" },
-        { "fieldPath": "createdAt", "order": "DESCENDING" }
-      ]
-    }
-  ],
+  "_comment": "No composite indexes are required for the current Firestore usage (only simple writes to the 'exports' collection). Add indexes here if complex queries are introduced.",
+  "indexes": [],
   "fieldOverrides": []
 }
