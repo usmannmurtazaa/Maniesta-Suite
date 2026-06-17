@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDashboard } from "../../contexts/DashboardProvider";
 import { get, save } from "../../services/storageService";
+import { trackExport } from "../../services/exportTracker"; // <-- ADDED
 
 const USER_DETAILS_KEY = "maniesta_export_user_details";
 
@@ -167,6 +168,17 @@ export default function ExportModal({
         filename: `Academic_Record_${new Date().toISOString().slice(0, 19)}.pdf`,
         type: "pdf",
         date: new Date().toISOString(),
+      });
+
+      // ── FIX: Save to Firestore ──────────────────────────────────────
+      trackExport({
+        studentName: userData.fullName,
+        studentId: userData.studentId,
+        university: userData.university,
+        degree: userData.degree,
+        semester: userData.semester,
+        exportType: "pdf",
+        timestamp: new Date().toISOString(),
       });
     } catch (err) {
       console.error("Export generation failed:", err);
