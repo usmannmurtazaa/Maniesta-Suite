@@ -1,112 +1,122 @@
-// src/services/firebase.js
+// services/firebase.js
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAnalytics, isSupported, logEvent as firebaseLogEvent } from 'firebase/analytics';
+import {
+  getFirestore,
+  initializeFirestore,
+  persistentLocalCache,
+} from 'firebase/firestore';
+import { getAnalytics, isSupported } from 'firebase/analytics';
 
-// Force inclusion of Firestore write functions (prevents tree-shaking)
-import 'firebase/firestore';
+/* -------------------------------------------------------------------------- */
+/*   Environment validation                                                    */
+/* -------------------------------------------------------------------------- */
+const REQUIRED_KEYS = [
+  'VITE_FIREBASE_API_KEY',
+  'VITE_FIREBASE_AUTH_DOMAIN',
+  'VITE_FIREBASE_PROJECT_ID',
+  'VITE_FIREBASE_APP_ID',
+];
 
+const missingRequired = REQUIRED_KEYS.filter((key) => !import.meta.env[key]);
+
+if (missingRequired.length > 0) {
+  console.error(
+    `[Maniesta Firebase] Missing required environment variables: ${missingRequired.join(', ')}. ` +
+    'Firebase features will be disabled. Create a .env file based on .env.example.'
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*   App initialisation                                                       */
+/* -------------------------------------------------------------------------- */
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || '',
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '',
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || '',
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || '',
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || '',
 };
 
-console.log('[Firebase] Config loaded:', {
-  hasApiKey: !!firebaseConfig.apiKey,
-  hasProjectId: !!firebaseConfig.projectId,
-  projectId: firebaseConfig.projectId,
-  authDomain: firebaseConfig.authDomain,
-});
-
 function getFirebaseApp() {
-  const existingApps = getApps().length;
-  console.log('[Firebase] getFirebaseApp called, existing apps:', existingApps);
-  if (existingApps > 0) {
-    const app = getApp();
-    console.log('[Firebase] Returning existing app');
-    return app;
+  // Do not attempt initialisation without required keys
+  if (missingRequired.length > 0) return null;
+
+  // Prevent duplicate apps (e.g., HMR in Vite)
+  if (getApps().length > 0) return getApp();
+
+  try {
+    return initializeApp(firebaseConfig);
+  } catch (error) {
+    console.error('[Maniesta Firebase] App initialisation failed:', error);
+    return null;
   }
-  console.log('[Firebase] Initializing new Firebase app...');
-  const newApp = initializeApp(firebaseConfig);
-  console.log('[Firebase] ✅ App initialized');
-  return newApp;
 }
 
 const app = getFirebaseApp();
-console.log('[Firebase] app instance created:', !!app);
 
-const db = getFirestore(app);
-console.log('[Firebase] ✅ Firestore initialized (default settings)');
-console.log('[Firebase] db instance exported:', !!db);
+/* -------------------------------------------------------------------------- */
+/*   Firestore – persistent local cache with graceful fallback                 */
+/* -------------------------------------------------------------------------- */
+let db = null;
+
+if (app) {
+  try {
+    db = initializeFirestore(app, {
+      localCache: persistentLocalCache(),
+    });
+  } catch {
+    console.warn(
+      '[Maniesta Firebase] Persistent cache unavailable. Falling back to default Firestore.'
+    );
+    db = getFirestore(app);
+  }
+}
+
 export { db };
 
+/* -------------------------------------------------------------------------- */
+/*   Analytics – lazy, singleton, non‑blocking                                  */
+/* -------------------------------------------------------------------------- */
 let analytics = null;
-export const initializeAnalytics = async () => {
-  if (!app) return;
-  if (await isSupported()) {
-    analytics = getAnalytics(app);
+let analyticsInitialised = false;
+let analyticsInitPromise = null;
+
+export async function initializeAnalytics() {
+  if (!app) {
+    console.warn('[Maniesta Analytics] Initialisation skipped – no Firebase app.');
+    return;
   }
-};
+
+  if (analyticsInitialised) return;
+
+  // Only one concurrent initialisation attempt
+  if (analyticsInitPromise) {
+    await analyticsInitPromise;
+    return;
+  }
+
+  analyticsInitPromise = (async () => {
+    try {
+      const supported = await isSupported();
+      if (supported) {
+        analytics = getAnalytics(app);
+        if (import.meta.env.DEV) {
+          console.log('[Maniesta Analytics] Initialised.');
+        }
+      } else {
+        console.info('[Maniesta Analytics] Not supported in this environment.');
+      }
+    } catch (error) {
+      console.error('[Maniesta Analytics] Initialisation error:', error);
+    } finally {
+      analyticsInitialised = true;
+      analyticsInitPromise = null;
+    }
+  })();
+
+  await analyticsInitPromise;
+}
+
 export { analytics };
-
-// ── Enhanced analytics wrapper ──────────────────────────────────
-let deviceInfoCache = null;
-
-function getDeviceInfo() {
-  if (deviceInfoCache) return deviceInfoCache;
-  const ua = navigator.userAgent;
-  const platform = navigator.platform || '';
-  const language = navigator.language || 'unknown';
-  const screenWidth = window.screen?.width || 0;
-  const screenHeight = window.screen?.height || 0;
-  const viewportWidth = window.innerWidth;
-  const viewportHeight = window.innerHeight;
-
-  let deviceType = 'desktop';
-  if (/Mobi|Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
-    deviceType = 'mobile';
-    if (/iPad|Tablet|PlayBook|Silk/i.test(ua) || (platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
-      deviceType = 'tablet';
-    }
-  }
-
-  let browserName = 'Unknown';
-  if (ua.includes('Firefox/')) browserName = 'Firefox';
-  else if (ua.includes('Edg/')) browserName = 'Edge';
-  else if (ua.includes('Chrome/') && !ua.includes('Edg/')) browserName = 'Chrome';
-  else if (ua.includes('Safari/') && !ua.includes('Chrome/')) browserName = 'Safari';
-  else if (ua.includes('OPR/') || ua.includes('Opera/')) browserName = 'Opera';
-
-  deviceInfoCache = {
-    device_type: deviceType,
-    browser: browserName,
-    platform,
-    language,
-    screen_resolution: `${screenWidth}x${screenHeight}`,
-    viewport: `${viewportWidth}x${viewportHeight}`,
-  };
-  return deviceInfoCache;
-}
-
-export function logEvent(eventName, params = {}) {
-  if (!analytics) return;
-  try {
-    const deviceInfo = getDeviceInfo();
-    firebaseLogEvent(analytics, eventName, {
-      ...params,
-      page_location: window.location.href,
-      page_title: document.title,
-      timestamp: new Date().toISOString(),
-      ...deviceInfo,
-    });
-  } catch (error) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn('Analytics logEvent error:', error);
-    }
-  }
-}

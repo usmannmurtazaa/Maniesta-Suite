@@ -1,134 +1,217 @@
+// services/firestore.js
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 
-const ALLOWED_CALCULATOR_TYPES = ['GPA', 'CGPA', 'Calculator', 'Converter', 'Interest'];
+/* -------------------------------------------------------------------------- */
+/*   Constants                                                                 */
+/* -------------------------------------------------------------------------- */
 
-/**
- * Custom AbortError – mimics the native DOMException when AbortController aborts.
- */
-class AbortError extends Error {
-  constructor(message = 'Aborted') {
+// Machine‑readable identifiers (matching the route paths)
+const ALLOWED_CALCULATOR_IDS = [
+  'gpa',
+  'cgpa',
+  'calculator',
+  'converter',
+  'interest',
+];
+
+// Maximum allowed length for string fields to prevent abuse
+const MAX_STRING_LENGTH = 300;
+
+// Maximum courses / semesters to store
+const MAX_COURSES = 20;
+const MAX_SEMESTERS = 15;
+
+/* -------------------------------------------------------------------------- */
+/*   Custom error class                                                        */
+/* -------------------------------------------------------------------------- */
+export class FirestoreError extends Error {
+  constructor(message, originalError = null) {
     super(message);
-    this.name = 'AbortError';
+    this.name = 'FirestoreError';
+    this.originalError = originalError;
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/*   Sanitisation helpers                                                      */
+/* -------------------------------------------------------------------------- */
+
 /**
- * Validate export payload, accepting both legacy and new shapes.
- *
- * Legacy shape: { calculatorType, userData, resultData }
- * New shape:    { studentName, scale, courses, gpaResult, ... }
+ * Strips HTML tags and trims whitespace.
  */
+function stripHtml(str) {
+  if (typeof str !== 'string') return str;
+  return str.replace(/<[^>]*>/g, '').trim();
+}
+
+/**
+ * Truncates a string to a safe maximum length.
+ */
+function truncate(str, maxLength = MAX_STRING_LENGTH) {
+  if (typeof str !== 'string') return str;
+  return str.slice(0, maxLength);
+}
+
+/**
+ * Deep sanitisation of the userData object.
+ * Removes potential XSS vectors and limits field sizes.
+ */
+function sanitizeUserData(userData) {
+  if (!userData || typeof userData !== 'object') return {};
+
+  const safe = {};
+  for (const [key, value] of Object.entries(userData)) {
+    if (typeof value === 'string') {
+      safe[key] = truncate(stripHtml(value));
+    } else {
+      safe[key] = value; // keep numbers, etc.
+    }
+  }
+  return safe;
+}
+
+/**
+ * Ensures resultData doesn't contain an unreasonable amount of entries.
+ */
+function sanitizeResultData(resultData, calculatorId) {
+  if (!resultData || typeof resultData !== 'object') return {};
+
+  const safe = { ...resultData };
+
+  // Limit courses/semesters arrays
+  if (calculatorId === 'gpa' && Array.isArray(safe.courses)) {
+    safe.courses = safe.courses.slice(0, MAX_COURSES).map((c) => ({
+      name: truncate(stripHtml(c.name || '')),
+      creditHours: c.creditHours,
+      grade: c.grade,
+    }));
+  }
+
+  if (calculatorId === 'cgpa' && Array.isArray(safe.semesters)) {
+    safe.semesters = safe.semesters.slice(0, MAX_SEMESTERS).map((sem) => ({
+      name: truncate(stripHtml(sem.name || '')),
+      courses: Array.isArray(sem.courses)
+        ? sem.courses.slice(0, MAX_COURSES).map((c) => ({
+            name: truncate(stripHtml(c.name || '')),
+            creditHours: c.creditHours,
+            grade: c.grade,
+          }))
+        : [],
+    }));
+  }
+
+  return safe;
+}
+
+/* -------------------------------------------------------------------------- */
+/*   Validation                                                                */
+/* -------------------------------------------------------------------------- */
 function validateExportPayload(payload) {
   if (!payload || typeof payload !== 'object') {
-    throw new Error('Export payload must be an object.');
+    throw new FirestoreError('Export payload must be an object.');
   }
 
-  // Legacy validation (contains calculatorType)
-  if (payload.calculatorType) {
-    if (!ALLOWED_CALCULATOR_TYPES.includes(payload.calculatorType)) {
-      throw new Error(`Invalid calculatorType: "${payload.calculatorType}".`);
-    }
-    if (!payload.userData || typeof payload.userData !== 'object') {
-      throw new Error('Legacy export requires userData.');
-    }
-    if (!payload.resultData) {
-      throw new Error('Legacy export requires resultData.');
-    }
-    return;
+  const { calculatorId, userData, resultData } = payload;
+
+  if (!calculatorId || !ALLOWED_CALCULATOR_IDS.includes(calculatorId)) {
+    throw new FirestoreError(
+      `Invalid calculatorId. Allowed: ${ALLOWED_CALCULATOR_IDS.join(', ')}`
+    );
   }
 
-  // New shape validation (contains studentName or other known fields)
-  if (!payload.studentName) {
-    throw new Error('New export payload must contain studentName.');
+  if (!userData || typeof userData !== 'object') {
+    throw new FirestoreError('userData is required and must be an object.');
   }
-  // Additional optional checks can be added here (e.g., scale, courses)
+
+  if (!resultData || typeof resultData !== 'object') {
+    throw new FirestoreError('resultData is required and must be an object.');
+  }
 }
 
+/* -------------------------------------------------------------------------- */
+/*   Save export data to Firestore                                             */
+/* -------------------------------------------------------------------------- */
+
 /**
- * Save export data to Firestore.
+ * Persists an export payload to Firestore.
  *
- * @param {Object} exportData – the export payload (legacy or new shape).
- * @param {Object} [options] – optional settings.
- * @param {AbortSignal} [options.signal] – external AbortSignal to cancel the operation.
- * @returns {Promise<string>} The Firestore document ID.
+ * @param {Object} exportData
+ * @param {string} exportData.calculatorId - e.g. 'gpa', 'cgpa'
+ * @param {string} [exportData.calculatorType] - display name (optional)
+ * @param {Object} exportData.userData - { fullName, studentId, ... }
+ * @param {Object} exportData.resultData - the calculation result
+ * @param {Object} [options]
+ * @param {AbortSignal} [options.signal] - pass an AbortSignal to cancel the operation
+ * @returns {Promise<string>} Firestore document ID
+ * @throws {FirestoreError}
  */
-export async function performSave(exportData, options = {}) {
-  console.log('[Firestore] performSave called with:', {
-    dataKeys: Object.keys(exportData),
-    hasSignal: !!options.signal,
-    dbExists: !!db,
-  });
-
+export async function saveExportData(exportData, { signal } = {}) {
+  // 1. Firestore availability
   if (!db) {
-    console.error('[Firestore] CRITICAL: db is undefined or falsy');
-    throw new Error('Firestore is not configured.');
+    throw new FirestoreError(
+      'Firestore is not configured. Check your Firebase environment variables.'
+    );
   }
 
-  // Validate the payload before proceeding
-  console.log('[Firestore] Validating payload...');
+  // 2. Validate shape
   validateExportPayload(exportData);
-  console.log('[Firestore] Validation passed');
 
-  // Handle abort if a signal is provided
-  if (options.signal) {
-    console.log('[Firestore] Signal provided, setting up abort handler');
-    if (options.signal.aborted) {
-      console.warn('[Firestore] Signal already aborted before write');
-      throw new AbortError();
-    }
-    // Create a race between the actual Firestore write and the abort event
-    const abortPromise = new Promise((_, reject) => {
-      options.signal.addEventListener('abort', () => {
-        console.warn('[Firestore] Write aborted via signal');
-        reject(new AbortError());
-      }, { once: true });
-    });
-    const firestorePromise = saveToFirestore(exportData);
-    return Promise.race([firestorePromise, abortPromise]);
-  }
+  // 3. Sanitise to prevent PII leakage / injection
+  const safeUserData = sanitizeUserData(exportData.userData);
+  const safeResultData = sanitizeResultData(
+    exportData.resultData,
+    exportData.calculatorId
+  );
 
-  // No signal – just save directly
-  console.log('[Firestore] No signal, proceeding with direct save');
-  return saveToFirestore(exportData);
-}
-
-/**
- * Internal helper that builds the document and writes to Firestore.
- */
-async function saveToFirestore(exportData) {
   const document = {
-    ...exportData,
+    calculatorId: exportData.calculatorId,
+    calculatorType: exportData.calculatorType || exportData.calculatorId,
+    userData: safeUserData,
+    resultData: safeResultData,
     createdAt: serverTimestamp(),
     metadata: {
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      language: navigator.language,
+      userAgent: navigator.userAgent.slice(0, 200),
+      platform: navigator.platform?.slice(0, 100),
+      language: navigator.language?.slice(0, 30),
+      screen: `${window.screen?.width ?? 0}x${window.screen?.height ?? 0}`,
       timestamp: new Date().toISOString(),
     },
   };
 
-  console.log('[Firestore] Building document for write:', {
-    docKeys: Object.keys(document),
-    hasMetadata: !!document.metadata,
-  });
+  // 4. Firestore write with optional abort
+  const writePromise = addDoc(collection(db, 'exports'), document);
+
+  if (signal) {
+    return new Promise((resolve, reject) => {
+      const onAbort = () => {
+        reject(new DOMException('The operation was aborted.', 'AbortError'));
+      };
+
+      signal.addEventListener('abort', onAbort);
+      writePromise
+        .then((docRef) => {
+          signal.removeEventListener('abort', onAbort);
+          resolve(docRef.id);
+        })
+        .catch((error) => {
+          signal.removeEventListener('abort', onAbort);
+          reject(
+            error instanceof FirestoreError
+              ? error
+              : new FirestoreError('Unable to save your data.', error)
+          );
+        });
+    });
+  }
 
   try {
-    console.log('[Firestore] Calling addDoc to exports collection...');
-    const exportsCollection = collection(db, 'exports');
-    console.log('[Firestore] Collection reference created');
-
-    const docRef = await addDoc(exportsCollection, document);
-
-    console.log('[Firestore] ✅ SUCCESS: Document written with ID:', docRef.id);
+    const docRef = await writePromise;
     return docRef.id;
   } catch (error) {
-    console.error('[Firestore] ❌ WRITE FAILED', {
-      errorCode: error.code,
-      errorMessage: error.message,
-      errorName: error.name,
-      fullError: error,
-    });
-    throw error;
+    throw new FirestoreError(
+      'Unable to save your data. Please check your connection and try again.',
+      error
+    );
   }
 }
