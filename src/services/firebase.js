@@ -3,6 +3,9 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAnalytics, isSupported, logEvent as firebaseLogEvent } from 'firebase/analytics';
 
+// Force inclusion of Firestore write functions (prevents tree-shaking)
+import 'firebase/firestore';
+
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
