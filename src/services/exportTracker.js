@@ -1,21 +1,6 @@
-// src/services/exportTracker.js
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, logEvent } from './firebase';
 
-// -------------------------------------------------------------------
-// Guard: if Firestore is not available, fail immediately (no silent skip)
-// -------------------------------------------------------------------
-function throwIfNoDb() {
-  if (!db) {
-    const err = new Error('Firestore instance (db) is not available');
-    err.code = 'firestore/unavailable';
-    throw err;
-  }
-}
-
-// -------------------------------------------------------------------
-// Retry helper (exponential backoff)
-// -------------------------------------------------------------------
 async function withRetry(fn, maxRetries = 3, baseDelayMs = 500) {
   let lastError;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -32,9 +17,6 @@ async function withRetry(fn, maxRetries = 3, baseDelayMs = 500) {
   throw lastError;
 }
 
-// -------------------------------------------------------------------
-// Default device info (used when none is provided)
-// -------------------------------------------------------------------
 function getDefaultDeviceInfo() {
   return {
     userAgent: navigator.userAgent || '',
@@ -47,13 +29,7 @@ function getDefaultDeviceInfo() {
   };
 }
 
-// -------------------------------------------------------------------
-// Main export tracking function
-// -------------------------------------------------------------------
 export async function trackExport(data) {
-  // 1. Fail fast if Firestore is not initialized
-  throwIfNoDb();
-
   const {
     studentName = '',
     studentId = '',
@@ -69,7 +45,7 @@ export async function trackExport(data) {
     deviceInfo,
   } = data;
 
-  // 2. Write the export record with automatic retries
+  // Firestore write with retry
   await withRetry(async () => {
     const exportsCollection = collection(db, 'exports');
     await addDoc(exportsCollection, {
@@ -89,7 +65,6 @@ export async function trackExport(data) {
     });
   });
 
-  // 3. Only after successful write: fire the analytics event
   logEvent('export_tracked', {
     export_type: exportType,
     scale,
