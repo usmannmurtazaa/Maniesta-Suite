@@ -1,3 +1,4 @@
+// src/services/exportTracker.js
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db, logEvent } from './firebase';
 
@@ -45,30 +46,40 @@ export async function trackExport(data) {
     deviceInfo,
   } = data;
 
-  // Firestore write with retry
-  await withRetry(async () => {
-    const exportsCollection = collection(db, 'exports');
-    await addDoc(exportsCollection, {
-      studentName,
-      studentId,
-      university,
-      degree,
-      semester,
+  // Firestore write with retry – failure is logged but does NOT block the export
+  try {
+    await withRetry(async () => {
+      const exportsCollection = collection(db, 'exports');
+      await addDoc(exportsCollection, {
+        studentName,
+        studentId,
+        university,
+        degree,
+        semester,
+        scale,
+        gpa,
+        credits,
+        date,
+        exportType,
+        timestamp: serverTimestamp(),
+        deviceInfo: deviceInfo || getDefaultDeviceInfo(),
+        createdAt: new Date().toISOString(),
+      });
+    });
+  } catch (error) {
+    console.error('Firestore save failed (non‑blocking):', error);
+    // Do NOT re‑throw; the download must proceed
+  }
+
+  // Analytics event – also safe
+  try {
+    logEvent('export_tracked', {
+      export_type: exportType,
       scale,
       gpa,
-      credits,
-      date,
-      exportType,
-      timestamp: serverTimestamp(),
-      deviceInfo: deviceInfo || getDefaultDeviceInfo(),
-      createdAt: new Date().toISOString(),
+      timestamp,
     });
-  });
-
-  logEvent('export_tracked', {
-    export_type: exportType,
-    scale,
-    gpa,
-    timestamp,
-  });
+  } catch (error) {
+    console.warn('Analytics event failed:', error);
+  }
 }
