@@ -1,6 +1,6 @@
 // src/services/firebase.js
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { getFirestore } from 'firebase/firestore';
 import { getAnalytics, isSupported, logEvent as firebaseLogEvent } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -37,10 +37,8 @@ function getFirebaseApp() {
 const app = getFirebaseApp();
 console.log('[Firebase] app instance created:', !!app);
 
-const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
-});
-console.log('[Firebase] ✅ Firestore initialized (long polling)');
+const db = getFirestore(app);
+console.log('[Firebase] ✅ Firestore initialized (default settings)');
 console.log('[Firebase] db instance exported:', !!db);
 export { db };
 
