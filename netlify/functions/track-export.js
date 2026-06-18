@@ -13,16 +13,12 @@ exports.handler = async (event) => {
           clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
           privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
         }),
-        databaseId: '(default)',
       });
     }
 
-    // Explicitly specify the database
     const db = admin.firestore();
-    
     const data = JSON.parse(event.body);
     
-    // Try writing to the exports collection
     const docRef = await db.collection('exports').add({
       ...data,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -38,10 +34,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        error: error.message, 
-        code: error.code || 'unknown',
-      }),
+      body: JSON.stringify({ error: error.message, code: error.code || 'unknown' }),
     };
   }
 };
