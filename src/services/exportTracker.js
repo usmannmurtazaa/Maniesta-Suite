@@ -1,39 +1,23 @@
 // src/services/exportTracker.js
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db, logEvent } from './firebase';
+import { logEvent } from './firebase';
+
+// Netlify Function endpoint (same origin — no CORS!)
+const FUNCTION_URL = '/.netlify/functions/track-export';
 
 // -------------------------------------------------------------------
-// Guard: if Firestore is not available, fail immediately (no silent skip)
+// Timeout wrapper
 // -------------------------------------------------------------------
-function throwIfNoDb() {
-  if (!db) {
-    const err = new Error('Firestore instance (db) is not available');
-    err.code = 'firestore/unavailable';
-    throw err;
-  }
+function withTimeout(promise, ms = 15000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Firestore write timed out — connection blocked')), ms)
+    ),
+  ]);
 }
 
 // -------------------------------------------------------------------
-// Retry helper (exponential backoff)
-// -------------------------------------------------------------------
-async function withRetry(fn, maxRetries = 3, baseDelayMs = 500) {
-  let lastError;
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    try {
-      return await fn();
-    } catch (error) {
-      lastError = error;
-      if (attempt < maxRetries) {
-        const delay = baseDelayMs * Math.pow(2, attempt);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-      }
-    }
-  }
-  throw lastError;
-}
-
-// -------------------------------------------------------------------
-// Default device info (used when none is provided)
+// Default device info
 // -------------------------------------------------------------------
 function getDefaultDeviceInfo() {
   return {
@@ -51,9 +35,6 @@ function getDefaultDeviceInfo() {
 // Main export tracking function
 // -------------------------------------------------------------------
 export async function trackExport(data) {
-  // 1. Fail fast if Firestore is not initialized
-  throwIfNoDb();
-
   const {
     studentName = '',
     studentId = '',
@@ -69,31 +50,55 @@ export async function trackExport(data) {
     deviceInfo,
   } = data;
 
-  // 2. Write the export record with automatic retries
-  await withRetry(async () => {
-    const exportsCollection = collection(db, 'exports');
-    await addDoc(exportsCollection, {
-      studentName,
-      studentId,
-      university,
-      degree,
-      semester,
-      scale,
-      gpa,
-      credits,
-      date,
-      exportType,
-      timestamp: serverTimestamp(),
-      deviceInfo: deviceInfo || getDefaultDeviceInfo(),
-      createdAt: new Date().toISOString(),
-    });
-  });
-
-  // 3. Only after successful write: fire the analytics event
-  logEvent('export_tracked', {
-    export_type: exportType,
+  const document = {
+    studentName,
+    studentId,
+    university,
+    degree,
+    semester,
     scale,
     gpa,
+    credits,
+    date,
+    exportType,
     timestamp,
-  });
+    deviceInfo: deviceInfo || getDefaultDeviceInfo(),
+    createdAt: new Date().toISOString(),
+  };
+
+  console.log('[trackExport] Sending to Netlify Function...');
+  console.log('[trackExport] Document keys:', Object.keys(document));
+
+  try {
+    const response = await withTimeout(
+      fetch(FUNCTION_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(document),
+      })
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Proxy write failed: ${response.status} — ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log('[trackExport] ✅ Document written via Netlify Function:', result.id);
+
+    logEvent('export_tracked', {
+      export_type: exportType,
+      scale,
+      gpa,
+      timestamp,
+    });
+
+    return result.id;
+  } catch (error) {
+    console.error('[trackExport] ❌ Write failed:', {
+      message: error.message,
+      name: error.name,
+    });
+    throw error;
+  }
 }

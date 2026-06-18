@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "maniesta-suite"
-  }
+    "default": "maniesta-suite",
+    "production": "maniesta-suite"
+  },
+  "targets": {},
+  "etags": {}
 }

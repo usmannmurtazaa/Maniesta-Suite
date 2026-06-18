@@ -1,6 +1,6 @@
 // src/services/firebase.js
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, initializeFirestore, persistentLocalCache } from 'firebase/firestore';
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
 import { getAnalytics, isSupported, logEvent as firebaseLogEvent } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -37,16 +37,10 @@ function getFirebaseApp() {
 const app = getFirebaseApp();
 console.log('[Firebase] app instance created:', !!app);
 
-let db;
-try {
-  console.log('[Firebase] Attempting initializeFirestore with persistent cache...');
-  db = initializeFirestore(app, { localCache: persistentLocalCache() });
-  console.log('[Firebase] ✅ Firestore initialized with persistent cache');
-} catch (error) {
-  console.warn('[Firebase] initializeFirestore failed, falling back to getFirestore:', error.message);
-  db = getFirestore(app);
-  console.log('[Firebase] ✅ Firestore initialized (fallback)');
-}
+const db = initializeFirestore(app, {
+  experimentalForceLongPolling: true,
+});
+console.log('[Firebase] ✅ Firestore initialized (long polling)');
 console.log('[Firebase] db instance exported:', !!db);
 export { db };
 
