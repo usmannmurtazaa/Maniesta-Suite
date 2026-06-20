@@ -1,8 +1,6 @@
-// src/pages/GPAToPercentageGuide.jsx
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
-// Inline SVG icon – replaces ⚠️
 const WarningIcon = () => (
   <svg
     className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0"

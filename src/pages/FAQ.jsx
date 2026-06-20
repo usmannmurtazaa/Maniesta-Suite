@@ -1,7 +1,6 @@
-// src/pages/FAQ.jsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Helmet } from "react-helmet-async";
+import SEO from "../components/SEO";
 
 const faqs = [
   {
@@ -50,7 +49,7 @@ const faqs = [
   },
   {
     q: "How do I contact support?",
-    a: "Use our Contact page or email support@maniestasuite.netlify.app. We typically reply within 48 hours.",
+    a: "Use our Contact page or email maniestasuite@gmail.com. We typically reply within 48 hours.",
   },
 ];
 
@@ -61,12 +60,19 @@ function FAQItem({ question, answer, isOpen, onClick }) {
         onClick={onClick}
         className="w-full text-left py-4 flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-brand-500 rounded-lg"
       >
-        <h3 className="font-heading text-lg font-semibold text-gray-900 dark:text-white">{question}</h3>
-        <span className="text-2xl text-brand-500 transition-transform duration-200" style={{ transform: isOpen ? "rotate(45deg)" : "rotate(0)" }}>
+        <h3 className="font-heading text-lg font-semibold text-gray-900 dark:text-white">
+          {question}
+        </h3>
+        <span
+          className="text-2xl text-brand-500 transition-transform duration-200"
+          style={{ transform: isOpen ? "rotate(45deg)" : "rotate(0)" }}
+        >
           +
         </span>
       </button>
-      {isOpen && <div className="pb-4 text-gray-600 dark:text-gray-400">{answer}</div>}
+      {isOpen && (
+        <div className="pb-4 text-gray-600 dark:text-gray-400">{answer}</div>
+      )}
     </div>
   );
 }
@@ -76,19 +82,26 @@ export default function FAQ() {
 
   return (
     <>
-      <Helmet>
-        <title>FAQ – Maniesta Suite Student Academic Tools</title>
-        <meta
-          name="description"
-          content="Get answers to common questions about GPA calculation, CGPA, PDF export, and using our free academic tools."
-        />
-        <link rel="canonical" href="https://maniestasuite.netlify.app/faq" />
-      </Helmet>
-
+      <SEO
+        title="FAQ"
+        description="Get answers to common questions about GPA calculation, CGPA, PDF export, and using our free academic tools."
+        keywords={[
+          "faq",
+          "frequently asked questions",
+          "GPA help",
+          "CGPA help",
+          "export help",
+        ]}
+        canonicalUrl="https://maniestasuite.netlify.app/faq"
+      />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="glass-card p-6 md:p-8 rounded-2xl">
-          <h1 className="font-hero text-3xl md:text-4xl font-bold text-gradient mb-2">Frequently Asked Questions</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-8">Everything you need to know about using Maniesta Suite.</p>
+          <h1 className="font-hero text-3xl md:text-4xl font-bold text-gradient mb-2">
+            Frequently Asked Questions
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            Everything you need to know about using Maniesta Suite.
+          </p>
 
           <div className="space-y-1">
             {faqs.map((faq, idx) => (
@@ -103,7 +116,10 @@ export default function FAQ() {
           </div>
 
           <div className="mt-10 pt-6 border-t border-gray-200 dark:border-gray-800 text-center">
-            <Link to="/" className="btn-secondary inline-flex items-center gap-2">
+            <Link
+              to="/"
+              className="btn-secondary inline-flex items-center gap-2"
+            >
               ← Back to Home
             </Link>
           </div>

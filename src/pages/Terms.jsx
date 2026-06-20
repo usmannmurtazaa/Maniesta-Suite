@@ -1,4 +1,3 @@
-// src/pages/Terms.jsx
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 
@@ -63,7 +62,7 @@ export default function Terms() {
 
             <section>
               <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Contact</h2>
-              <p>For questions, email: <a href="mailto:legal@maniestasuite.netlify.app" className="text-brand-500 hover:underline">legal@maniestasuite.netlify.app</a></p>
+              <p>For questions, email: <a href="mailto:maniestasuite@gmail.com" className="text-brand-500 hover:underline">maniestasuite@gmail.com</a></p>
             </section>
           </div>
 

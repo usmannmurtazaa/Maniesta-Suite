@@ -1,18 +1,3 @@
-/**
- * ⚠️ DEPRECATED THEME CONFIGURATION
- *
- * This file originally provided a centralized design‑token system.
- * The application has since migrated to Tailwind CSS with utility classes
- * and uses the global font stack "Inter" (see index.html and tailwind.config).
- *
- * The `generateCSSVariables` function and the `typography` scale are no longer
- * actively consumed.  They are kept here for reference only and may be removed
- * in a future cleanup.
- *
- * If you need to modify the visual appearance, prefer updating the Tailwind
- * configuration or the global styles in `src/index.css`.
- */
-
 const theme = {
   colors: {
     primary: '#7c3aed',

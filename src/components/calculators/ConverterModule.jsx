@@ -1,4 +1,3 @@
-// file: src/components/calculators/ConverterModule.jsx
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Dropdown from "../common/Dropdown";

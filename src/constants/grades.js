@@ -1,19 +1,3 @@
-// constant/grade.js
-
-/**
- * Academic grading scales and standing determination.
- *
- * Supported scales:
- * - 4.0 (default)
- * - 5.0
- * - 10.0
- *
- * Each scale entry provides:
- * - l: display label (e.g. "A+  — 4.00")
- * - p: numeric point value
- * - g: raw grade letter/number
- */
-
 // ── 4.0 Scale (default) ────────────────────────────────────────────
 export const GRADES = Object.freeze([
   { l: 'A+  — 4.00', p: 4.0, g: 'A+' },

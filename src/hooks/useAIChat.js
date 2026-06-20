@@ -1,4 +1,4 @@
-// src/hooks/useAIChat.js
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { generateAIResponse } from '../services/aiService';
 

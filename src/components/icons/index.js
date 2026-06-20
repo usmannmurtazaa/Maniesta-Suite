@@ -1,4 +1,3 @@
-// src/components/icons/index.js
 export { default as GraduationIcon } from "./GraduationIcon";
 export { default as CurrencyIcon } from "./CurrencyIcon";
 export { default as DocumentIcon } from "./DocumentIcon";

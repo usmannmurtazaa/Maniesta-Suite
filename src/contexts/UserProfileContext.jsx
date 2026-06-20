@@ -1,4 +1,3 @@
-// src/contexts/UserProfileContext.jsx
 import React, { createContext, useContext, useMemo } from 'react';
 import { useUserProfile } from '../hooks/useUserProfile';
 

@@ -1,7 +1,6 @@
-// src/components/dashboard/widgets/QuickActionsWidget.jsx
 import { Link } from 'react-router-dom';
 
-// Inline SVG – replaces ⚡
+// SVG
 const LightningIcon = () => (
   <svg
     className="w-5 h-5 text-brand-500"

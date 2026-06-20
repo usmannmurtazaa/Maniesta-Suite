@@ -1,4 +1,3 @@
-// src/utils/localStorageWrapper.js
 const STORAGE_KEY_PREFIX = 'maniesta_';
 
 function getFullKey(key) {

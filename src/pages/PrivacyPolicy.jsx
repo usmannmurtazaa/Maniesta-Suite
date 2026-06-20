@@ -1,4 +1,3 @@
-// src/pages/PrivacyPolicy.jsx
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 
@@ -71,7 +70,7 @@ export default function PrivacyPolicy() {
 
             <section>
               <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Contact Us</h2>
-              <p>For privacy questions, email: <a href="mailto:privacy@maniestasuite.netlify.app" className="text-brand-500 hover:underline">privacy@maniestasuite.netlify.app</a></p>
+              <p>For privacy questions, email: <a href="mailto:maniestasuite@gmail.com" className="text-brand-500 hover:underline">maniestasuite@gmail.com</a></p>
             </section>
           </div>
 

@@ -1,4 +1,3 @@
-// src/hooks/useGPA.js
 import { useState, useCallback } from 'react';
 import { calculateGPA } from '../utils/calculations';
 import { getGradeScale } from '../utils/grades';

@@ -1,4 +1,3 @@
-// src/components/layout/Layout.jsx
 import { lazy, Suspense, useState, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "./Header";

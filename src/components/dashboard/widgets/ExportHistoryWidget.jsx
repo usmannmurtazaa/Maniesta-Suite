@@ -1,4 +1,3 @@
-// src/components/dashboard/widgets/ExportHistoryWidget.jsx
 export default function ExportHistoryWidget({ exports }) {
   if (!exports || exports.length === 0) {
     return (

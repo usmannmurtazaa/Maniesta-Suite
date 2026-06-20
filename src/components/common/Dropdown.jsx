@@ -1,4 +1,3 @@
-// src/components/common/Dropdown.jsx
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";

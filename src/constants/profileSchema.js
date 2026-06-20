@@ -1,4 +1,3 @@
-// src/constants/profileSchema.js
 export const CURRENT_SCHEMA_VERSION = 2;
 
 export const DEFAULT_PROFILE = {

@@ -1,4 +1,3 @@
-// src/hooks/useUserActivity.js
 import { useState, useEffect } from 'react';
 import { STORAGE_KEYS } from '../services/storageService';
 

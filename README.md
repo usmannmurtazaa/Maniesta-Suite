@@ -1,16 +1,16 @@
-Here is a refined, production level version of your README with improved structure, consistency, clarity, and senior level documentation quality.
-
----
+```
+# MANIESTA SUITE – Academic Productivity Dashboard System
 
 <p align="center">
-  <img src="./src/assets/logo.png" alt="Maniesta Suite Logo" width="120" />
+  <img src="./src/assets/logo.png" width="110" alt="Maniesta Suite Logo" />
 </p>
 
-<h1 align="center">Maniesta Suite</h1>
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=600&size=26&pause=1000&color=4F46E5&center=true&vCenter=true&width=900&lines=All+your+academic+tools+in+one+dashboard;GPA+and+CGPA+tracking+with+real+time+logic;Financial+tools+with+live+currency+conversion;Export+reports+in+PDF+and+CSV;Built+for+performance+and+scalability" />
+</p>
 
 <p align="center">
-  <strong>Academic Productivity Dashboard System</strong><br/>
-  A modern frontend first platform for students to calculate, convert, export, and track academic performance in one unified dashboard.
+  A SaaS‑style academic productivity platform that replaces scattered tools with a unified, real‑time dashboard experience.
 </p>
 
 <p align="center">
@@ -18,216 +18,214 @@ Here is a refined, production level version of your README with improved structu
   <img src="https://img.shields.io/badge/Vite-5-646CFF?logo=vite" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-3-38B2AC?logo=tailwind-css" />
   <img src="https://img.shields.io/badge/Firebase-10-FFCA28?logo=firebase" />
-  <img src="https://img.shields.io/badge/License-MIT-green" />
+  <img src="https://img.shields.io/badge/Framer%20Motion-Animation-000000" />
 </p>
 
 ---
 
-## Overview
+## 📖 Product Overview
 
-Maniesta Suite is a modular academic productivity system designed to replace scattered student tools with a unified interface.
+Maniesta Suite is built for students and academic workflows that require speed, accuracy, and structured tracking. It combines multiple systems into one unified SaaS‑style dashboard:
 
-It provides calculators, converters, export systems, analytics, and a dashboard that tracks user activity locally without requiring authentication.
-
----
-
-## Core Capabilities
-
-### Academic Tools
-
-* GPA Calculator with real time computation and target planning
-* CGPA Calculator with semester based tracking
-* Standard and scientific calculator with history support
-* Unit converter covering length, weight, temperature, area, time, speed
-* Interest calculator supporting simple, compound, and EMI
-
-### Financial Tools
-
-* Live currency converter supporting 150 plus currencies
-* Cached exchange rates for performance optimization
-* Swap and copy functionality for quick usage
-
-### Export System
-
-* PDF academic reports with branding
-* CSV structured data export
-* Export history tracking
-* Optional Firestore backup
-
-### Dashboard Intelligence
-
-* Tracks GPA, CGPA, currency conversions, and exports
-* Stores last activity state in localStorage
-* Cross tab synchronization using custom events
-* Favorite tools and recent activity tracking
-
-### Contact System
-
-* EmailJS based contact form
-* Validation with accessible feedback
+- **Academic computation engine** – GPA, CGPA, target GPA simulation
+- **Financial & currency tools** – live exchange rates, interest calculations
+- **Utility calculators** – unit conversion, scientific calculator
+- **Export & reporting system** – PDF/CSV generation with professional styling
+- **Real‑time dashboard intelligence** – activity tracking, favorites, and cross‑tab sync
 
 ---
 
-## Architecture
+## 🚀 Why Maniesta Suite?
 
-UI Layer
-React pages and components handle rendering and interaction
+Traditional academic tools are fragmented, slow, and inconsistent. Maniesta Suite solves this by providing:
 
-Hooks Layer
-Custom hooks manage domain logic like GPA, CGPA, currency, and activity tracking
-
-Services Layer
-Handles external integrations such as Firebase, EmailJS, exports, and analytics
-
-Utilities Layer
-Pure functions for calculations, validation, and formatting
-
-Storage Layer
-localStorage and Firebase for persistence
+- ✅ One unified dashboard for all academic tools  
+- ✅ Real‑time GPA and CGPA computation  
+- ✅ Cached and optimised financial APIs  
+- ✅ Local‑first architecture for instant performance  
+- ✅ Exportable reports for academic tracking  
+- ✅ Clean SaaS‑grade UI system with glassmorphism
 
 ---
 
-## Data Flow
+## 🧩 Core Product Modules
 
-User Action → Component → Hook → Service → Storage
-Storage update → custom event → UI sync
+### 📚 Academic Engine
+- GPA Calculator with real‑time updates  
+- CGPA tracking across semesters  
+- Target GPA simulation system  
+- Grade forecasting engine  
 
----
+### 💰 Financial Engine
+- Currency converter supporting 150+ currencies  
+- Cached exchange rate optimisation (24h cache)  
+- Instant swap and conversion system  
 
-## Project Structure
+### 🛠 Utility Engine
+- Scientific calculator with history tracking  
+- Unit conversion system (length, weight, temperature, area, speed, time)  
+- Interest calculator for EMI, simple and compound interest  
 
-src
-components reusable UI components
-pages route level screens
-hooks business logic hooks
-services external integrations and APIs
-utils pure functions
-constants fixed configuration values
-contexts theme and dashboard state
-store optional global state
-router routing configuration
-styles global styles
-main entry point
+### 📄 Export Engine
+- PDF report generation with structured formatting  
+- CSV export system for academic data  
+- Export history tracking system  
+- Optional Firebase backup layer  
 
----
-
-## Design System
-
-* Glassmorphism based UI design
-* Fully responsive from mobile to large desktop screens
-* Dark, light, and system theme support
-* Smooth Framer Motion transitions
-* SVG based icons only, no emojis in production UI
-* Consistent spacing and typography system
+### 📊 Dashboard Engine
+- Real‑time activity tracking  
+- Cross‑tab synchronisation  
+- Favourites and recent tools system  
+- Local storage persistence engine  
 
 ---
 
-## Typography System
+## 🎨 Product Experience
 
-* Brand and logo: Cinzel or Agbalumo
-* Headings: Playfair Display
-* Body text: Google Sans
-* Numbers and calculations: JetBrains Mono or STIX Two Math
+Maniesta Suite is designed like a modern SaaS dashboard. Key experience principles:
 
----
-
-## Tech Stack
-
-Frontend
-React, React Router, Vite
-
-Styling
-Tailwind CSS, custom design tokens, Framer Motion
-
-Backend Services
-Firebase Firestore, Firebase Analytics, EmailJS
-
-State Management
-React Context, localStorage, optional Zustand
-
-Utilities
-jsPDF, CSV generator, currency API integration
-
-Deployment
-Netlify
+- ⚡ Instant response UI with no lag  
+- 🧩 Modular tool‑based architecture  
+- ✨ Clean, minimal interface  
+- 🎬 Smooth animations using Framer Motion  
+- 📱 Fully responsive across all devices  
+- 🌗 Dark, light, and system theme support  
 
 ---
 
-## Installation
+## 🏗 Architecture
 
-Clone repository
-git clone repository-url
-cd maniesta-suite
+```
+┌─────────────────┐
+│   UI LAYER      │  React components – rendering & interaction
+├─────────────────┤
+│   HOOK LAYER    │  Business logic – GPA, CGPA, currency, dashboard state
+├─────────────────┤
+│  SERVICE LAYER  │  Firebase, EmailJS, export generation, external APIs
+├─────────────────┤
+│  UTILITY LAYER  │  Pure functions – calculations, formatting, validation
+├─────────────────┤
+│ STORAGE LAYER   │  localStorage + optional Firebase sync
+└─────────────────┘
+```
 
-Install dependencies
+### Data Flow
+
+```
+User Action → Component Trigger → Hook Execution → Service Call → Storage Update → Event Broadcast → UI Sync
+```
+
+---
+
+## 💻 Tech Stack
+
+| Layer          | Technology                              |
+|----------------|-----------------------------------------|
+| Frontend       | React 18, Vite, Tailwind CSS            |
+| Backend Svcs   | Firebase Firestore, Firebase Analytics, EmailJS |
+| Animations     | Framer Motion                           |
+| Utilities      | jsPDF, CSV Generator                    |
+| State Mgmt     | React Context + localStorage (Zustand optional) |
+| Deployment     | Netlify ready                           |
+
+---
+
+## ⚡ Performance Design
+
+- 🧩 Lazy loading for route‑based optimisation  
+- 🧮 Memoised computation for heavy logic  
+- 🔄 Cached API responses for currency module  
+- 📡 Event‑driven synchronisation system  
+- 🔬 Hook isolation for reduced re‑renders  
+- 💾 Local‑first architecture for instant UI  
+
+---
+
+## 🔒 Security Model
+
+- No authentication required by default – all core logic runs locally  
+- Optional Firebase integration only for export backup and analytics  
+- No sensitive data collection  
+- User‑controlled data export and storage  
+
+---
+
+## 📦 Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+
+# Install dependencies
 npm install
 
-Start development server
+# Run development server
 npm run dev
 
-Build production
+# Build for production
 npm run build
+```
 
 ---
 
-## Environment Variables
+## 🔧 Environment Variables
 
-Firebase configuration required for analytics and export backup
-EmailJS required for contact form functionality
+Create a `.env` file in the root directory with the following variables:
 
-Without these, core UI still works normally
+```
+# Firebase (optional – for analytics and export backup)
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
 
----
+# EmailJS (for contact form)
+VITE_EMAILJS_SERVICE_ID=your_service_id
+VITE_EMAILJS_TEMPLATE_ID=your_template_id
+VITE_EMAILJS_PUBLIC_KEY=your_public_key
+```
 
-## Key Features
-
-Dashboard Intelligence
-Tracks all tool usage automatically and updates in real time
-
-Currency Converter
-Live rates with caching for performance optimization
-
-GPA and CGPA System
-Dynamic grading system with target planning
-
-Export Engine
-Generates PDF and CSV reports with structured formatting
-
-Theming System
-Persistent theme with system preference detection
+The application works fully without backend configuration – all core features run locally.
 
 ---
 
-## Performance Strategy
+## 🤝 Contributing
 
-* Lazy loading for route based code splitting
-* Memoized tool lists using useMemo
-* Local caching for API calls
-* Event based state synchronization
-* Reduced re renders via hook isolation
+Contributions are welcome! Please open an issue or submit a pull request. For major changes, discuss first to align with the architecture vision.
 
 ---
 
-## Contributing Guidelines
+## 📄 License
 
-* Keep UI and logic separated
-* Use hooks for all business logic
-* Use services for external integrations
-* Maintain local first architecture
-* Avoid inline calculations inside components
-* Ensure full responsiveness on all screen sizes
+MIT © [Usman Murtaza](https://usmanmurtaza.netlify.app/)
 
 ---
 
-## License
+## 👨‍💻 Author
 
-MIT License
+**Usman Murtaza**  
+- Portfolio: [usmanmurtaza.netlify.app](https://usmanmurtaza.netlify.app/)  
+- GitHub: [@usmannmurtazaa](https://github.com/usmannmurtazaa)
 
 ---
 
-## Author
+## 🏅 Recruiter Positioning
 
-Usman Murtaza
-Portfolio: https://usmanmurtaza.netlify.app/
+This project demonstrates:
 
-GitHub: @usmannmurtazaa
+- ✅ SaaS‑level frontend architecture  
+- ✅ Scalable React hook‑based system design  
+- ✅ Real‑time computation engine design  
+- ✅ Performance‑optimised UI engineering  
+- ✅ Modular system decomposition  
+- ✅ Production‑ready frontend structure  
+
+---
+
+<p align="center">
+  Made with ❤️ by Usman Murtaza
+</p>
+```

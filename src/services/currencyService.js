@@ -1,4 +1,3 @@
-// src/services/currencyService.js
 const API_URL = 'https://api.exchangerate-api.com/v4/latest/';
 const CACHE_KEY = 'maniesta_currency_rates_cache';
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours

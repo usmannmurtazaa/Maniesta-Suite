@@ -1,4 +1,3 @@
-// src/components/dashboard/widgets/FavoriteToolsWidget.jsx
 import { Link } from "react-router-dom";
 import { useDashboard } from "../../../contexts/DashboardProvider";
 

@@ -1,4 +1,3 @@
-// src/pages/HomeBottom.jsx
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { StarIcon, ArrowRightIcon, RocketIcon } from "../components/icons";

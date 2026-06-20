@@ -1,10 +1,3 @@
-/**
- * ⚠️ DEPRECATED – Not currently used in the application.
- *
- * The SEO metadata for each page is handled directly by the `<SEO>` component
- * (see `src/components/SEO.jsx`) with per‑page props. This configuration object
- * is kept for reference only and may be removed in a future cleanup.
- */
 export const SEO = {
   defaultTitle: "Maniesta Suite",
   defaultDescription: "Academic tools dashboard for GPA, CGPA, currency conversion and exports.",

@@ -1,4 +1,3 @@
-// src/services/aiService.js
 import { buildPrompt, getFallbackResponse } from '../utils/promptEngine';
 
 // Set to true to enable external API (requires VITE_OPENAI_KEY)
@@ -6,7 +5,6 @@ const USE_EXTERNAL_API = false;
 const API_URL = 'https://api.openai.com/v1/chat/completions';
 
 export async function generateAIResponse(userMessage, context, { signal } = {}) {
-  // 1. Try external API if enabled and key exists
   if (USE_EXTERNAL_API && import.meta.env.VITE_OPENAI_KEY) {
     try {
       const response = await fetch(API_URL, {
@@ -34,16 +32,13 @@ export async function generateAIResponse(userMessage, context, { signal } = {}) 
       }
     } catch (err) {
       if (err.name === 'AbortError') throw err;
-      console.warn('AI API failed, falling back to rule‑based');
     }
   }
 
-  // 2. Fallback to rule‑based engine
   return getFallbackResponse(userMessage, context);
 }
 
 function extractSuggestions(text) {
-  // Simple heuristics – you can improve later
   const suggestions = [];
   if (text.includes('GPA')) suggestions.push('How to improve GPA?');
   if (text.includes('CGPA')) suggestions.push('Explain CGPA calculation');

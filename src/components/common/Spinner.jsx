@@ -1,4 +1,3 @@
-// src/components/common/Spinner.jsx
 import { useState, useEffect } from 'react';
 
 /**
@@ -21,7 +20,7 @@ export default function Spinner({
   className = '',
   size = 'md',
   logo = false,
-  reducedMotion, // optional: parent can pass this directly
+  reducedMotion,
 }) {
   // If parent doesn’t supply reducedMotion, use the local hook
   const systemReducedMotion = usePrefersReducedMotion();

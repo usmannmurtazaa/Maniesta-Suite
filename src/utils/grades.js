@@ -1,4 +1,3 @@
-// Re-export everything from the canonical grades constants
 export {
   GRADES,
   SCALES,
@@ -11,7 +10,7 @@ export {
 import { GRADES as _GRADES, getGradeScale as _getGradeScale } from '../constants/grades';
 
 /**
- * ⚠️  DEPRECATED – Quick lookup table (grade letter → points) for the **default 4.0 scale only**.
+ * DEPRECATED – Quick lookup table (grade letter → points) for the **default 4.0 scale only**.
  *
  * This table is locked to the 4.0 scale and will **not** work correctly
  * for 5.0 / 10.0 scales.  New code should either:

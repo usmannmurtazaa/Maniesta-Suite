@@ -1,4 +1,3 @@
-// src/components/common/Confetti.jsx
 import { useEffect, useRef, useState } from "react";
 
 /**

@@ -1,4 +1,3 @@
-// src/hooks/useCountUp.js
 import { useState, useEffect, useRef, useCallback } from 'react';
 
 /**

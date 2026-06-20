@@ -1,4 +1,3 @@
-// src/services/userProfileService.js
 import { safeGetItem, safeSetItem } from '../utils/localStorageWrapper';
 import { DEFAULT_PROFILE, migrateProfile, CURRENT_SCHEMA_VERSION } from '../constants/profileSchema';
 

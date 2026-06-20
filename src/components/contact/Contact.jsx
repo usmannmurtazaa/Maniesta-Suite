@@ -7,7 +7,7 @@ import { validateEmail } from "../../utils/validators";
 const MAX_MESSAGE_LENGTH = 500;
 const SUCCESS_MESSAGE_DURATION = 5000;
 
-// Professional icon components (replacing emojis)
+// icon components
 const SuccessIcon = () => (
   <svg
     className="w-5 h-5 text-green-500 shrink-0"
@@ -121,7 +121,7 @@ export default function ContactForm() {
       setStatus({
         type: "error",
         message:
-          "Failed to send. Please try again later or email us directly at support@maniestasuite.netlify.app.",
+          "Failed to send. Please try again later or email us directly at maniestasuite@gmail.com.",
       });
     } finally {
       setLoading(false);

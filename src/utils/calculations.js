@@ -1,7 +1,5 @@
-// src/utils/calculations.js
-
 // -------------------------------------------------------
-// ⚠️  DEPRECATED – Legacy grade map (4.0 scale only)
+// – Legacy grade map (4.0 scale only)
 // New functions: calculateWeightedGPA / calculateWeightedCGPA
 // accept pre‑computed points and work with any scale.
 // -------------------------------------------------------

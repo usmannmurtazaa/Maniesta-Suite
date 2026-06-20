@@ -1,6 +1,3 @@
-// src/components/dashboard/widgets/RecentActivityWidget.jsx
-
-// Inline SVG icons – replaces emojis
 const ClipboardIcon = () => (
   <svg className="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2" />

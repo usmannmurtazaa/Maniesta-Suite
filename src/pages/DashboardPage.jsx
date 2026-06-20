@@ -1,4 +1,3 @@
-// src/pages/DashboardPage.jsx
 import { useDashboard } from '../contexts/DashboardProvider';
 import RecentActivityWidget from '../components/dashboard/widgets/RecentActivityWidget';
 import GPAWidget from '../components/dashboard/widgets/GPAWidget';

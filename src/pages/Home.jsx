@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import { useRef, useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { Link } from "react-router-dom";
 import { motion, useInView, useSpring } from "framer-motion";

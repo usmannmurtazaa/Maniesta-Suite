@@ -1,4 +1,3 @@
-// src/services/storageService.js
 export const STORAGE_KEYS = {
   RECENT_ACTIONS: 'maniesta_recent_actions',
   FAVORITE_TOOLS: 'maniesta_favorite_tools',

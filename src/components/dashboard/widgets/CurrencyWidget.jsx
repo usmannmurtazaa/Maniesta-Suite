@@ -1,45 +1,29 @@
-// src/components/dashboard/widgets/CurrencyWidget.jsx
 import { Link } from "react-router-dom";
-
-// Inline SVG – replaces 💱
-const CurrencyIcon = () => (
-  <svg
-    className="w-5 h-5 text-brand-500"
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="M12 6v12m-3-2.818l.879.659a3 3 0 004.242 0L18 13.182" />
-    <path d="M12 6v12m-3-2.818l.879.659a3 3 0 004.242 0L18 13.182" />
-  </svg>
-);
+import { CurrencyIcon } from '../../icons';
 
 export default function CurrencyWidget({ lastCurrency }) {
   if (!lastCurrency) {
     return (
       <div className="glass-card p-5">
         <h3 className="font-heading font-semibold text-lg mb-2 flex items-center gap-2">
-          <CurrencyIcon />
+          <CurrencyIcon className="w-5 h-5 text-brand-500" />
           Last Conversion
         </h3>
         <p className="text-gray-500">No currency conversions yet.</p>
         <Link
           to="/currencyconverter"
-          className="text-brand-500 text-sm mt-2 inline-block"
+          className="text-brand-500 text-sm mt-2 inline-block hover:underline"
         >
           Convert now →
         </Link>
       </div>
     );
   }
+
   return (
     <div className="glass-card p-5">
       <h3 className="font-heading font-semibold text-lg mb-2 flex items-center gap-2">
-        <CurrencyIcon />
+        <CurrencyIcon className="w-5 h-5 text-brand-500" />
         Last Conversion
       </h3>
       <p className="text-2xl font-bold">
@@ -51,7 +35,7 @@ export default function CurrencyWidget({ lastCurrency }) {
       </p>
       <Link
         to="/currencyconverter"
-        className="text-brand-500 text-sm mt-2 inline-block"
+        className="text-brand-500 text-sm mt-2 inline-block hover:underline"
       >
         New conversion →
       </Link>

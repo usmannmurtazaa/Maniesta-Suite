@@ -1,4 +1,3 @@
-// src/components/calculators/GPACalculator.jsx
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGPA } from "../../hooks/useGPA";

@@ -1,4 +1,3 @@
-// src/components/currency/CurrencySearchDropdown.jsx
 import { useState, useRef, useEffect, useCallback } from 'react';
 
 /* ── Chevron SVG (replaces ▼) ──────────────────────────────────────── */

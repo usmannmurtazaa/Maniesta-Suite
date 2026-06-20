@@ -1,19 +1,22 @@
-// src/pages/MediaKit.jsx
-import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
 
 export default function MediaKit() {
   return (
     <>
-      <Helmet>
-        <title>Media Kit – Maniesta Suite</title>
-        <meta
-          name="description"
-          content="Media kit for Maniesta Suite – an academic and productivity tools platform. Audience, traffic, and partnership details."
-        />
-        <link rel="canonical" href="https://maniestasuite.netlify.app/mediakit" />
-      </Helmet>
-
+      <SEO
+        title="Media Kit"
+        description="Media kit for Maniesta Suite – an academic and productivity tools platform. Audience, traffic, and partnership details."
+        keywords={[
+          "media kit",
+          "partnership",
+          "audience",
+          "traffic",
+          "advertising",
+          "sponsorship",
+        ]}
+        canonicalUrl="https://maniestasuite.netlify.app/mediakit"
+      />
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-12 md:py-16">
         <div className="glass-card p-6 md:p-8 rounded-2xl space-y-10 text-gray-800 dark:text-gray-200">
           {/* Header */}
@@ -37,9 +40,10 @@ export default function MediaKit() {
               designed to simplify complex academic calculations and everyday
               utility tasks. From GPA and CGPA calculators to live currency
               converters and interest tools, Maniesta Suite brings together
-              essential resources in a clean, fast, and ad‑supported environment.
-              The platform is built with a focus on performance, accessibility,
-              and a premium user experience, serving a growing global audience.
+              essential resources in a clean, fast, and ad‑supported
+              environment. The platform is built with a focus on performance,
+              accessibility, and a premium user experience, serving a growing
+              global audience.
             </p>
           </section>
 
@@ -49,16 +53,37 @@ export default function MediaKit() {
               Platform Features
             </h2>
             <ul className="list-disc pl-6 space-y-2">
-              <li>GPA Calculator – instant semester GPA with 4.0 / 5.0 / 10.0 scales</li>
+              <li>
+                GPA Calculator – instant semester GPA with 4.0 / 5.0 / 10.0
+                scales
+              </li>
               <li>CGPA Calculator – cumulative GPA across semesters</li>
-              <li>Currency Converter – 150+ currencies with live exchange rates</li>
+              <li>
+                Currency Converter – 150+ currencies with live exchange rates
+              </li>
               <li>Interest Calculator – simple, compound, and loan EMI</li>
-              <li>Scientific & Normal Calculators – trigonometry, logarithms, memory functions</li>
-              <li>Unit Converter – length, weight, temperature, area, speed, time, currency</li>
-              <li>Academic Dashboard – track recent activity, favorites, and export history</li>
-              <li>AI Chat Assistant – instant help with tools and calculations</li>
-              <li>PDF & CSV Export – professional reports for academic and job purposes</li>
-              <li>Dark mode, fully responsive design, and accessibility support</li>
+              <li>
+                Scientific & Normal Calculators – trigonometry, logarithms,
+                memory functions
+              </li>
+              <li>
+                Unit Converter – length, weight, temperature, area, speed, time,
+                currency
+              </li>
+              <li>
+                Academic Dashboard – track recent activity, favorites, and
+                export history
+              </li>
+              <li>
+                AI Chat Assistant – instant help with tools and calculations
+              </li>
+              <li>
+                PDF & CSV Export – professional reports for academic and job
+                purposes
+              </li>
+              <li>
+                Dark mode, fully responsive design, and accessibility support
+              </li>
             </ul>
           </section>
 
@@ -115,9 +140,7 @@ export default function MediaKit() {
             <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">
               Partnership Opportunities
             </h2>
-            <p className="mb-2">
-              We welcome collaborations with:
-            </p>
+            <p className="mb-2">We welcome collaborations with:</p>
             <ul className="list-disc pl-6 space-y-1">
               <li>SaaS companies (productivity, analytics, design tools)</li>
               <li>Educational platforms (online courses, tutoring services)</li>
@@ -160,7 +183,10 @@ export default function MediaKit() {
 
           {/* Back to Home */}
           <div className="pt-6 border-t border-gray-200 dark:border-gray-800 text-center">
-            <Link to="/" className="btn-secondary inline-flex items-center gap-2">
+            <Link
+              to="/"
+              className="btn-secondary inline-flex items-center gap-2"
+            >
               ← Back to Home
             </Link>
           </div>

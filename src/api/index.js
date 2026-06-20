@@ -1,8 +1,3 @@
-// Centralized API client for future backend calls or Firebase Cloud Functions.
-// ⚠️ Placeholder: not currently used in production. Add timeout handling, retry logic,
-// and proper abort-controller integration before activating.
-// Currently used as a thin wrapper, but allows easy swapping of backends later.
-
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 /**

@@ -1,4 +1,3 @@
-// src/components/currency/CurrencyConverter.jsx
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { fetchExchangeRates, convertCurrency } from '../../services/currencyService';

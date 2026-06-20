@@ -1,4 +1,3 @@
-// src/services/firebase.js
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, initializeFirestore, persistentLocalCache } from 'firebase/firestore';
 import { getAnalytics, isSupported, logEvent as firebaseLogEvent } from 'firebase/analytics';

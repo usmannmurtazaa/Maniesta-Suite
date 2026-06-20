@@ -1,4 +1,3 @@
-// src/router/AppRouter.jsx
 import { lazy, Suspense, useState, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Spinner from "../components/common/Spinner";

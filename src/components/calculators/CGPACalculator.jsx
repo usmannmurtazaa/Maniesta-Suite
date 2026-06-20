@@ -26,7 +26,7 @@ function usePrefersReducedMotion() {
   return prefers;
 }
 
-// SVG error alert icon – replaces ⚠️ emoji
+// SVG error alert icon 
 const ErrorAlertIcon = () => (
   <svg
     className="w-5 h-5 text-red-500 shrink-0"

@@ -1,4 +1,3 @@
-// src/pages/ExportGuide.jsx
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 
@@ -83,7 +82,7 @@ export default function ExportGuide() {
 
             <section>
               <h2 className="font-heading text-xl font-semibold mb-3 text-gray-900 dark:text-white">Privacy & Data Storage</h2>
-              <p>When you export, your anonymised data is saved to our Firebase database to help us improve. You can request deletion by emailing <a href="mailto:privacy@maniestasuite.netlify.app" className="text-brand-500 hover:underline">privacy@maniestasuite.netlify.app</a>. We never sell your data.</p>
+              <p>When you export, your anonymised data is saved to our Firebase database to help us improve. You can request deletion by emailing <a href="mailto:maniestasuite@gmail.com" className="text-brand-500 hover:underline">maniestasuite@gmail.com</a>. We never sell your data.</p>
             </section>
           </div>
 

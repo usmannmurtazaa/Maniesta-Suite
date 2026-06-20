@@ -1,4 +1,3 @@
-// file: src/components/layout/Footer.jsx
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
@@ -35,7 +34,7 @@ const columns = [
     title: "Converters",
     links: [
       { to: "/converter", label: "Unit Converter" },
-      { to: "/currencyconverter", label: "Currency Converter" }, // FIXED: was "/currency-converter"
+      { to: "/currencyconverter", label: "Currency Converter" },
     ],
   },
   {
@@ -71,7 +70,7 @@ const columns = [
 
 const socialLinks = [
   {
-    href: "https://github.com", // Placeholder – replace with actual profile
+    href: "https://github.com/usmannmurtazaa", 
     label: "GitHub",
     icon: (
       <svg
@@ -87,8 +86,8 @@ const socialLinks = [
     ),
   },
   {
-    href: "https://twitter.com", // Placeholder – replace with actual profile
-    label: "Twitter",
+    href: "https://x.com/usman_murtazaa", 
+    label: "X",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +102,7 @@ const socialLinks = [
     ),
   },
   {
-    href: "https://linkedin.com", // Placeholder – replace with actual profile
+    href: "https://www.linkedin.com/in/usmannmurtazaa/", 
     label: "LinkedIn",
     icon: (
       <svg

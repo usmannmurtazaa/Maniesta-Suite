@@ -1,4 +1,3 @@
-// src/components/calculators/CourseCard.jsx
 import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { getGradeScale } from "../../utils/grades";
