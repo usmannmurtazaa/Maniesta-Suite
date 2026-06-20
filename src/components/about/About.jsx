@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
+import founderImage from "../../assets/usman-murtaza.png";
 
 // -------------------------------------------------------------------
 // Local hook: detect reduced motion preference
@@ -210,7 +211,7 @@ export default function AboutSection() {
             <div className="flex items-center gap-5">
               {/* Replace the initials with an image */}
               <img
-                src="/assets/usman-murtaza.png"
+                src={founderImage}
                 alt="Usman Murtaza – Founder"
                 className="w-16 h-16 rounded-full object-cover shadow-brand"
               />
