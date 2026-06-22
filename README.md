@@ -1,4 +1,3 @@
-```
 # MANIESTA SUITE – Academic Productivity Dashboard System
 
 <p align="center">
@@ -20,8 +19,6 @@
   <img src="https://img.shields.io/badge/Firebase-10-FFCA28?logo=firebase" />
   <img src="https://img.shields.io/badge/Framer%20Motion-Animation-000000" />
 </p>
-
----
 
 ## 📖 Product Overview
 
@@ -95,7 +92,7 @@ Maniesta Suite is designed like a modern SaaS dashboard. Key experience principl
 
 ## 🏗 Architecture
 
-```
+
 ┌─────────────────┐
 │   UI LAYER      │  React components – rendering & interaction
 ├─────────────────┤
@@ -107,13 +104,13 @@ Maniesta Suite is designed like a modern SaaS dashboard. Key experience principl
 ├─────────────────┤
 │ STORAGE LAYER   │  localStorage + optional Firebase sync
 └─────────────────┘
-```
+
 
 ### Data Flow
 
-```
+
 User Action → Component Trigger → Hook Execution → Service Call → Storage Update → Event Broadcast → UI Sync
-```
+
 
 ---
 
@@ -168,30 +165,6 @@ npm run build
 
 ---
 
-## 🔧 Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
-
-```
-# Firebase (optional – for analytics and export backup)
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_auth_domain
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
-
-# EmailJS (for contact form)
-VITE_EMAILJS_SERVICE_ID=your_service_id
-VITE_EMAILJS_TEMPLATE_ID=your_template_id
-VITE_EMAILJS_PUBLIC_KEY=your_public_key
-```
-
-The application works fully without backend configuration – all core features run locally.
-
----
-
 ## 🤝 Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request. For major changes, discuss first to align with the architecture vision.
@@ -228,4 +201,3 @@ This project demonstrates:
 <p align="center">
   Made with ❤️ by Usman Murtaza
 </p>
-```
