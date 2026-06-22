@@ -1,7 +1,5 @@
 import { getStanding, getGradeScale } from './grades';
-// Removed deprecated import: import { gradePoints } from './calculations';
 
-// ── Helpers ────────────────────────────────────────────────
 function s(value) {
   if (value === null || value === undefined) return '';
   return String(value);
@@ -32,10 +30,9 @@ function sanitizeFilename(name) {
     .substring(0, 50);
 }
 
-// ── PDF Builder ───────────────────────────────────────────
 async function buildPDF(doc, normalized) {
   const {
-    studentName = 'Student',
+    studentName = '',
     studentId = '',
     university = '',
     degree = '',
@@ -61,7 +58,7 @@ async function buildPDF(doc, normalized) {
   const checkPageBreak = (neededSpace = 10) => {
     if (yPos + neededSpace > 275) {
       doc.addPage();
-      addPageHeader(doc, (yPos = 30));
+      yPos = addPageHeader(doc, 30);
     }
   };
 
@@ -73,11 +70,16 @@ async function buildPDF(doc, normalized) {
     docInstance.setFontSize(20);
     docInstance.text('Maniesta Suite', 105, 20, { align: 'center' });
     docInstance.setFontSize(9);
-    docInstance.setTextColor(...primaryLight);
+    // ---- Changed subheading ----
+    // Subheading – normal font, light lavender color (distinct)
+    docInstance.setFontSize(9);
+    docInstance.setFont('helvetica', 'normal');
+    docInstance.setTextColor(200, 200, 255);
     docInstance.text('Academic Excellence Suite', 105, 28, { align: 'center' });
+    return startY;
   };
 
-  addPageHeader(doc, yPos);
+  yPos = addPageHeader(doc, yPos);
 
   // Title
   checkPageBreak(25);
@@ -117,25 +119,27 @@ async function buildPDF(doc, normalized) {
   doc.setFontSize(13);
   doc.setTextColor(...primary);
   doc.text(isCGPA ? 'Semester Summary' : 'Course Details', 20, yPos);
-  yPos += 8;
+  yPos += 12;
 
-  checkPageBreak(10);
+  // Table header row (improved spacing)
+  checkPageBreak(15);
   doc.setFillColor(...primary);
-  doc.rect(20, yPos, 170, 8, 'F');
+  doc.rect(20, yPos, 170, 12, 'F');
   doc.setFontSize(9);
   doc.setTextColor(...white);
+  const headerY = yPos + 6;
   if (isCGPA) {
-    doc.text('Semester', 25, yPos + 5.5);
-    doc.text('GPA', 80, yPos + 5.5);
-    doc.text('Credits', 115, yPos + 5.5);
-    doc.text('Status', 155, yPos + 5.5);
+    doc.text('Semester', 25, headerY);
+    doc.text('GPA', 80, headerY);
+    doc.text('Credits', 115, headerY);
+    doc.text('Status', 155, headerY);
   } else {
-    doc.text('Course Code', 25, yPos + 5.5);
-    doc.text('Credits', 80, yPos + 5.5);
-    doc.text('Grade', 115, yPos + 5.5);
-    doc.text('Points', 155, yPos + 5.5);
+    doc.text('Course Code', 25, headerY);
+    doc.text('Credits', 80, headerY);
+    doc.text('Grade', 115, headerY);
+    doc.text('Points', 155, headerY);
   }
-  yPos += 10;
+  yPos += 14;
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(...darkText);
@@ -144,27 +148,31 @@ async function buildPDF(doc, normalized) {
     ? semesters.map((sem, idx) => ({ name: `Semester ${idx + 1}`, ...sem }))
     : courses;
 
+  let totalCredits = 0;
+  let totalPoints = 0;
+
   tableRows.forEach((row, index) => {
     checkPageBreak(7);
     if (yPos > 250) {
       doc.addPage();
-      addPageHeader(doc, (yPos = 30));
+      yPos = addPageHeader(doc, 30);
       doc.setFillColor(...primary);
-      doc.rect(20, yPos, 170, 8, 'F');
+      doc.rect(20, yPos, 170, 12, 'F');
       doc.setFontSize(9);
       doc.setTextColor(...white);
+      const headerY2 = yPos + 6;
       if (isCGPA) {
-        doc.text('Semester', 25, yPos + 5.5);
-        doc.text('GPA', 80, yPos + 5.5);
-        doc.text('Credits', 115, yPos + 5.5);
-        doc.text('Status', 155, yPos + 5.5);
+        doc.text('Semester', 25, headerY2);
+        doc.text('GPA', 80, headerY2);
+        doc.text('Credits', 115, headerY2);
+        doc.text('Status', 155, headerY2);
       } else {
-        doc.text('Course Code', 25, yPos + 5.5);
-        doc.text('Credits', 80, yPos + 5.5);
-        doc.text('Grade', 115, yPos + 5.5);
-        doc.text('Points', 155, yPos + 5.5);
+        doc.text('Course Code', 25, headerY2);
+        doc.text('Credits', 80, headerY2);
+        doc.text('Grade', 115, headerY2);
+        doc.text('Points', 155, headerY2);
       }
-      yPos += 10;
+      yPos += 14;
     }
 
     if (index % 2 === 0) {
@@ -173,18 +181,47 @@ async function buildPDF(doc, normalized) {
     }
     doc.setFontSize(10);
     if (isCGPA) {
+      const rowGPA = parseFloat(row.gpa ?? row.cgpa ?? 0);
       doc.text(s(row.name), 25, yPos);
-      doc.text(s(row.gpa ?? row.cgpa ?? '—'), 80, yPos);
+      doc.text(isNaN(rowGPA) ? '—' : rowGPA.toFixed(2), 80, yPos);
       doc.text(s(row.credits ?? '—'), 115, yPos);
       doc.text(s(row.status ?? '—'), 155, yPos);
+      totalCredits += parseFloat(row.credits) || 0;
+      totalPoints += rowGPA * (parseFloat(row.credits) || 0);
     } else {
+      const pts = parseFloat(row.points) || 0;
       doc.text(s(row.code ?? row.name ?? '—'), 25, yPos);
       doc.text(s(row.credits ?? 0), 80, yPos);
       doc.text(s(row.grade ?? '—'), 115, yPos);
-      doc.text(s(row.points ?? '0'), 155, yPos);
+      doc.text(pts.toFixed(2), 155, yPos);
+      totalCredits += parseFloat(row.credits) || 0;
+      totalPoints += pts;
     }
     yPos += 7;
   });
+
+  // Total row
+  if (tableRows.length > 0) {
+    checkPageBreak(7);
+    doc.setFillColor(...bgLight);
+    doc.rect(20, yPos - 4, 170, 7, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(...darkText);
+    if (isCGPA) {
+      doc.text('Total / Avg', 25, yPos);
+      const avgGPA = totalCredits > 0 ? totalPoints / totalCredits : 0;
+      doc.text(avgGPA.toFixed(2), 80, yPos);
+      doc.text(totalCredits.toFixed(1), 115, yPos);
+      doc.text('—', 155, yPos);
+    } else {
+      doc.text('TOTAL', 25, yPos);
+      doc.text(totalCredits.toFixed(1), 80, yPos);
+      doc.text('—', 115, yPos);
+      doc.text(totalPoints.toFixed(2), 155, yPos);
+    }
+    yPos += 7;
+  }
 
   // Summary
   checkPageBreak(30);
@@ -261,39 +298,35 @@ async function buildPDF(doc, normalized) {
   }
 }
 
-// ── Normalize data shapes (now scale‑aware for legacy path) ──
 function normalizeExportData(data) {
-  // Old ExportModal style (userData, resultData, calculatorType)
   if (data.userData) {
     const { userData, resultData, calculatorType, scale = '4.0' } = data;
     const isCGPA = calculatorType === 'CGPA';
 
-    // Build a points map from the selected scale (fixes hardcoded 4.0)
     const gradeScale = getGradeScale(scale);
     const pointsMap = Object.fromEntries(gradeScale.map(g => [g.g, g.p]));
 
     const courses = !isCGPA
-      ? (resultData.courses || []).map(c => {
-        const pts = (pointsMap[c.grade] || 0) * (parseFloat(c.creditHours) || 0);
+      ? (resultData.courses || []).map(c => ({
+        code: c.name,
+        credits: parseFloat(c.creditHours) || 0,
+        grade: c.grade,
+        points: (pointsMap[c.grade] || 0) * (parseFloat(c.creditHours) || 0),
+      }))
+      : [];
+
+    const semesters = isCGPA
+      ? (resultData.semesters || []).map(sem => {
+        const totalCredits = sem.courses ? sem.courses.reduce((acc, c) => acc + parseFloat(c.creditHours), 0) : 0;
+        const totalPoints = sem.courses
+          ? sem.courses.reduce((acc, c) => acc + (pointsMap[c.grade] || 0) * parseFloat(c.creditHours), 0)
+          : 0;
         return {
-          code: c.name,
-          credits: parseFloat(c.creditHours) || 0,
-          grade: c.grade,
-          points: pts,
+          gpa: totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : '0',
+          credits: totalCredits,
+          status: '',
         };
       })
-      : [];
-    const semesters = isCGPA
-      ? (resultData.semesters || []).map(sem => ({
-        gpa: sem.courses
-          ? (
-            sem.courses.reduce((acc, c) => acc + (pointsMap[c.grade] || 0) * parseFloat(c.creditHours), 0) /
-            (sem.courses.reduce((acc, c) => acc + parseFloat(c.creditHours), 0) || 1)
-          ).toFixed(2)
-          : '0',
-        credits: sem.courses ? sem.courses.reduce((acc, c) => acc + parseFloat(c.creditHours), 0) : 0,
-        status: '',
-      }))
       : [];
 
     return {
@@ -303,7 +336,7 @@ function normalizeExportData(data) {
       degree: userData.degree || '',
       semester: userData.semester,
       date: new Date().toLocaleDateString(),
-      scale, // use actual scale, not hardcoded 4.0
+      scale,
       isCGPA,
       courses,
       semesters,
@@ -324,9 +357,8 @@ function normalizeExportData(data) {
     };
   }
 
-  // New direct call (used by our fixed components)
   return {
-    studentName: data.studentName || 'Student',
+    studentName: data.studentName || data.fullName || '',
     studentId: data.studentId || '',
     university: data.university || '',
     degree: data.degree || '',
@@ -341,7 +373,6 @@ function normalizeExportData(data) {
   };
 }
 
-// ── Blob‑returning functions for premium export modal ──────────
 export async function generatePDFBlob(data) {
   const { jsPDF } = await import('jspdf');
   const doc = new jsPDF();
@@ -355,7 +386,6 @@ export function generateCSVBlob(data) {
   return new Blob([csv], { type: 'text/csv;charset=utf-8;' });
 }
 
-// ── Public API (original) ──────────────────────────────────
 export async function generatePDF(data) {
   try {
     const { jsPDF } = await import('jspdf');
@@ -382,7 +412,7 @@ export function generateCSV(data, type) {
   lines.push('');
 
   const info = data.userData || data;
-  const studentName = info.fullName || info.studentName || 'Student';
+  const studentName = info.fullName || info.studentName || '';
   const studentId = info.studentId || '';
   const university = info.university || '';
   const degree = info.degree || '';
