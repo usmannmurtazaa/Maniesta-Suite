@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { calculateGPA } from '../utils/calculations';
+import { calculateWeightedGPA } from '../utils/calculations';
 import { getGradeScale } from '../utils/grades';
 
 export function useGPA(scale) {
@@ -38,24 +38,24 @@ export function useGPA(scale) {
       return;
     }
 
-    // Use the selected scale instead of the default 4.0
+    // Get the grade scale for the selected scale
     const gradeScale = getGradeScale(scale);
-    const mappedCourses = courses.map(c => ({
-      name: c.code || 'Course',
+
+    // Build weighted course list with explicit points from the scale
+    const weightedCourses = courses.map(c => ({
       creditHours: c.credits,
-      grade: gradeScale[c.gradeIdx]?.g || 'F',
+      points: gradeScale[c.gradeIdx]?.p || 0,
     }));
 
-    const gpaResult = calculateGPA(mappedCourses);
-
-    // Removed the false error for a valid 0.00 GPA.
-    // A student with all F's should still see a 0.00 result.
+    // Compute weighted GPA as a number
+    const gpaNumber = calculateWeightedGPA(weightedCourses);
+    const gpaRounded = parseFloat(gpaNumber.toFixed(2));
 
     const totalCredits = courses.reduce((sum, c) => sum + (c.credits || 0), 0);
-    const totalGradePoints = parseFloat(gpaResult) * totalCredits;
+    const totalGradePoints = gpaNumber * totalCredits;
 
     setResult({
-      gpa: parseFloat(gpaResult),
+      gpa: gpaRounded,
       count: courses.length,
       credits: totalCredits,
       points: parseFloat(totalGradePoints.toFixed(2)),
